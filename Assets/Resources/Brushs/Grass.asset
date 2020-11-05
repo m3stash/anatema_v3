@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fdc5e1eccedb29e4894bbfab99032590, type: 3}
-  m_Name: Grass_brush
+  m_Name: Grass
   m_EditorClassIdentifier: 
   m_Cells:
   - m_Tile: {fileID: 0}
