@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8750667607844476435}
   - component: {fileID: 8750667607844476437}
   - component: {fileID: 8750667607844476436}
+  - component: {fileID: 6557045177007737916}
   m_Layer: 0
   m_Name: Limits
   m_TagString: Untagged
@@ -1979,6 +1980,22 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
+--- !u!19719996 &6557045177007737916
+TilemapCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8750667607844476434}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_MaximumTileChangeCount: 1000
+  m_ExtrusionFactor: 0.00001
 --- !u!1 &8750667608017815188
 GameObject:
   m_ObjectHideFlags: 0
@@ -2141,6 +2158,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b184f628d639e04fae23024f4524208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gridPos: {x: 0, y: 0}
+  roomShape: 0
+  doorTop: 0
+  doorBot: 0
+  doorLeft: 0
+  doorRight: 0
 --- !u!1 &8750667608590262848
 GameObject:
   m_ObjectHideFlags: 0

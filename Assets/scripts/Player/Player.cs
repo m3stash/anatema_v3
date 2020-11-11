@@ -39,7 +39,6 @@ public class Player : MonoBehaviour {
     private void SetVelocity() {
         Vector2 targetVelocity;
         currentSpeed = 0;
-        Debug.Log(hMove);
         if (hMove) {
             currentSpeed = Mathf.Abs(moveDirection.x * 25f);
             targetVelocity = new Vector2(moveDirection.x * currentSpeed, rg2d.velocity.y);

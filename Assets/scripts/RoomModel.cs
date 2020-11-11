@@ -5,7 +5,6 @@ using UnityEngine;
 public class RoomModel {
 
     public Vector2Int gridPos;
-    public int type;
     public RoomShapeEnum roomShape;
     public bool doorTop = false;
     public bool doorBot = false;
@@ -13,9 +12,8 @@ public class RoomModel {
     public bool doorRight = false;
     public Room room;
 
-    public RoomModel(Vector2Int gridPos, int type, RoomShapeEnum roomShape) {
+    public RoomModel(Vector2Int gridPos, RoomShapeEnum roomShape) {
         this.gridPos = gridPos;
-        this.type = type;
         this.roomShape = roomShape;
     }
 }
