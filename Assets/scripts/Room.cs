@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Room : MonoBehaviour {
 
+    [SerializeField] public GameObject Polygone2D;
+
     public Vector2Int gridPos;
     public RoomShapeEnum roomShape;
     public bool doorTop = false;

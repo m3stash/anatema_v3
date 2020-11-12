@@ -19,17 +19,7 @@ public class LevelGenerator : MonoBehaviour {
     private int current_ROOMSHAPE_2x2 = 0;
     private int current_ROOMSHAPE_1x2, current_ROOMSHAPE_2x1 = 0;
     private GameObject roomContainer;
-
-    /*private void Start() {
-        if (numberOfRooms >= (worldSize.x * 2) * (worldSize.y * 2)) {
-            numberOfRooms = Mathf.RoundToInt((worldSize.x * 2) * (worldSize.y * 2));
-        }
-        gridSizeX = worldSize.x;
-        gridSizeY = worldSize.y;
-        Generate();
-        CreateRooms();
-        SetRoomNeighboorsDoors();
-    }*/
+    private Vector2Int spawnPoint;
 
     public void StartGeneration(GameObject roomContainer) {
         this.roomContainer = roomContainer;
@@ -43,6 +33,14 @@ public class LevelGenerator : MonoBehaviour {
         CreateRooms();
         SetRoomNeighboorsDoors();
     }
+
+    public Room GetRoomFromVector2Int(Vector2Int position) {
+        return rooms[position.x, position.y].room;
+    }
+    public Vector2Int GetStartPosition() {
+        return spawnPoint;
+    }
+
 
     private void CreatePool() {
         GameObject[] go_1x1 = Resources.LoadAll<GameObject>("Prefabs/Rooms/1x1");
@@ -67,7 +65,8 @@ public class LevelGenerator : MonoBehaviour {
         rooms = new RoomModel[gridSizeX * 2, gridSizeY * 2];
         rooms = new RoomModel[gridSizeX * 2, gridSizeY * 2];
         // creation of first room with fixed position => ToDo find a better way
-        rooms[gridSizeX, gridSizeY] = new RoomModel(Vector2Int.zero, RoomShapeEnum.ROOMSHAPE_1x1);
+        spawnPoint = new Vector2Int(gridSizeX, gridSizeY);
+        rooms[spawnPoint.x, spawnPoint.y] = new RoomModel(Vector2Int.zero, RoomShapeEnum.ROOMSHAPE_1x1);
         roomListPositions.Insert(0, Vector2Int.zero);
         Vector2Int newPos;
         float randomCompare = 0.2f;
@@ -81,6 +80,7 @@ public class LevelGenerator : MonoBehaviour {
                     newPos = SearchNewPositionForRoomWithOneNeighboor(roomToCreate);
                     iterations++;
                 } while (GetNumberOfNeighborsByRoomShape(newPos, roomListPositions, roomToCreate) > 1 && iterations < 100);
+                Debug.Log(iterations);
             }
             InsertNewRoomInListPosition(newPos, roomToCreate);
         }
@@ -133,6 +133,7 @@ public class LevelGenerator : MonoBehaviour {
      */
     private Vector2Int SearchNewPositionForRoomFromEmptySpace(RoomShapeEnum roomToCreate) {
         int x, y;
+        int iterations = 0;
         Vector2Int checkingPos;
         do {
             int index = Mathf.RoundToInt(Random.value * (roomListPositions.Count - 1)); // pick a random room
@@ -155,8 +156,12 @@ public class LevelGenerator : MonoBehaviour {
                 }
             }
             checkingPos = new Vector2Int(x, y);
+            iterations++;
             // while => if already exist or out of bound search another place in Do iteration else return new position
         } while (SearchNewPositionForRoomFromEmptySpaceByRoomShape(checkingPos, roomToCreate, x, y));
+        if (iterations >= 100) {
+            Debug.Log("STOP IT");
+        }
         return checkingPos;
     }
 
@@ -223,6 +228,9 @@ public class LevelGenerator : MonoBehaviour {
             }
             checkingPos = new Vector2Int(x, y);
         } while (SearchNewPositionForRoomFromEmptySpaceByRoomShape(checkingPos, roomToCreate, x, y));
+        if (inc >= 100) { // break loop if it takes too long: this loop isnt garuanteed to find solution, which is fine for this
+            print("Error: ErrorErrorErrorErrorErrorErrorError");
+        }
         // if too many check so we break => ToDo find better way
         return checkingPos;
     }
@@ -317,7 +325,7 @@ public class LevelGenerator : MonoBehaviour {
     }
 
     private GameObject GetRandomRoomFromPool(List<GameObject> rooms) {
-        int index = Random.Range(0, rooms.Count-1);
+        int index = Random.Range(0, rooms.Count - 1);
         GameObject room = rooms[index];
         rooms.RemoveAt(index);
         return room;
