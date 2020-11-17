@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class RoomModel {
 
-    public Vector2Int gridPos;
+    public DoorWithVector2[] doorsToCheck;
+    public Vector2Int rootPos;
+    public Vector2Int worldPosition;
     public RoomShapeEnum roomShape;
-    public bool doorTop = false;
-    public bool doorBot = false;
-    public bool doorLeft = false;
-    public bool doorRight = false;
+    public int id;
     public Room room;
+    public bool isStartRoom = false;
+    public bool isRootRoom = false;
 
-    public RoomModel(Vector2Int gridPos, RoomShapeEnum roomShape) {
-        this.gridPos = gridPos;
+    public RoomModel(Vector2Int rootPos, RoomShapeEnum roomShape) {
+        this.rootPos = rootPos;
         this.roomShape = roomShape;
     }
 }

@@ -3,10 +3,29 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
+public enum DirectionalEnum {
+    T,
+    L,
+    R,
+    B,
+}
+
+public class DoorWithVector2 {
+    public Vector2Int vector2;
+    public DoorEnum door;
+
+    public DoorWithVector2(Vector2Int vector2, DoorEnum door) {
+        this.vector2 = vector2;
+        this.door = door;
+    }
+}
+
+
 public class LevelGenerator : MonoBehaviour {
 
     private Vector2Int worldSize = new Vector2Int(4, 4);
     private RoomModel[,] rooms;
+    private List<Room> gridOfRoom = new List<Room>();
     private readonly List<Vector2Int> roomListPositions = new List<Vector2Int>();
     private List<GameObject> room_1x1 = new List<GameObject>();
     private List<GameObject> room_1x2 = new List<GameObject>();
@@ -20,6 +39,7 @@ public class LevelGenerator : MonoBehaviour {
     private int current_ROOMSHAPE_1x2, current_ROOMSHAPE_2x1 = 0;
     private GameObject roomContainer;
     private Vector2Int spawnPoint;
+    private int id;
 
     public void StartGeneration(GameObject roomContainer) {
         this.roomContainer = roomContainer;
@@ -35,12 +55,8 @@ public class LevelGenerator : MonoBehaviour {
     }
 
     public Room GetRoomFromVector2Int(Vector2Int position) {
-        return rooms[position.x, position.y].room;
+        return gridOfRoom.Find(room => room.GetId() == rooms[position.x + gridSizeX, position.y + gridSizeY].id);
     }
-    public Vector2Int GetStartPosition() {
-        return spawnPoint;
-    }
-
 
     private void CreatePool() {
         GameObject[] go_1x1 = Resources.LoadAll<GameObject>("Prefabs/Rooms/1x1");
@@ -62,17 +78,17 @@ public class LevelGenerator : MonoBehaviour {
     }
 
     private void Generate() {
-        rooms = new RoomModel[gridSizeX * 2, gridSizeY * 2];
+        id = 0;
         rooms = new RoomModel[gridSizeX * 2, gridSizeY * 2];
         // creation of first room with fixed position => ToDo find a better way
         spawnPoint = new Vector2Int(gridSizeX, gridSizeY);
-        rooms[spawnPoint.x, spawnPoint.y] = new RoomModel(Vector2Int.zero, RoomShapeEnum.ROOMSHAPE_1x1);
+        InsertNewRoomInListPosition(Vector2Int.zero, RoomShapeEnum.ROOMSHAPE_1x1);
         roomListPositions.Insert(0, Vector2Int.zero);
         Vector2Int newPos;
         float randomCompare = 0.2f;
         //add rooms
         for (int i = 0; i < numberOfRooms - 1; i++) {
-            RoomShapeEnum roomToCreate = getRandomShapeRoom();
+            RoomShapeEnum roomToCreate = GetRandomShapeRoom();
             newPos = SearchNewPositionForRoomFromEmptySpace(roomToCreate);
             if (GetNumberOfNeighborsByRoomShape(newPos, roomListPositions, roomToCreate) > 1 && Random.value > randomCompare) {
                 int iterations = 0;
@@ -80,39 +96,95 @@ public class LevelGenerator : MonoBehaviour {
                     newPos = SearchNewPositionForRoomWithOneNeighboor(roomToCreate);
                     iterations++;
                 } while (GetNumberOfNeighborsByRoomShape(newPos, roomListPositions, roomToCreate) > 1 && iterations < 100);
-                Debug.Log(iterations);
+                // Debug.Log(iterations);
             }
             InsertNewRoomInListPosition(newPos, roomToCreate);
         }
     }
 
-    private void InsertNewRoomInListPosition(Vector2Int newPos, RoomShapeEnum roomToCreate) {
+    private void InsertNewRoomInListPosition(Vector2Int rootPos, RoomShapeEnum roomToCreate) {
+        id++;
+        roomListPositions.Insert(0, rootPos);
+        RoomModel rootRoom = new RoomModel(rootPos, roomToCreate) {
+            worldPosition = new Vector2Int(rootPos.x + gridSizeX, rootPos.y + gridSizeY),
+            id = id,
+            isRootRoom = true,
+        };
+        rooms[rootPos.x + gridSizeX, rootPos.y + gridSizeY] = rootRoom;
         switch (roomToCreate) {
             case RoomShapeEnum.ROOMSHAPE_1x1:
-            rooms[newPos.x + gridSizeX, newPos.y + gridSizeY] = new RoomModel(newPos, roomToCreate);
-            roomListPositions.Insert(0, newPos);
+            rootRoom.doorsToCheck = new DoorWithVector2[] {
+                new DoorWithVector2(new Vector2Int(0, 1), DoorEnum.T),
+                new DoorWithVector2(new Vector2Int(0, -1), DoorEnum.B),
+                new DoorWithVector2(new Vector2Int(- 1, 0), DoorEnum.L),
+                new DoorWithVector2(new Vector2Int(+ 1, 0), DoorEnum.R),
+            };
             break;
-            case RoomShapeEnum.ROOMSHAPE_2x2:
-            rooms[newPos.x + gridSizeX, newPos.y + gridSizeY] = new RoomModel(newPos, roomToCreate);
-            roomListPositions.Insert(0, newPos);
-            roomListPositions.Insert(0, new Vector2Int(newPos.x + 1, newPos.y));
-            roomListPositions.Insert(0, new Vector2Int(newPos.x, newPos.y + 1));
-            roomListPositions.Insert(0, new Vector2Int(newPos.x + 1, newPos.y + 1));
+            case RoomShapeEnum.ROOMSHAPE_2x2: {
+                rootRoom.doorsToCheck = new DoorWithVector2[] {
+                    new DoorWithVector2(new Vector2Int(-1, 0), DoorEnum.LB),
+                    new DoorWithVector2(new Vector2Int(-1, 1), DoorEnum.LT),
+                    new DoorWithVector2(new Vector2Int(0, 2), DoorEnum.TL),
+                    new DoorWithVector2(new Vector2Int(1, 2), DoorEnum.TR),
+                    new DoorWithVector2(new Vector2Int(2, 0), DoorEnum.RB),
+                    new DoorWithVector2(new Vector2Int(2, 1), DoorEnum.RT),
+                    new DoorWithVector2(new Vector2Int(0, -1), DoorEnum.BL),
+                    new DoorWithVector2(new Vector2Int(1, -1), DoorEnum.BR),
+                };
+                Vector2Int tl, tr, br;
+                br = new Vector2Int(rootPos.x + 1, rootPos.y);
+                rooms[rootPos.x + 1 + gridSizeX, rootPos.y + gridSizeY] = new RoomModel(br, roomToCreate) {
+                    id = id,
+                };
+                roomListPositions.Insert(0, br);
+                tl = new Vector2Int(rootPos.x, rootPos.y + 1);
+                rooms[rootPos.x + gridSizeX, rootPos.y + 1 + gridSizeY] = new RoomModel(tl, roomToCreate) {
+                    id = id,
+                };
+                roomListPositions.Insert(0, tl);
+                tr = new Vector2Int(rootPos.x + 1, rootPos.y + 1);
+                rooms[rootPos.x + 1 + gridSizeX, rootPos.y + 1 + gridSizeY] = new RoomModel(tr, roomToCreate) {
+                    id = id,
+                };
+                roomListPositions.Insert(0, tr);
+            }
             break;
-            case RoomShapeEnum.ROOMSHAPE_1x2:
-            rooms[newPos.x + gridSizeX, newPos.y + gridSizeY] = new RoomModel(newPos, roomToCreate);
-            roomListPositions.Insert(0, newPos);
-            roomListPositions.Insert(0, new Vector2Int(newPos.x, newPos.y + 1));
+            case RoomShapeEnum.ROOMSHAPE_1x2: {
+                rootRoom.doorsToCheck = new DoorWithVector2[] {
+                    new DoorWithVector2(new Vector2Int(-1, 0), DoorEnum.LB),
+                    new DoorWithVector2(new Vector2Int(-1, 1), DoorEnum.LT),
+                    new DoorWithVector2(new Vector2Int(1, 0), DoorEnum.RB),
+                    new DoorWithVector2(new Vector2Int(1, 1), DoorEnum.RT),
+                    new DoorWithVector2(new Vector2Int(0, 2), DoorEnum.T),
+                    new DoorWithVector2(new Vector2Int(0, -1), DoorEnum.B),
+                };
+                Vector2Int t = new Vector2Int(rootPos.x, rootPos.y + 1);
+                rooms[rootPos.x + gridSizeX, rootPos.y + 1 + gridSizeY] = new RoomModel(t, roomToCreate) {
+                    id = id,
+                };
+                roomListPositions.Insert(0, t);
+            }
             break;
-            case RoomShapeEnum.ROOMSHAPE_2x1:
-            rooms[newPos.x + gridSizeX, newPos.y + gridSizeY] = new RoomModel(newPos, roomToCreate);
-            roomListPositions.Insert(0, newPos);
-            roomListPositions.Insert(0, new Vector2Int(newPos.x + 1, newPos.y));
+            case RoomShapeEnum.ROOMSHAPE_2x1: {
+                rootRoom.doorsToCheck = new DoorWithVector2[] {
+                    new DoorWithVector2(new Vector2Int(-1, 0), DoorEnum.L),
+                    new DoorWithVector2(new Vector2Int(2, 0), DoorEnum.R),
+                    new DoorWithVector2(new Vector2Int(0, 1), DoorEnum.TL),
+                    new DoorWithVector2(new Vector2Int(0, -1), DoorEnum.BL),
+                    new DoorWithVector2(new Vector2Int(1, 1), DoorEnum.TR),
+                    new DoorWithVector2(new Vector2Int(1, -1), DoorEnum.BR),
+                };
+                Vector2Int r = new Vector2Int(rootPos.x + 1, rootPos.y);
+                rooms[rootPos.x + 1 + gridSizeX, rootPos.y + gridSizeY] = new RoomModel(r, roomToCreate) {
+                    id = id,
+                };
+                roomListPositions.Insert(0, r);
+            }
             break;
         }
     }
 
-    private RoomShapeEnum getRandomShapeRoom() {
+    private RoomShapeEnum GetRandomShapeRoom() {
         if (Random.value > 0.7 && current_ROOMSHAPE_2x2 < max_ROOMSHAPE_2x2) {
             current_ROOMSHAPE_2x2 = 1;
             return RoomShapeEnum.ROOMSHAPE_2x2;
@@ -229,7 +301,7 @@ public class LevelGenerator : MonoBehaviour {
             checkingPos = new Vector2Int(x, y);
         } while (SearchNewPositionForRoomFromEmptySpaceByRoomShape(checkingPos, roomToCreate, x, y));
         if (inc >= 100) { // break loop if it takes too long: this loop isnt garuanteed to find solution, which is fine for this
-            print("Error: ErrorErrorErrorErrorErrorErrorError");
+            // print("Error: ErrorErrorErrorErrorErrorErrorError");
         }
         // if too many check so we break => ToDo find better way
         return checkingPos;
@@ -285,42 +357,35 @@ public class LevelGenerator : MonoBehaviour {
     private void CreateRooms() {
         foreach (RoomModel room in rooms) {
             //skip where there is no room
-            if (room == null) {
+            if (room == null || !room.isRootRoom) {
                 continue;
             }
             GameObject roomGo = null;
             string prefabRoom = "";
-            Vector2Int pos = Vector2Int.zero;
+            Vector2Int pos = new Vector2Int(room.worldPosition.x * 61, room.worldPosition.y * 31);
             switch (room.roomShape) {
                 case RoomShapeEnum.ROOMSHAPE_1x1:
-                pos.x = room.gridPos.x * 61;
-                pos.y = room.gridPos.y * 31;
                 prefabRoom = "Room_1x1";
                 roomGo = GetRandomRoomFromPool(room_1x1);
                 break;
                 case RoomShapeEnum.ROOMSHAPE_1x2:
-                pos.x = room.gridPos.x * 61;
-                pos.y = room.gridPos.y * 31;
                 prefabRoom = "Room_1x2";
                 roomGo = GetRandomRoomFromPool(room_1x2);
                 break;
                 case RoomShapeEnum.ROOMSHAPE_2x1:
-                pos.x = room.gridPos.x * 61;
-                pos.y = room.gridPos.y * 31;
                 prefabRoom = "Room_2x1";
                 roomGo = GetRandomRoomFromPool(room_2x1);
                 break;
                 case RoomShapeEnum.ROOMSHAPE_2x2:
-                pos.x = room.gridPos.x * 61;
-                pos.y = room.gridPos.y * 31;
                 prefabRoom = "Room_2x2";
                 roomGo = GetRandomRoomFromPool(room_2x2);
                 break;
             }
             Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
             obj.transform.parent = roomContainer.transform;
-            obj.Setup(room.gridPos, room.roomShape);
+            obj.Setup(room.rootPos, room.roomShape, room.id);
             room.room = obj;
+            gridOfRoom.Add(obj);
         }
     }
 
@@ -331,28 +396,70 @@ public class LevelGenerator : MonoBehaviour {
         return room;
     }
 
+    private bool CheckRightDoor(int x, int y) {
+        return x < gridSizeX * 2 && y >= 0 && y < gridSizeY * 2 && rooms[x, y] != null;
+    }
+
+    private bool CheckLeftDoor(int x, int y) {
+        return x >= 0 && y >= 0 && y < gridSizeY * 2 && rooms[x, y] != null;
+    }
+
+    private bool CheckTopDoor(int x, int y) {
+        return y < gridSizeY * 2 && x < gridSizeX * 2 && x >= 0 && rooms[x, y] != null;
+    }
+
+    private bool CheckBottomDoor(int x, int y) {
+        return y >= 0 && x < gridSizeX * 2 && x >= 0 &&  rooms[x, y] != null;
+    }
+
     private void SetRoomNeighboorsDoors() {
         for (int x = 0; x < ((gridSizeX * 2)); x++) {
             for (int y = 0; y < ((gridSizeY * 2)); y++) {
-                if (rooms[x, y] == null) {
+                RoomModel roomModel = rooms[x, y];
+                if (roomModel == null || !rooms[x, y].isRootRoom) {
                     continue;
                 }
-                Vector2 gridPosition = new Vector2(x, y);
-                if (y - 1 >= 0) { // if not outOfBound
-                    rooms[x, y].doorBot = (rooms[x, y - 1] != null);
-                    rooms[x, y].room.doorBot = (rooms[x, y - 1] != null);
-                }
-                if (y + 1 < gridSizeY * 2) { // if not outOfBound
-                    rooms[x, y].doorTop = (rooms[x, y + 1] != null);
-                    rooms[x, y].room.doorTop = (rooms[x, y + 1] != null);
-                }
-                if (x - 1 >= 0) { // if not outOfBound
-                    rooms[x, y].doorLeft = (rooms[x - 1, y] != null);
-                    rooms[x, y].room.doorLeft = (rooms[x - 1, y] != null);
-                }
-                if (x + 1 < gridSizeX * 2) { // if not outOfBound
-                    rooms[x, y].doorRight = (rooms[x + 1, y] != null);
-                    rooms[x, y].room.doorRight = (rooms[x + 1, y] != null);
+                Room room = roomModel.room;
+                for (var i = 0; i < roomModel.doorsToCheck.Length; i++) {
+                    DoorWithVector2 dwv = roomModel.doorsToCheck[i];
+                    switch (dwv.door) {
+                        case DoorEnum.L:
+                        room.enable_door_L = CheckBottomDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.LB:
+                        room.enable_door_LB = CheckLeftDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.LT:
+                        room.enable_door_LT = CheckLeftDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.B:
+                        room.enable_door_B = CheckBottomDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.BL:
+                        room.enable_door_BL = CheckBottomDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.BR:
+                        room.enable_door_BR = CheckBottomDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.T:
+                        room.enable_door_T = CheckTopDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.TL:
+                        room.enable_door_TL = CheckTopDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.TR:
+                        room.enable_door_TR = CheckTopDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.R:
+                        room.enable_door_R = CheckRightDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.RB:
+                        room.enable_door_RB = CheckRightDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                        case DoorEnum.RT:
+                        room.enable_door_RT = CheckRightDoor(dwv.vector2.x + x, dwv.vector2.y + y);
+                        break;
+                    }
                 }
             }
         }
