@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d6f3da9c9771b14ab4ebdc27c21f517, type: 3}
+  m_Name: Room 1x1 config
+  m_EditorClassIdentifier: 
+  RoomShape: 0
+  disable_door_T: 0
+  disable_door_TL: 1
+  disable_door_TR: 1
+  disable_door_B: 0
+  disable_door_BL: 1
+  disable_door_BR: 1
+  disable_door_L: 0
+  disable_door_LT: 1
+  disable_door_LB: 1
+  disable_door_R: 0
+  disable_door_RT: 1
+  disable_door_RB: 1
