@@ -6,11 +6,12 @@ using Cinemachine;
 public class GameManager : MonoBehaviour {
 
     [SerializeField] static private GameObject player;
-    [SerializeField] private GameObject roomContainer;
+    [SerializeField] private GameObject dungeonContainer;
 
-    private LevelGenerator levelGenerator;
+    private DungeonGenerator generator;
     private Vector2Int playerSpawnPoint;
     private Room currentRoom;
+    private DungeonConfig dungeon;
 
     public static GameManager instance;
 
@@ -27,10 +28,12 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Start() {
-        levelGenerator = GetComponent<LevelGenerator>();
-        levelGenerator.StartGeneration(roomContainer);
-        currentRoom = levelGenerator.GetRoomFromVector2Int(Vector2Int.zero);
+        generator = GetComponent<DungeonGenerator>();
+        generator.StartGeneration(dungeonContainer);
+        currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
         player = Instantiate(Resources.Load<GameObject>("Prefabs/Characters/Player"), new Vector3(currentRoom.transform.position.x + 10, currentRoom.transform.position.y + 10), transform.rotation);
+        Dungeon dungeon = dungeonContainer.GetComponent<Dungeon>();
+        dungeon.Setup(new DungeonConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L));
     }
 
     private void ChangeRoom(Door door) {
@@ -95,7 +98,7 @@ public class GameManager : MonoBehaviour {
                 y += (playerGridPosInRoomY - RoomGridWorldPositionY);
             }
         }
-        roomTo = levelGenerator.GetRoomFromVector2Int(new Vector2Int(x, y));
+        roomTo = generator.GetRoomFromVector2Int(new Vector2Int(x, y));
         currentRoom = roomTo;
         Vector3 neighboor = new Vector3(door.transform.position.x + xTo, door.transform.position.y + yTo, door.transform.position.z);
         List<Door> doorList = roomTo.GetDoorsForRoom();
