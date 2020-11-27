@@ -3,13 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public enum DirectionalEnum {
-    T,
-    L,
-    R,
-    B,
-}
-
 public class DoorWithVector2 {
     public Vector2Int vector2;
     public DoorEnum door;
@@ -20,8 +13,7 @@ public class DoorWithVector2 {
     }
 }
 
-
-public class LevelGenerator : MonoBehaviour {
+public class DungeonGenerator : MonoBehaviour {
 
     private Vector2Int worldSize = new Vector2Int(4, 4);
     private RoomModel[,] rooms;
@@ -37,12 +29,12 @@ public class LevelGenerator : MonoBehaviour {
     private readonly int max_ROOMSHAPE_2x1 = 1;
     private int current_ROOMSHAPE_2x2 = 0;
     private int current_ROOMSHAPE_1x2, current_ROOMSHAPE_2x1 = 0;
-    private GameObject roomContainer;
+    private GameObject level;
     private Vector2Int spawnPoint;
     private int id;
 
-    public void StartGeneration(GameObject roomContainer) {
-        this.roomContainer = roomContainer;
+    public void StartGeneration(GameObject level) {
+        this.level = level;
         if (numberOfRooms >= (worldSize.x * 2) * (worldSize.y * 2)) {
             numberOfRooms = Mathf.RoundToInt((worldSize.x * 2) * (worldSize.y * 2));
         }
@@ -382,7 +374,7 @@ public class LevelGenerator : MonoBehaviour {
                 break;
             }
             Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
-            obj.transform.parent = roomContainer.transform;
+            obj.transform.parent = level.transform;
             obj.Setup(room.rootPos, room.roomShape, room.id);
             room.room = obj;
             gridOfRoom.Add(obj);
