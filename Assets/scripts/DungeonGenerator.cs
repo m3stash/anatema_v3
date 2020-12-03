@@ -33,7 +33,7 @@ public class DungeonGenerator : MonoBehaviour {
     private Vector2Int spawnPoint;
     private int id;
 
-    public void StartGeneration(GameObject level) {
+    public void StartGeneration(GameObject level, DungeonConfig config) {
         this.level = level;
         if (numberOfRooms >= (worldSize.x * 2) * (worldSize.y * 2)) {
             numberOfRooms = Mathf.RoundToInt((worldSize.x * 2) * (worldSize.y * 2));
