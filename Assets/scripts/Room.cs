@@ -23,6 +23,9 @@ public class Room : MonoBehaviour {
     [SerializeField] public bool enable_door_RT = true;
     [SerializeField] public bool enable_door_RB = true;
 
+    public delegate void OnPlayerEnterRoom(Room room);
+    public static event OnPlayerEnterRoom OnPlayerEnter;
+
     public bool isRootRoom;
     public bool isStartRoom = false;
     public Vector2Int rootPos;
@@ -113,6 +116,7 @@ public class Room : MonoBehaviour {
             cam.SetActive(true);
             CinemachineVirtualCamera vcam = cam.GetComponent<CinemachineVirtualCamera>();
             vcam.m_Follow = collision.transform;
+            OnPlayerEnter(this);
         }
     }
 

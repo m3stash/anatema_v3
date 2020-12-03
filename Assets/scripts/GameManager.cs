@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour {
     private Vector2Int playerSpawnPoint;
     private Room currentRoom;
     private DungeonConfig dungeon;
+    private bool firstRoomInit = false;
+    private Dungeon currentDungeon;
 
     public static GameManager instance;
 
@@ -21,6 +23,14 @@ public class GameManager : MonoBehaviour {
 
     private void OnEnable() {
         Door.OnChangeRoom += ChangeRoom;
+        Room.OnPlayerEnter += PlayerEnterRoom;
+    }
+
+    public void PlayerEnterRoom(Room room) {
+        if (!firstRoomInit) {
+            firstRoomInit = true;
+            currentDungeon.InitBackgroundContainer();
+        }
     }
 
     public static GameObject GetPlayer() {
@@ -29,11 +39,11 @@ public class GameManager : MonoBehaviour {
 
     private void Start() {
         generator = GetComponent<DungeonGenerator>();
-        generator.StartGeneration(dungeonContainer);
+        currentDungeon = dungeonContainer.GetComponent<Dungeon>();
+        currentDungeon.Setup(new DungeonConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L));
+        generator.StartGeneration(dungeonContainer, currentDungeon.GetConfig());
         currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
-        player = Instantiate(Resources.Load<GameObject>("Prefabs/Characters/Player"), new Vector3(currentRoom.transform.position.x + 10, currentRoom.transform.position.y + 10), transform.rotation);
-        Dungeon dungeon = dungeonContainer.GetComponent<Dungeon>();
-        dungeon.Setup(new DungeonConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L));
+        player = Instantiate(Resources.Load<GameObject>("Prefabs/Characters/Player"), new Vector3(currentRoom.transform.position.x + 10, currentRoom.transform.position.y + 10), transform.rotation); // toDO ajouter spawn !!
     }
 
     private void ChangeRoom(Door door) {
@@ -113,6 +123,7 @@ public class GameManager : MonoBehaviour {
 
     private void OnDisable() {
         Door.OnChangeRoom -= ChangeRoom;
+        Room.OnPlayerEnter -= PlayerEnterRoom;
     }
 
 }
