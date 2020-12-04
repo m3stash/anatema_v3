@@ -32,8 +32,11 @@ public class DungeonGenerator : MonoBehaviour {
     private GameObject level;
     private Vector2Int spawnPoint;
     private int id;
+    private string roomPath = "Prefabs/Rooms/";
+    private DungeonConfig currentDungeonConfig;
 
     public void StartGeneration(GameObject level, DungeonConfig config) {
+        currentDungeonConfig = config;
         this.level = level;
         if (numberOfRooms >= (worldSize.x * 2) * (worldSize.y * 2)) {
             numberOfRooms = Mathf.RoundToInt((worldSize.x * 2) * (worldSize.y * 2));
@@ -50,20 +53,24 @@ public class DungeonGenerator : MonoBehaviour {
         return gridOfRoom.Find(room => room.GetId() == rooms[position.x + gridSizeX, position.y + gridSizeY].id);
     }
 
+    private string getPathRoom(string roomSize) {
+        return roomPath + roomSize + "/" + currentDungeonConfig.GetBiomeType();
+    }
+
     private void CreatePool() {
-        GameObject[] go_1x1 = Resources.LoadAll<GameObject>("Prefabs/Rooms/1x1");
+        GameObject[] go_1x1 = Resources.LoadAll<GameObject>(getPathRoom("1x1"));
         for (var i = 0; i < go_1x1.Length; i++) {
             room_1x1.Add(go_1x1[i]);
         }
-        GameObject[] go_1x2 = Resources.LoadAll<GameObject>("Prefabs/Rooms/1x2");
+        GameObject[] go_1x2 = Resources.LoadAll<GameObject>(getPathRoom("1x2"));
         for (var i = 0; i < go_1x2.Length; i++) {
             room_1x2.Add(go_1x2[i]);
         }
-        GameObject[] go_2x1 = Resources.LoadAll<GameObject>("Prefabs/Rooms/2x1");
+        GameObject[] go_2x1 = Resources.LoadAll<GameObject>(getPathRoom("2x1"));
         for (var i = 0; i < go_2x1.Length; i++) {
             room_2x1.Add(go_2x1[i]);
         }
-        GameObject[] go_2x2 = Resources.LoadAll<GameObject>("Prefabs/Rooms/2x2");
+        GameObject[] go_2x2 = Resources.LoadAll<GameObject>(getPathRoom("2x2"));
         for (var i = 0; i < go_2x2.Length; i++) {
             room_2x2.Add(go_2x2[i]);
         }
@@ -75,6 +82,7 @@ public class DungeonGenerator : MonoBehaviour {
         // creation of first room with fixed position => ToDo find a better way
         spawnPoint = new Vector2Int(gridSizeX, gridSizeY);
         InsertNewRoomInListPosition(Vector2Int.zero, RoomShapeEnum.ROOMSHAPE_1x1);
+        rooms[gridSizeX, gridSizeY].isStartRoom = true;
         roomListPositions.Insert(0, Vector2Int.zero);
         Vector2Int newPos;
         float randomCompare = 0.2f;
@@ -358,7 +366,11 @@ public class DungeonGenerator : MonoBehaviour {
             switch (room.roomShape) {
                 case RoomShapeEnum.ROOMSHAPE_1x1:
                 prefabRoom = "Room_1x1";
-                roomGo = GetRandomRoomFromPool(room_1x1);
+                if (room.isStartRoom) {
+                    roomGo = Resources.Load<GameObject>(roomPath + "Starter/Room_1x1_" + currentDungeonConfig.GetBiomeType());
+                } else {
+                    roomGo = GetRandomRoomFromPool(room_1x1);
+                }
                 break;
                 case RoomShapeEnum.ROOMSHAPE_1x2:
                 prefabRoom = "Room_1x2";
@@ -401,7 +413,7 @@ public class DungeonGenerator : MonoBehaviour {
     }
 
     private bool CheckBottomDoor(int x, int y) {
-        return y >= 0 && x < gridSizeX * 2 && x >= 0 &&  rooms[x, y] != null;
+        return y >= 0 && x < gridSizeX * 2 && x >= 0 && rooms[x, y] != null;
     }
 
     private void SetRoomNeighboorsDoors() {

@@ -112,7 +112,7 @@ public class Room : MonoBehaviour {
     }
 
     private void OnTriggerEnter2D(Collider2D collision) {
-        if (collision.name == "Player(Clone)") {
+        if (collision.name == "Player") {
             cam.SetActive(true);
             CinemachineVirtualCamera vcam = cam.GetComponent<CinemachineVirtualCamera>();
             vcam.m_Follow = collision.transform;
@@ -121,7 +121,7 @@ public class Room : MonoBehaviour {
     }
 
     private void OnTriggerExit2D(Collider2D collision) {
-        if (collision.name == "Player(Clone)") {
+        if (collision.name == "Player") {
             cam.SetActive(false);
         }
     }
