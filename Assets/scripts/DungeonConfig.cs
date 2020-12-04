@@ -18,15 +18,15 @@ public class DungeonConfig {
         
     }
 
-    public BiomeEnum GetBiomeEnum() {
+    public BiomeEnum GetBiomeType() {
         return biomeType;
     }
 
-    public DifficultyEnum GetDifficultyEnum() {
+    public DifficultyEnum GetDifficulty() {
         return difficulty;
     }
 
-    public RoomSizeEnum GetRoomSizeEnum() {
+    public RoomSizeEnum GetRoomSize() {
         return roomSize;
     }
 }

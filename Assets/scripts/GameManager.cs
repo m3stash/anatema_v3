@@ -43,7 +43,8 @@ public class GameManager : MonoBehaviour {
         currentDungeon.Setup(new DungeonConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L));
         generator.StartGeneration(dungeonContainer, currentDungeon.GetConfig());
         currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
-        player = Instantiate(Resources.Load<GameObject>("Prefabs/Characters/Player"), new Vector3(currentRoom.transform.position.x + 10, currentRoom.transform.position.y + 10), transform.rotation); // toDO ajouter spawn !!
+        player = GameObject.FindGameObjectWithTag("Player");
+        // player = Instantiate(Resources.Load<GameObject>("Prefabs/Characters/Player"), new Vector3(currentRoom.transform.position.x + 10, currentRoom.transform.position.y + 10), transform.rotation);
     }
 
     private void ChangeRoom(Door door) {

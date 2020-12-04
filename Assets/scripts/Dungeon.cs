@@ -9,13 +9,12 @@ public class Dungeon : MonoBehaviour {
         this.config = config;
     }
 
-    // toDo faire une Enum avec tout ça !
-    private string GetBackgroundByBiome() {
-        switch (config.GetBiomeEnum()) {
+    private string GetFolderNameByBiome() {
+        switch (config.GetBiomeType()) {
             case BiomeEnum.CAVE:
-            return "BackgroundParallax Cave";
+            return "Cave";
             default:
-            return "BackgroundParallax Cave";
+            return "Cave";
         }
     }
 
@@ -24,7 +23,7 @@ public class Dungeon : MonoBehaviour {
     }
 
     public void InitBackgroundContainer() {
-        Instantiate(Resources.Load<GameObject>("Prefabs/Backgrounds/ParallaxContainers/" + GetBackgroundByBiome()));
+        Instantiate(Resources.Load<GameObject>("Prefabs/Backgrounds/Background_3/BackgroundParallax_" + GetFolderNameByBiome()));
     }
 
 }

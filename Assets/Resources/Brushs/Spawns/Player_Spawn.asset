@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d5751a2c961df945a34295ccf5e576d, type: 3}
-  m_Name: Player_spawn
+  m_Name: Player_Spawn
   m_EditorClassIdentifier: 
   m_Cells:
   - m_Tile: {fileID: 0}
@@ -36,5 +36,5 @@ MonoBehaviour:
   m_Pivot: {x: 0, y: 0, z: 0}
   m_CanChangeZPosition: 0
   m_Anchor: {x: 0.5, y: 0.5, z: 0}
-  m_Prefab: {fileID: 7055318829680796415, guid: f81bc70c2599a8a41b82b15a307599c0,
+  m_Prefab: {fileID: 6321248795753275744, guid: 060d503c76379654885ba2341b2a0274,
     type: 3}

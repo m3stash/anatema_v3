@@ -10,7 +10,7 @@ public class Door : MonoBehaviour {
     public static event OnDoorEnter OnChangeRoom;
 
     private void OnTriggerEnter2D(Collider2D collision) {
-        if (collision.name == "Player(Clone)") {
+        if (collision.name == "Player") {
             OnChangeRoom(this);
         }
     }
