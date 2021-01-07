@@ -118,6 +118,16 @@ PrefabInstance:
       propertyPath: bottomOffset.y
       value: -0.32
       objectReference: {fileID: 0}
+    - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
+      propertyPath: nextTileOffset.x
+      value: 0.64
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
+      propertyPath: nextTileOffset.y
+      value: -0.32
+      objectReference: {fileID: 0}
     - target: {fileID: 6802909859054445737, guid: 9ca8954edcb90204b84280e40343aff9,
         type: 3}
       propertyPath: m_Size.x

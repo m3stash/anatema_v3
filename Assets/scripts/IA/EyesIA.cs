@@ -45,7 +45,6 @@ public class EyesIA : MonoBehaviour {
             }
             if (!findPlayer) {
                 state.seePlayer = false;
-                state.playerPositon = Vector3.zero;
             }
             yield return new WaitForSeconds(0.2f);
         }

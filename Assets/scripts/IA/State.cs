@@ -7,11 +7,13 @@ public abstract class State : MonoBehaviour {
     protected DetectColliders colliders;
     protected Vector3 moveTo;
     protected LocalState localState;
+    protected SpriteRenderer spriteRenderer;
     private float moveSpeed;
     private IEnumerator patrol;
-    private SpriteRenderer spriteRenderer;
+    private EnnemyConfig config;
 
     public virtual void Init(LocalState localState, EnnemyConfig config) {
+        this.config = config;
         spriteRenderer = GetComponent<SpriteRenderer>();
         this.localState = localState;
         moveSpeed = config.MoveSpeed();
@@ -28,24 +30,47 @@ public abstract class State : MonoBehaviour {
         }
     }
 
-    public virtual void Update() {
-
-        FlipPosition();
-
+    private void ManageSeeState() {
+        if (!localState.canSee)
+            return;
         if (localState.seePlayer) {
             if (patrol != null) {
                 StopCoroutine(patrol);
                 patrol = null;
             }
+            /*if (!localState.colliders.OnNextTileCollision()) {
+                // if(can falling without die) else ...
+                // or(can jump) else ...
+                float newPosX;
+                if (!spriteRenderer.flipX) {
+                    newPosX = localState.playerPositon.x - 10;
+                } else {
+                    newPosX = localState.playerPositon.x + 10;
+                }
+                View(new Vector2(newPosX, localState.playerPositon.y), transform.position);
+            } else if (localState.colliders.OnRightCollision()) {
+                // if(can jump) else ...
+                float newPosX;
+                if (!spriteRenderer.flipX) {
+                    newPosX = localState.playerPositon.x - 10;
+                } else {
+                    newPosX = localState.playerPositon.x + 10;
+                }
+                View(new Vector2(newPosX, localState.playerPositon.y), transform.position);
+            } else {
+                View(localState.playerPositon, transform.position);
+            }*/
             View(localState.playerPositon, transform.position);
+        } else if (localState.onAlert) {
+            View(Vector2.zero, transform.position);
         }
+    }
 
-        if (!localState.seePlayer && localState.onAlert) {
-            View(Vector3.zero, transform.position);
-        }
-
+    private void ManagePatrolState() {
+        if (!localState.canPatrol)
+            return;
         // TODO améliorer ça : permet de gérer le fait d'être arrivé ou on voulait le transform.position == localState.moveTo ne fonctionnant pas à cause d'écarts de float de 0.02f
-        if (patrol != null && (transform.position - localState.moveTo).x == 0) {
+        if (patrol != null && (transform.position.x - localState.moveTo.x) == 0) {
             StopCoroutine(patrol);
             patrol = null;
         }
@@ -54,12 +79,19 @@ public abstract class State : MonoBehaviour {
             patrol = Patrol();
             StartCoroutine(patrol);
         }
+    }
+
+    public virtual void Update() {
+
+        FlipPosition();
+        ManageSeeState();
+        ManagePatrolState();
 
     }
 
     private void FixedUpdate() {
 
-        if (localState.moveTo != Vector3.zero) {
+        if (localState.moveTo != Vector2.zero) {
             transform.position = Vector2.MoveTowards(transform.position, new Vector2(localState.moveTo.x, transform.position.y), moveSpeed * Time.deltaTime);
         }
 

@@ -4,13 +4,17 @@ using UnityEngine;
 
 public class LocalState {
     public bool seePlayer = false;
-    public Vector3 playerPositon = Vector3.zero;
+    public Vector2 playerPositon = Vector3.zero;
     public bool earPlayer = false;
     public bool onAlert = false;
-    public Vector3 moveTo;
+    public Vector2 moveTo;
     public bool startPatrol = true;
-    public Vector3 startPoint;
+    public Vector2 startPoint;
     public DirectionalEnum flipDirection;
+    public DetectColliders colliders;
+    public bool canEar;
+    public bool canSee;
+    public bool canPatrol;
 }
 
 public class IA : MonoBehaviour {
@@ -21,25 +25,32 @@ public class IA : MonoBehaviour {
     [SerializeField] private GameObject eyes;
     [SerializeField] private EnnemyConfig config;
 
-    private DetectColliders colliders;
     private EnnemyAgresivityTypeEnum agressivityType;
     private EyesIA eyesIa;
     private Coroutine endAlertCoroutine;
 
     private void Awake() {
-        colliders = GetComponent<DetectColliders>();
-        agressivityType = config.EnnemyAgresivityType();
-        localState = new LocalState {
-            startPoint = transform.position
-        };
-        if (config.EnnemyCanEar()) {
+        bool canEar = config.EnnemyCanSee() || false;
+        bool canSee = config.EnnemyCanEar() || false;
 
+        localState = new LocalState {
+            startPoint = transform.position,
+            colliders = GetComponent<DetectColliders>(),
+            canEar = canEar,
+            canSee = canSee,
+            canPatrol = config.EnnemyCanPatrol(),
+        };
+
+        if (canEar) {
+            //
         }
-        if (config.EnnemyCanSee()) {
+        if (canSee) {
             eyes.SetActive(true);
             eyesIa = eyes.GetComponent<EyesIA>();
             eyesIa.Setup(config.ViewRange(), localState);
         }
+        agressivityType = config.EnnemyAgresivityType();
+
         switch (agressivityType) {
             case EnnemyAgresivityTypeEnum.AGRESSIVE:
             // state = new AgressiveCalmState();
