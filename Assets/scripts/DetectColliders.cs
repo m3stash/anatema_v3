@@ -11,41 +11,23 @@ public class DetectColliders : MonoBehaviour {
     [SerializeField] private Vector2 bottomOffset;
     [SerializeField] private Vector2 nextTileOffset;
     private float radiusOffset = 0.05f;
-    public bool topCollider;
-    public bool bottomCollider;
-    public bool leftCollider;
-    public bool rightCollider;
-    public bool nextTileCollider;
+    private LocalState localState;
+
+    public void Init(LocalState localState) {
+        this.localState = localState;
+    }
 
     void Update() {
+        if (localState == null)
+            return;
         Vector2 position = transform.position;
-        topCollider = Physics2D.OverlapCircle(position + topOffset, radiusOffset, wallLayer);
-        bottomCollider = Physics2D.OverlapCircle(position + bottomOffset, radiusOffset, wallLayer);
-        leftCollider = Physics2D.OverlapCircle(position + leftOffset, radiusOffset, wallLayer);
-        rightCollider = Physics2D.OverlapCircle(position + rightOffset, radiusOffset, wallLayer);
-        nextTileCollider = Physics2D.OverlapCircle(position + nextTileOffset, radiusOffset, wallLayer);
+        localState.collisionState.top = Physics2D.OverlapCircle(position + topOffset, radiusOffset, wallLayer);
+        localState.collisionState.bottom = Physics2D.OverlapCircle(position + bottomOffset, radiusOffset, wallLayer);
+        localState.collisionState.left = Physics2D.OverlapCircle(position + leftOffset, radiusOffset, wallLayer);
+        localState.collisionState.right = Physics2D.OverlapCircle(position + rightOffset, radiusOffset, wallLayer);
+        Vector2 newPosLeft = localState.moveDirection == DirectionalEnum.R ? new Vector2(position.x + nextTileOffset.x, position.y + nextTileOffset.y) : new Vector2(position.x - nextTileOffset.x, position.y + nextTileOffset.y);
+        localState.collisionState.noGround = Physics2D.OverlapCircle(newPosLeft, radiusOffset, wallLayer);
     }
-
-    public bool IsTopCollision() {
-        return topCollider;
-    }
-
-    public bool IsBottomCollision() {
-        return bottomCollider;
-    }
-
-    public bool OnRightCollision() {
-        return rightCollider;
-    }
-
-    public bool OnLeftCollision() {
-        return leftCollider;
-    }
-
-    public bool OnNextTileCollision() {
-        return nextTileCollider;
-    }
-
 
     private void OnDrawGizmos() {
         Vector2 position = transform.position;
@@ -55,7 +37,8 @@ public class DetectColliders : MonoBehaviour {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(position + rightOffset, radiusOffset);
         Gizmos.DrawWireSphere(position + leftOffset, radiusOffset);
-        Gizmos.DrawWireSphere(position + nextTileOffset, radiusOffset);
+        Vector2 newPosLeft = localState.moveDirection == DirectionalEnum.R ? new Vector2(position.x + nextTileOffset.x, position.y + nextTileOffset.y) : new Vector2(position.x - nextTileOffset.x, position.y + nextTileOffset.y);
+        Gizmos.DrawWireSphere(newPosLeft, radiusOffset);
     }
 
 }

@@ -11,6 +11,8 @@ public abstract class State : MonoBehaviour {
     private float moveSpeed;
     private IEnumerator patrol;
     private EnnemyConfig config;
+    private bool goToOppositeDirectionFromPlayer = false;
+    private Vector2 newDirection;
 
     public virtual void Init(LocalState localState, EnnemyConfig config) {
         this.config = config;
@@ -20,12 +22,12 @@ public abstract class State : MonoBehaviour {
     }
 
     private void FlipPosition() {
-        if (localState.flipDirection != DirectionalEnum.L && transform.position.x > localState.moveTo.x) {
-            localState.flipDirection = DirectionalEnum.L;
+        if (localState.moveDirection != DirectionalEnum.L && transform.position.x > localState.moveTo.x) {
+            localState.moveDirection = DirectionalEnum.L;
             spriteRenderer.flipX = false;
         }
-        if (localState.flipDirection != DirectionalEnum.R && transform.position.x < localState.moveTo.x) {
-            localState.flipDirection = DirectionalEnum.R;
+        if (localState.moveDirection != DirectionalEnum.R && transform.position.x < localState.moveTo.x) {
+            localState.moveDirection = DirectionalEnum.R;
             spriteRenderer.flipX = true;
         }
     }
@@ -38,28 +40,28 @@ public abstract class State : MonoBehaviour {
                 StopCoroutine(patrol);
                 patrol = null;
             }
-            /*if (!localState.colliders.OnNextTileCollision()) {
+            // toDO a revoir => soucis avec mes murs etc..
+            if (goToOppositeDirectionFromPlayer) {
+                if (transform.position.x == newDirection.x) {
+                    goToOppositeDirectionFromPlayer = false;
+                }
+                return;
+            }
+            // if no ground in front
+            if (!localState.collisionState.noGround) {
                 // if(can falling without die) else ...
                 // or(can jump) else ...
-                float newPosX;
-                if (!spriteRenderer.flipX) {
-                    newPosX = localState.playerPositon.x - 10;
-                } else {
-                    newPosX = localState.playerPositon.x + 10;
-                }
-                View(new Vector2(newPosX, localState.playerPositon.y), transform.position);
-            } else if (localState.colliders.OnRightCollision()) {
+                goToOppositeDirectionFromPlayer = true;
+                localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x - 1, transform.position.y) : new Vector2(localState.playerPositon.x + 1, transform.position.y);
+                // if wall in front
+            } else if (localState.collisionState.right && localState.moveDirection == DirectionalEnum.R || localState.collisionState.left && localState.moveDirection == DirectionalEnum.L) {
                 // if(can jump) else ...
-                float newPosX;
-                if (!spriteRenderer.flipX) {
-                    newPosX = localState.playerPositon.x - 10;
-                } else {
-                    newPosX = localState.playerPositon.x + 10;
-                }
-                View(new Vector2(newPosX, localState.playerPositon.y), transform.position);
+                goToOppositeDirectionFromPlayer = true;
+                localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x - 1, transform.position.y) : new Vector2(localState.playerPositon.x + 1, transform.position.y);
+                // if wall in front
             } else {
-                View(localState.playerPositon, transform.position);
-            }*/
+                localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x + 10, transform.position.y) : new Vector2(localState.playerPositon.x - 10, transform.position.y);
+            }
             View(localState.playerPositon, transform.position);
         } else if (localState.onAlert) {
             View(Vector2.zero, transform.position);

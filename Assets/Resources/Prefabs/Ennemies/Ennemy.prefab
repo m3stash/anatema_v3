@@ -55,7 +55,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!212 &6802909859054445742
 SpriteRenderer:
@@ -167,10 +167,12 @@ MonoBehaviour:
   topOffset: {x: 0, y: 0}
   rightOffset: {x: 0, y: 0}
   bottomOffset: {x: 0, y: 0}
+  nextTileOffset: {x: 0, y: 0}
   topCollider: 0
   bottomCollider: 0
   leftCollider: 0
   rightCollider: 0
+  nextTileCollider: 0
 --- !u!1001 &6802909858800788671
 PrefabInstance:
   m_ObjectHideFlags: 0
