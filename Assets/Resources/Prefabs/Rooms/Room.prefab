@@ -288,7 +288,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &983739905623053081
 Transform:
   m_ObjectHideFlags: 0
@@ -3071,7 +3071,7 @@ GameObject:
   - component: {fileID: 4611295687798872863}
   m_Layer: 0
   m_Name: Room
-  m_TagString: Untagged
+  m_TagString: Room
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3106,6 +3106,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 5184428662011500940}
   roomConfig: {fileID: 0}
+  tilemapEnnemiesGo: {fileID: 3046060176739328199}
+  tilemapGo: {fileID: 8750667609057755710}
   tilemapDoorsGo: {fileID: 712714502162041344}
   tilemapLimitsGo: {fileID: 8750667607844476434}
   enable_door_T: 1

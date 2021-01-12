@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour {
 
     private DungeonGenerator generator;
     private Vector2Int playerSpawnPoint;
-    private Room currentRoom;
+    private static Room currentRoom;
     private DungeonConfig dungeon;
     private bool firstRoomInit = false;
     private Dungeon currentDungeon;
@@ -37,6 +37,10 @@ public class GameManager : MonoBehaviour {
         return player;
     }
 
+    public static Room GetCurrentRoom() {
+        return currentRoom;
+    }
+
     private void Start() {
         generator = GetComponent<DungeonGenerator>();
         currentDungeon = dungeonContainer.GetComponent<Dungeon>();
@@ -44,7 +48,6 @@ public class GameManager : MonoBehaviour {
         generator.StartGeneration(dungeonContainer, currentDungeon.GetConfig());
         currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
         player = GameObject.FindGameObjectWithTag("Player");
-        // player = Instantiate(Resources.Load<GameObject>("Prefabs/Characters/Player"), new Vector3(currentRoom.transform.position.x + 10, currentRoom.transform.position.y + 10), transform.rotation);
     }
 
     private void ChangeRoom(Door door) {
@@ -114,7 +117,7 @@ public class GameManager : MonoBehaviour {
         Vector3 neighboor = new Vector3(door.transform.position.x + xTo, door.transform.position.y + yTo, door.transform.position.z);
         List<Door> doorList = roomTo.GetDoorsForRoom();
         Door neighboorDoor = doorList.Find(d => d.transform.position == neighboor);
-        if (neighboorDoor) {
+         if (neighboorDoor != null) {
             // *2 because if tp just on door then player is infinit re TP on other room etc..
             player.transform.position = new Vector3(neighboorDoor.transform.position.x + xTo, neighboorDoor.transform.position.y + yTo, player.transform.position.z);
         } else {

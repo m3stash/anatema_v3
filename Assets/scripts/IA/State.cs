@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public abstract class State : MonoBehaviour {
 
@@ -13,12 +14,16 @@ public abstract class State : MonoBehaviour {
     private EnnemyConfig config;
     private bool goToOppositeDirectionFromPlayer = false;
     private Vector2 newDirection;
+    private Tilemap tilemap;
+    private GameObject player;
 
     public virtual void Init(LocalState localState, EnnemyConfig config) {
+        player = GameManager.GetPlayer();
         this.config = config;
         spriteRenderer = GetComponent<SpriteRenderer>();
         this.localState = localState;
         moveSpeed = config.MoveSpeed();
+        tilemap = GameManager.GetCurrentRoom().GetTilemap();
     }
 
     private void FlipPosition() {
@@ -33,6 +38,7 @@ public abstract class State : MonoBehaviour {
     }
 
     private void ManageSeeState() {
+        // Debug.Log(player.transform.localPosition.x);
         if (!localState.canSee)
             return;
         if (localState.seePlayer) {

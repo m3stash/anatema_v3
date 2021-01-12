@@ -8,6 +8,8 @@ using Cinemachine;
 public class Room : MonoBehaviour {
     [SerializeField] public GameObject cam;
     [SerializeField] public RoomConfig roomConfig;
+    [SerializeField] public GameObject tilemapEnnemiesGo;
+    [SerializeField] public GameObject tilemapGo;
     [SerializeField] public GameObject tilemapDoorsGo;
     [SerializeField] public GameObject tilemapLimitsGo;
     [SerializeField] public bool enable_door_T = true;
@@ -32,6 +34,8 @@ public class Room : MonoBehaviour {
     private RoomShapeEnum roomShape;
     [SerializeField] private int id;
     private List<Door> doors;
+    private Tilemap tilemap;
+    private Tilemap tilemapEnnemies;
     private Tilemap tilemapDoors;
     private Tilemap tilemapLimits;
     private CinemachineTransposer camTransposer;
@@ -53,12 +57,23 @@ public class Room : MonoBehaviour {
         this.roomShape = roomShape;
         this.id = id;
     }
-    public void Start() {
+
+    private void Start() {
+        tilemapEnnemies = tilemapEnnemiesGo.GetComponent<Tilemap>();
+        tilemap = tilemapGo.GetComponent<Tilemap>();
         tilemapDoors = tilemapDoorsGo.GetComponent<Tilemap>();
         tilemapLimits = tilemapLimitsGo.GetComponent<Tilemap>();
         doors = new List<Door>();
         doors.AddRange(tilemapDoors.GetComponentsInChildren<Door>());
         ManageDoor();
+    }
+
+    public Tilemap GetTilemap() {
+        return tilemap;
+    }
+
+    public Tilemap GetTilemapEnnemies() {
+        return tilemapEnnemies;
     }
 
     private void ManageDoor() {
@@ -113,6 +128,7 @@ public class Room : MonoBehaviour {
 
     private void OnTriggerEnter2D(Collider2D collision) {
         if (collision.name == "Player") {
+            tilemapEnnemiesGo.SetActive(true);
             cam.SetActive(true);
             CinemachineVirtualCamera vcam = cam.GetComponent<CinemachineVirtualCamera>();
             vcam.m_Follow = collision.transform;
@@ -122,6 +138,7 @@ public class Room : MonoBehaviour {
 
     private void OnTriggerExit2D(Collider2D collision) {
         if (collision.name == "Player") {
+            tilemapEnnemiesGo.SetActive(false);
             cam.SetActive(false);
         }
     }
