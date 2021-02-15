@@ -20,3 +20,4 @@ MonoBehaviour:
   viewRange: 10
   speed: 1.5
   alertDuration: 4
+  health: 100

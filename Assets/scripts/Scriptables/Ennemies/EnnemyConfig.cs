@@ -14,6 +14,7 @@ public class EnnemyConfig : ScriptableObject {
     [SerializeField] private int viewRange;
     [SerializeField] private float speed;
     [SerializeField] private int alertDuration;
+    [SerializeField] private int health;
 
     public bool EnnemyCanSee() {
         return canSee;
@@ -43,6 +44,9 @@ public class EnnemyConfig : ScriptableObject {
     }
     public float AlertCountdownDuration() {
         return alertDuration;
+    }
+    public int Health() {
+        return health;
     }
 
 }

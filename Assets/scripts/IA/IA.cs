@@ -32,6 +32,7 @@ public class IA : MonoBehaviour {
 
     [SerializeField] private GameObject eyes;
     [SerializeField] private EnnemyConfig config;
+    [SerializeField] private HealthBar healthBar;
 
     private EnnemyAgresivityTypeEnum agressivityType;
     private EyesIA eyesIa;
@@ -62,6 +63,8 @@ public class IA : MonoBehaviour {
             eyesIa = eyes.GetComponent<EyesIA>();
             eyesIa.Setup(config.ViewRange(), localState);
         }
+
+        healthBar.SetHealth(config.Health());
 
         agressivityType = config.EnnemyAgresivityType();
 

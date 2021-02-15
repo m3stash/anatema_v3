@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public abstract class State : MonoBehaviour {
 
@@ -12,18 +11,12 @@ public abstract class State : MonoBehaviour {
     private float moveSpeed;
     private IEnumerator patrol;
     private EnnemyConfig config;
-    private bool goToOppositeDirectionFromPlayer = false;
-    private Vector2 newDirection;
-    private Tilemap tilemap;
-    private GameObject player;
 
     public virtual void Init(LocalState localState, EnnemyConfig config) {
-        player = GameManager.GetPlayer();
         this.config = config;
         spriteRenderer = GetComponent<SpriteRenderer>();
         this.localState = localState;
         moveSpeed = config.MoveSpeed();
-        tilemap = GameManager.GetCurrentRoom().GetTilemap();
     }
 
     private void FlipPosition() {
@@ -38,7 +31,6 @@ public abstract class State : MonoBehaviour {
     }
 
     private void ManageSeeState() {
-        // Debug.Log(player.transform.localPosition.x);
         if (!localState.canSee)
             return;
         if (localState.seePlayer) {
@@ -46,23 +38,14 @@ public abstract class State : MonoBehaviour {
                 StopCoroutine(patrol);
                 patrol = null;
             }
-            // toDO a revoir => soucis avec mes murs etc..
-            if (goToOppositeDirectionFromPlayer) {
-                if (transform.position.x == newDirection.x) {
-                    goToOppositeDirectionFromPlayer = false;
-                }
-                return;
-            }
             // if no ground in front
             if (!localState.collisionState.noGround) {
                 // if(can falling without die) else ...
                 // or(can jump) else ...
-                goToOppositeDirectionFromPlayer = true;
                 localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x - 1, transform.position.y) : new Vector2(localState.playerPositon.x + 1, transform.position.y);
                 // if wall in front
             } else if (localState.collisionState.right && localState.moveDirection == DirectionalEnum.R || localState.collisionState.left && localState.moveDirection == DirectionalEnum.L) {
                 // if(can jump) else ...
-                goToOppositeDirectionFromPlayer = true;
                 localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x - 1, transform.position.y) : new Vector2(localState.playerPositon.x + 1, transform.position.y);
                 // if wall in front
             } else {
