@@ -30,37 +30,26 @@ public abstract class State : MonoBehaviour {
         }
     }
 
-    private void ManageSeeState() {
+    private void ManageSee() {
         if (!localState.canSee)
             return;
         if (localState.seePlayer) {
-            if (patrol != null) {
-                StopCoroutine(patrol);
-                patrol = null;
-            }
-            // if no ground in front
-            if (!localState.collisionState.noGround) {
-                // if(can falling without die) else ...
-                // or(can jump) else ...
-                localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x - 1, transform.position.y) : new Vector2(localState.playerPositon.x + 1, transform.position.y);
-                // if wall in front
-            } else if (localState.collisionState.right && localState.moveDirection == DirectionalEnum.R || localState.collisionState.left && localState.moveDirection == DirectionalEnum.L) {
-                // if(can jump) else ...
-                localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x - 1, transform.position.y) : new Vector2(localState.playerPositon.x + 1, transform.position.y);
-                // if wall in front
-            } else {
-                localState.moveTo = transform.position.x > localState.playerPositon.x ? new Vector2(localState.playerPositon.x + 10, transform.position.y) : new Vector2(localState.playerPositon.x - 10, transform.position.y);
-            }
-            View(localState.playerPositon, transform.position);
-        } else if (localState.onAlert) {
-            View(Vector2.zero, transform.position);
+            StopPatrol();
+            ViewEnnemy(localState.playerPositon);
         }
+    }
+
+    private void ManageEar() {
+        if (!localState.canEar)
+            return;
     }
 
     private void ManagePatrolState() {
         if (!localState.canPatrol)
             return;
-        // TODO améliorer ça : permet de gérer le fait d'être arrivé ou on voulait le transform.position == localState.moveTo ne fonctionnant pas à cause d'écarts de float de 0.02f
+        /*
+        * transform.position == localState.moveTo ne fonctionnant pas à cause d'écarts de float de 0.02f
+        */
         if (patrol != null && (transform.position.x - localState.moveTo.x) == 0) {
             StopCoroutine(patrol);
             patrol = null;
@@ -72,10 +61,37 @@ public abstract class State : MonoBehaviour {
         }
     }
 
+    protected bool CanEscape() {
+        if (!localState.collisionState.noGround || localState.collisionState.right && localState.moveDirection == DirectionalEnum.R || localState.collisionState.left && localState.moveDirection == DirectionalEnum.L) {
+            return false;
+        }
+        return true;
+    }
+
+    protected void Escape(Vector2 ennemyPosition) {
+        localState.moveTo = transform.position.x > ennemyPosition.x ? new Vector2(ennemyPosition.x + 10, transform.position.y) : new Vector2(ennemyPosition.x - 10, transform.position.y);
+    }
+
+    protected void GoTo(Vector2 newPosition) {
+        localState.moveTo = newPosition;
+    }
+
+    protected bool AnalyseEscapePossibility(Vector2 ennemyPosition) {
+        if(Mathf.Abs(ennemyPosition.x - transform.position.x) < 2) {
+            return true;
+        }
+        return false;
+    }
+
+    protected Vector2 EscapeEnnemy(Vector2 ennemyPosition) {
+        return localState.moveTo = transform.position.x > ennemyPosition.x ? new Vector2(ennemyPosition.x - 1, transform.position.y) : new Vector2(ennemyPosition.x + 1, transform.position.y);
+    }
+
     public virtual void Update() {
 
         FlipPosition();
-        ManageSeeState();
+        ManageSee();
+        ManageEar();
         ManagePatrolState();
 
     }
@@ -88,22 +104,25 @@ public abstract class State : MonoBehaviour {
 
     }
 
-
     void Start() {
-        StartCoroutine(Patrol());
+        patrol = Patrol();
+        StartCoroutine(patrol);
     }
 
-    public virtual void View(Vector3 viewObjectPositon, Vector3 position) {
+    private void StopPatrol() {
+        if (patrol != null) {
+            StopCoroutine(patrol);
+            patrol = null;
+        }
+    }
+
+    public virtual void ViewEnnemy(Vector3 viewObjectPositon) {
         moveTo = viewObjectPositon;
         localState.moveTo = moveTo;
     }
 
     public void Ear() {
 
-    }
-
-    public void GoTo(Vector3 goToPosition, LocalState localState) {
-        localState.moveTo = goToPosition;
     }
 
     private IEnumerator Patrol() {
