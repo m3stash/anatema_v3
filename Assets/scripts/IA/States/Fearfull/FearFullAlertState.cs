@@ -9,8 +9,8 @@ public class FearFullAlertState : State {
 
     public override void ViewEnnemy(Vector3 ennemyPosition) {
         if (onEscape == null) {
-            if (CanEscape()) {
-                Escape(ennemyPosition);
+            if (CanEscape(ennemyPosition)) {
+                EscapeFromEnnemy(ennemyPosition);
             } else {
                 if (AnalyseEscapePossibility(ennemyPosition)) {
                     escapeTo = EscapeEnnemy(ennemyPosition);
@@ -25,12 +25,6 @@ public class FearFullAlertState : State {
     }
 
     private IEnumerator OnEscape() {
-        /* attention ce débile ne détecte pas l'égalité dans ce genre de cas : 
-        * (Vector2)transform.position = "(291.0, 133.3)"
-        * escapeTo == "(291.0, 133.3)"
-        * (Vector2)transform.position == escapeTo => false....
-        * le débile..
-        */
         while ((Vector2)transform.position != escapeTo) {
             yield return new WaitForSeconds(0.1f);
         }

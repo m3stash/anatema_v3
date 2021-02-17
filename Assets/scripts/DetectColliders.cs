@@ -9,7 +9,8 @@ public class DetectColliders : MonoBehaviour {
     [SerializeField] private Vector2 topOffset;
     [SerializeField] private Vector2 rightOffset;
     [SerializeField] private Vector2 bottomOffset;
-    [SerializeField] private Vector2 nextTileOffset;
+    [SerializeField] private Vector2 frontTileOffset;
+    [SerializeField] private Vector2 backTileOffset;
     private float radiusOffset = 0.05f;
     private LocalState localState;
 
@@ -25,11 +26,15 @@ public class DetectColliders : MonoBehaviour {
         localState.collisionState.bottom = Physics2D.OverlapCircle(position + bottomOffset, radiusOffset, wallLayer);
         localState.collisionState.left = Physics2D.OverlapCircle(position + leftOffset, radiusOffset, wallLayer);
         localState.collisionState.right = Physics2D.OverlapCircle(position + rightOffset, radiusOffset, wallLayer);
-        Vector2 newPosLeft = localState.moveDirection == DirectionalEnum.R ? new Vector2(position.x + nextTileOffset.x, position.y + nextTileOffset.y) : new Vector2(position.x - nextTileOffset.x, position.y + nextTileOffset.y);
-        localState.collisionState.noGround = Physics2D.OverlapCircle(newPosLeft, radiusOffset, wallLayer);
+        Vector2 newPosLeft = localState.moveDirection == DirectionalEnum.R ? new Vector2(position.x + frontTileOffset.x, position.y + frontTileOffset.y) : new Vector2(position.x - frontTileOffset.x, position.y + frontTileOffset.y);
+        Vector2 newPosRight = localState.moveDirection == DirectionalEnum.R ? new Vector2(position.x - backTileOffset.x, position.y + backTileOffset.y) : new Vector2(position.x + backTileOffset.x, position.y + backTileOffset.y);
+        localState.collisionState.groundInFront = Physics2D.OverlapCircle(newPosLeft, radiusOffset, wallLayer);
+        localState.collisionState.groundInBack = Physics2D.OverlapCircle(newPosRight, radiusOffset, wallLayer);
     }
 
     private void OnDrawGizmos() {
+        if (localState == null)
+            return;
         Vector2 position = transform.position;
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(position + topOffset, radiusOffset);
@@ -37,8 +42,10 @@ public class DetectColliders : MonoBehaviour {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(position + rightOffset, radiusOffset);
         Gizmos.DrawWireSphere(position + leftOffset, radiusOffset);
-        Vector2 newPosLeft = localState.moveDirection == DirectionalEnum.R ? new Vector2(position.x + nextTileOffset.x, position.y + nextTileOffset.y) : new Vector2(position.x - nextTileOffset.x, position.y + nextTileOffset.y);
+        Vector2 newPosLeft = localState.moveDirection == DirectionalEnum.R ? new Vector2(position.x + frontTileOffset.x, position.y + frontTileOffset.y) : new Vector2(position.x - frontTileOffset.x, position.y + frontTileOffset.y);
+        Vector2 newPosRight = localState.moveDirection == DirectionalEnum.L ? new Vector2(position.x + backTileOffset.x, position.y + backTileOffset.y) : new Vector2(position.x - backTileOffset.x, position.y + backTileOffset.y);
         Gizmos.DrawWireSphere(newPosLeft, radiusOffset);
+        Gizmos.DrawWireSphere(newPosRight, radiusOffset);
     }
 
 }

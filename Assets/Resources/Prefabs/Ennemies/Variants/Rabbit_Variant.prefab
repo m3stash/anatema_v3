@@ -18,6 +18,16 @@ PrefabInstance:
       propertyPath: EnnemyAgresivityType
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 419638729765317484, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 419638729765317484, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2115894270910571872, guid: 9ca8954edcb90204b84280e40343aff9,
         type: 3}
       propertyPath: m_RootOrder
@@ -120,12 +130,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
         type: 3}
+      propertyPath: backTileOffset.x
+      value: 0.64
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
+      propertyPath: backTileOffset.y
+      value: -0.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
       propertyPath: nextTileOffset.x
       value: 0.64
       objectReference: {fileID: 0}
     - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
         type: 3}
       propertyPath: nextTileOffset.y
+      value: -0.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
+      propertyPath: frontTileOffset.x
+      value: 0.64
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689276344945940832, guid: 9ca8954edcb90204b84280e40343aff9,
+        type: 3}
+      propertyPath: frontTileOffset.y
       value: -0.32
       objectReference: {fileID: 0}
     - target: {fileID: 4382198070651615828, guid: 9ca8954edcb90204b84280e40343aff9,

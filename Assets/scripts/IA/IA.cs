@@ -7,7 +7,8 @@ public class CollisionState {
     public bool bottom;
     public bool left;
     public bool right;
-    public bool noGround;
+    public bool groundInFront;
+    public bool groundInBack;
 }
 
 public class LocalState {
