@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efd6722740e28b24faeac486c0ff773f, type: 3}
   m_Name: Ennemy Rabbit Config
   m_EditorClassIdentifier: 
-  ennemyAgresivityType: 1
   canSee: 1
   canEar: 1
+  canPatrol: 1
+  ennemyCategoryType: 1
+  ennemyAgresivityType: 1
   viewRange: 10
   speed: 1.5
   alertDuration: 4
+  health: 100

@@ -34,7 +34,7 @@ public class EyesIA : MonoBehaviour {
             while (i < hits.Length) {
                 if (hits[i].transform.CompareTag("Player")) {
                     float hitPosX = hits[i].transform.position.x;
-                    if (!state.onAlert && (state.flipDirection == DirectionalEnum.L && hitPosX < transform.position.x || state.flipDirection == DirectionalEnum.R && hitPosX > transform.position.x)) {
+                    if (!state.onAlert && (state.moveDirection == DirectionalEnum.L && hitPosX < transform.position.x || state.moveDirection == DirectionalEnum.R && hitPosX > transform.position.x)) {
                         findPlayer = ManageSeeState(hits[i]);
                     }
                     if (state.onAlert) {
@@ -45,7 +45,6 @@ public class EyesIA : MonoBehaviour {
             }
             if (!findPlayer) {
                 state.seePlayer = false;
-                state.playerPositon = Vector3.zero;
             }
             yield return new WaitForSeconds(0.2f);
         }

@@ -4,13 +4,32 @@ using UnityEngine;
 
 public class FearFullAlertState : State {
 
-    public override void View(Vector3 viewObjectPositon, Vector3 position) {
-        if (position.x > viewObjectPositon.x) {
-            moveTo = viewObjectPositon + position;
-        } else {
-            moveTo = viewObjectPositon - position;
+    private IEnumerator onEscape;
+    private Vector2 escapeTo;
+
+    public override void ViewEnnemy(Vector3 ennemyPosition) {
+        if (onEscape == null) {
+            if (CanEscape(ennemyPosition)) {
+                EscapeFromEnnemy(ennemyPosition);
+            } else {
+                if (AnalyseEscapePossibility(ennemyPosition)) {
+                    escapeTo = EscapeEnnemy(ennemyPosition);
+                    GoTo(escapeTo);
+                    onEscape = OnEscape();
+                    StartCoroutine(onEscape);
+                } else {
+                    GoTo(transform.position);
+                }
+            }
         }
-        localState.moveTo = moveTo;
     }
 
+    private IEnumerator OnEscape() {
+        while ((Vector2)transform.position != escapeTo) {
+            yield return new WaitForSeconds(0.1f);
+        }
+        escapeTo = Vector2.zero;
+        StopCoroutine(onEscape);
+        onEscape = null;
+    }
 }

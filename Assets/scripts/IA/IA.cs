@@ -2,15 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class CollisionState {
+    public bool top;
+    public bool bottom;
+    public bool left;
+    public bool right;
+    public bool groundInFront;
+    public bool groundInBack;
+}
+
 public class LocalState {
     public bool seePlayer = false;
-    public Vector3 playerPositon = Vector3.zero;
+    public Vector2 playerPositon = Vector3.zero;
     public bool earPlayer = false;
     public bool onAlert = false;
-    public Vector3 moveTo;
+    public Vector2 moveTo;
     public bool startPatrol = true;
-    public Vector3 startPoint;
-    public DirectionalEnum flipDirection;
+    public Vector2 startPoint;
+    public DirectionalEnum moveDirection;
+    public CollisionState collisionState;
+    public bool canEar;
+    public bool canSee;
+    public bool canPatrol;
 }
 
 public class IA : MonoBehaviour {
@@ -20,26 +33,42 @@ public class IA : MonoBehaviour {
 
     [SerializeField] private GameObject eyes;
     [SerializeField] private EnnemyConfig config;
+    [SerializeField] private HealthBar healthBar;
 
-    private DetectColliders colliders;
     private EnnemyAgresivityTypeEnum agressivityType;
     private EyesIA eyesIa;
-    private Coroutine endAlertCoroutine;
+    private Coroutine alertCoroutine;
 
     private void Awake() {
-        colliders = GetComponent<DetectColliders>();
-        agressivityType = config.EnnemyAgresivityType();
-        localState = new LocalState {
-            startPoint = transform.position
-        };
-        if (config.EnnemyCanEar()) {
+        bool canEar = config.EnnemyCanSee() || false;
+        bool canSee = config.EnnemyCanEar() || false;
 
+        DetectColliders colliders = GetComponent<DetectColliders>();
+
+        localState = new LocalState {
+            startPoint = transform.position,
+            canEar = canEar,
+            canSee = canSee,
+            canPatrol = config.EnnemyCanPatrol(),
+            collisionState = new CollisionState(),
+        };
+
+
+        colliders.Init(localState);
+
+        if (canEar) {
+            //
         }
-        if (config.EnnemyCanSee()) {
+        if (canSee) {
             eyes.SetActive(true);
             eyesIa = eyes.GetComponent<EyesIA>();
             eyesIa.Setup(config.ViewRange(), localState);
         }
+
+        healthBar.SetHealth(config.Health());
+
+        agressivityType = config.EnnemyAgresivityType();
+
         switch (agressivityType) {
             case EnnemyAgresivityTypeEnum.AGRESSIVE:
             // state = new AgressiveCalmState();
@@ -55,35 +84,37 @@ public class IA : MonoBehaviour {
     }
 
     private void Update() {
-        if (endAlertCoroutine == null && localState.seePlayer && !localState.onAlert) {
-            localState.onAlert = true;
-            localState.startPatrol = false;
-            Destroy(currentState);
+        if (alertCoroutine == null && localState.seePlayer && !localState.onAlert) {
             switch (agressivityType) {
                 case EnnemyAgresivityTypeEnum.AGRESSIVE:
+                Destroy(currentState);
+                localState.onAlert = true;
+                localState.startPatrol = false;
                 // state new AgressiveAlertState();
                 break;
                 case EnnemyAgresivityTypeEnum.FEARFULL:
+                Destroy(currentState);
+                localState.onAlert = true;
+                localState.startPatrol = false;
                 currentState = gameObject.AddComponent<FearFullAlertState>();
                 break;
                 case EnnemyAgresivityTypeEnum.PASSIVE:
+                // toDo => do nothing if passive IA not Agressed ?!? 
                 // state = new PassiveAlterState();
                 break;
             }
             currentState.Init(localState, config);
         }
-        if (endAlertCoroutine == null && !localState.seePlayer && localState.onAlert) {
-            endAlertCoroutine = StartCoroutine(EndAlertCountdown());
+        if (alertCoroutine == null && !localState.seePlayer && localState.onAlert) {
+            alertCoroutine = StartCoroutine(endAlertCountdown());
         }
-        if (localState.seePlayer) {
-            if (endAlertCoroutine != null) {
-                StopCoroutine(endAlertCoroutine);
-                endAlertCoroutine = null;
-            }
+        if (alertCoroutine != null && localState.seePlayer) {
+            StopCoroutine(alertCoroutine);
+            alertCoroutine = null;
         }
     }
 
-    private IEnumerator EndAlertCountdown() {
+    private IEnumerator endAlertCountdown() {
         float duration = config.AlertCountdownDuration();
         float totalTime = 0;
         while (totalTime <= duration) {
