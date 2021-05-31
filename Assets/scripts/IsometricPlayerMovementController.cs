@@ -41,6 +41,7 @@ public class IsometricPlayerMovementController : MonoBehaviour {
         } else {
             targetVelocity = new Vector2(0, rg2d.velocity.y);
         }
+        rg2d.velocity = Vector2.SmoothDamp(rg2d.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
         if (vMove) {
             currentSpeed = Mathf.Abs(moveDirection.y * 25f);
             targetVelocity = new Vector2(rg2d.velocity.x, moveDirection.y * currentSpeed);
