@@ -12,7 +12,7 @@ public class Player : MonoBehaviour {
     private float currentSpeed;
     private bool hMove;
     private Vector2 m_Velocity = Vector2.zero;
-    private float speed = 18f;
+    private float speed = 25f;
     private float m_MovementSmoothing = .05f;
 
     // Start is called before the first frame update
@@ -40,7 +40,7 @@ public class Player : MonoBehaviour {
         Vector2 targetVelocity;
         currentSpeed = 0;
         if (hMove) {
-            currentSpeed = Mathf.Abs(moveDirection.x * 25f);
+            currentSpeed = Mathf.Abs(moveDirection.x * speed);
             targetVelocity = new Vector2(moveDirection.x * currentSpeed, rg2d.velocity.y);
         } else {
             targetVelocity = new Vector2(0, rg2d.velocity.y);

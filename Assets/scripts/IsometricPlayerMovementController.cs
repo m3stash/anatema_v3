@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 public class IsometricPlayerMovementController : MonoBehaviour {
 
-    public float movementSpeed = 1f;
+    public float movementSpeed = 10f;
     IsometricCharacterRenderer isoRenderer;
     private Vector2 moveDirection;
     private float currentSpeed;
@@ -36,14 +36,14 @@ public class IsometricPlayerMovementController : MonoBehaviour {
         Vector2 targetVelocity;
         currentSpeed = 0;
         if (hMove) {
-            currentSpeed = Mathf.Abs(moveDirection.x * 25f);
+            currentSpeed = Mathf.Abs(moveDirection.x * movementSpeed);
             targetVelocity = new Vector2(moveDirection.x * currentSpeed, rg2d.velocity.y);
         } else {
             targetVelocity = new Vector2(0, rg2d.velocity.y);
         }
         rg2d.velocity = Vector2.SmoothDamp(rg2d.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
         if (vMove) {
-            currentSpeed = Mathf.Abs(moveDirection.y * 25f);
+            currentSpeed = Mathf.Abs(moveDirection.y * movementSpeed);
             targetVelocity = new Vector2(rg2d.velocity.x, moveDirection.y * currentSpeed);
         } else {
             targetVelocity = new Vector2(rg2d.velocity.x, 0);
