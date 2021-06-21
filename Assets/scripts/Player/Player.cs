@@ -11,6 +11,7 @@ public class Player : MonoBehaviour {
     private const int defaultGravityScale = 3;
     private float currentSpeed;
     private bool hMove;
+    private bool vMove;
     private Vector2 m_Velocity = Vector2.zero;
     private float speed = 25f;
     private float m_MovementSmoothing = .05f;
@@ -37,12 +38,14 @@ public class Player : MonoBehaviour {
     }
 
     private void SetVelocity() {
-        Vector2 targetVelocity;
+        Vector2 targetVelocity = Vector2.zero;
         currentSpeed = 0;
         if (hMove) {
             currentSpeed = Mathf.Abs(moveDirection.x * speed);
             targetVelocity = new Vector2(moveDirection.x * currentSpeed, rg2d.velocity.y);
-        } else {
+        } 
+        if (vMove) {
+            currentSpeed = Mathf.Abs(moveDirection.y * speed);
             targetVelocity = new Vector2(0, rg2d.velocity.y);
         }
         rg2d.velocity = Vector2.SmoothDamp(rg2d.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
@@ -51,6 +54,7 @@ public class Player : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         hMove = moveDirection.x > 0 || moveDirection.x < 0 ? true : false;
+        vMove = moveDirection.y > 0 || moveDirection.y < 0 ? true : false;
     }
 
     private void FixedUpdate() {

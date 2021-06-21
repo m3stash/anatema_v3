@@ -33,22 +33,16 @@ public class IsometricPlayerMovementController : MonoBehaviour {
     }
 
     private void SetVelocity() {
-        Vector2 targetVelocity;
-        currentSpeed = 0;
-        if (hMove) {
-            currentSpeed = Mathf.Abs(moveDirection.x * movementSpeed);
-            targetVelocity = new Vector2(moveDirection.x * currentSpeed, rg2d.velocity.y);
-        } else {
-            targetVelocity = new Vector2(0, rg2d.velocity.y);
+        
+        if (hMove || vMove) {
+            // rg2d.velocity = new Vector2(moveDirection.x * movementSpeed, moveDirection.y * movementSpeed);
+            rg2d.velocity = Vector2.SmoothDamp(rg2d.velocity, new Vector2(moveDirection.x * movementSpeed, moveDirection.y * movementSpeed), ref m_Velocity, m_MovementSmoothing);
         }
-        rg2d.velocity = Vector2.SmoothDamp(rg2d.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
-        if (vMove) {
-            currentSpeed = Mathf.Abs(moveDirection.y * movementSpeed);
-            targetVelocity = new Vector2(rg2d.velocity.x, moveDirection.y * currentSpeed);
-        } else {
-            targetVelocity = new Vector2(rg2d.velocity.x, 0);
+
+        if(!hMove && !vMove) {
+            rg2d.velocity = Vector2.zero;
         }
-        rg2d.velocity = Vector2.SmoothDamp(rg2d.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+
     }
 
     void Update() {
