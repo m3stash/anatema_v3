@@ -131,7 +131,7 @@ public class Room : MonoBehaviour {
             tilemapEnnemiesGo.SetActive(true);
             cam.SetActive(true);
             CinemachineVirtualCamera vcam = cam.GetComponent<CinemachineVirtualCamera>();
-            vcam.m_Lens.OrthographicSize = 4; //camera lens
+            vcam.m_Lens.OrthographicSize = 5; //camera lens
             vcam.m_Follow = collision.transform;
             OnPlayerEnter(this);
         }

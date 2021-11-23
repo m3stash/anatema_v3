@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour {
     public void PlayerEnterRoom(Room room) {
         if (!firstRoomInit) {
             firstRoomInit = true;
-            currentDungeon.InitBackgroundContainer();
+            // currentDungeon.InitBackgroundContainer();
         }
     }
 
