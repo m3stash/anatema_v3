@@ -52,10 +52,10 @@ public class Room : MonoBehaviour {
         return id;
     }
 
-    public void Setup(Vector2Int rootPos, RoomShapeEnum roomShape, int id) {
+    public void Setup(Vector2Int rootPos, RoomShapeEnum roomShape/*, int id*/) {
         this.rootPos = rootPos;
         this.roomShape = roomShape;
-        this.id = id;
+        // this.id = id;
     }
 
     private void Start() {
