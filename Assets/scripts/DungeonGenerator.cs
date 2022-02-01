@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using System.IO;
 
 public class DoorWithVector2 {
     public Vector2Int vector2;
@@ -99,6 +100,7 @@ public class DungeonGenerator : MonoBehaviour {
     int floorplanCount;
     int maxRooms; // toDo a dynamiser par rapport à la difficulté du level courant !
     Vector2Int vectorStart;
+    int totalLoop = 0;
     /******************************/
 
     public void StartGeneration(GameObject level, DungeonConfig config) {
@@ -110,7 +112,7 @@ public class DungeonGenerator : MonoBehaviour {
         }
         // CreatePool();
         Generate();
-        // CreateRooms();
+        CreateRooms();
         // SetRoomNeighboorsDoors();
     }
 
@@ -141,37 +143,6 @@ public class DungeonGenerator : MonoBehaviour {
         }
     }*/
 
-    /*private void Generate() {
-        // Vector2Int startPos = new Vector2Int(maxCol / 2, maxCol / 2);
-        Vector2Int startPos = new Vector2Int(0, 0);
-        listOfUsingSpace = new List<Vector2Int>();
-        listOfUsingSpace.Add(startPos);
-        listOfPseudoRoom = new List<PseudoRoom>();
-        listOfPseudoRoom.Add(new PseudoRoom(startPos, RoomShapeEnum.ROOMSHAPE_1x1, true));
-        for (int i = 0; i < numberOfRooms - 1; i++) {
-            bool addedRoom = false;
-            // RoomShapeEnum newRoomShape = GetRandomShapeRoom();
-            RoomShapeEnum newRoomShape = RoomShapeEnum.ROOMSHAPE_1x1;
-            var tmpList = new List<Vector2Int>(listOfUsingSpace);
-            while (tmpList.Count > 0 && !addedRoom) {
-                int index = Random.Range(0, (tmpList.Count));
-                PseudoRoom newRoom = SearchPositionForRoom(tmpList[index], newRoomShape);
-                if (newRoom == null) {
-                    tmpList.Remove(tmpList[index]);
-                } else {
-                    listOfPseudoRoom.Add(newRoom);
-                    listOfUsingSpace.Add(newRoom.position);
-                    addedRoom = true;
-                }
-            }
-        }
-        if (listOfUsingSpace.Count < numberOfRooms && maxTry < 4) {
-            currentTry++;
-            Debug.Log("GENERATION FAILED RETRAIL NUMBER " + currentTry);
-            Generate();
-        }
-    }*/
-
     private void Generate() {
         // Vector2Int startPos = new Vector2Int(maxCol / 2, maxCol / 2);
         /*Vector2Int startPos = new Vector2Int(0, 0);
@@ -181,36 +152,54 @@ public class DungeonGenerator : MonoBehaviour {
         listOfPseudoRoom.Add(new PseudoRoom(startPos, RoomShapeEnum.ROOMSHAPE_1x1, true));*/
         floorplanCount = 0;
         maxRooms = 15;
-        floorplan = new int[10, 10];
+        floorplan = new int[11, 11];
         vectorStart = new Vector2Int(5, 5);
         cellQueue = new List<Vector2Int>();
         endRooms = new List<Vector2Int>();
+        listOfPseudoRoom = new List<PseudoRoom>();
         // Start Breadth First Pattern
-        Visit(vectorStart);
+        Visit(vectorStart, RoomShapeEnum.ROOMSHAPE_1x1, true);
 
         while (cellQueue.Count > 0) {
+            RoomShapeEnum roomShape = GetRandomShapeRoom();
             Vector2Int vector = cellQueue[0];
             cellQueue.RemoveAt(0);
             int createdCount = 0;
-            if (vector.x > 1) {
-                createdCount += Visit(new Vector2Int(vector.x - 1, vector.y));
-            }
-            if (vector.x < 9) {
-                createdCount += Visit(new Vector2Int(vector.x + 1, vector.y));
-            }
-            if (vector.y > 1) {
-                createdCount += Visit(new Vector2Int(vector.x, vector.y - 1));
-            }
-            if (vector.y < 9) {
-                createdCount += Visit(new Vector2Int(vector.x, vector.y + 1));
+
+            Vector2Int[] shapesToCheck = SearchPositionByShapes(roomShape, vector);
+            foreach (var vectorToCheck in shapesToCheck) {
+                if (vectorToCheck.x > 1 && vectorToCheck.x < 9 && vectorToCheck.y > 1 && vectorToCheck.y < 9) {
+                    createdCount += Visit(vectorToCheck, roomShape, false);
+                }
             }
 
             if (createdCount == 0) {
                 endRooms.Add(vector);
             }
         }
-        Debug.Log("TEST " + floorplanCount);
+        if (floorplanCount < maxRooms) {
+            totalLoop++;
+            Generate();
+        } else {
+            Debug.Log("END " + totalLoop);
+
+            /*
+             * 
+                PENSER A RESET LES VARS!
+                int[,] floorplan;
+                List<Vector2Int> cellQueue;
+                List<Vector2Int> endRooms;
+                int floorplanCount;
+                int maxRooms; // toDo a dynamiser par rapport à la difficulté du level courant !
+                Vector2Int vectorStart;
+                int totalLoop = 0;
+             * 
+             */
+            totalLoop = 0;
+        }
         /*
+         * 
+         * RAJOUTER LA GESTION DES PIECES SPECIALES !!!
          * 
          if(floorplanCount < minrooms) {
                 start.apply(this);
@@ -241,20 +230,55 @@ public class DungeonGenerator : MonoBehaviour {
 
     }
 
-    private int neighbourCount(Vector2Int vector) {
-        return floorplan[vector.x - 1, vector.y] + floorplan[vector.x + 1, vector.y] + floorplan[vector.x, vector.y - 1] + floorplan[vector.x, vector.y + 1];
+    private int neighbourCount(Vector2Int vector, RoomShapeEnum shape) {
+        int count = 0;
+        Vector2Int[] shapesToCheck = SearchPositionByShapes(shape, vector);
+        foreach (var checkNewPlace in shapesToCheck) {
+            count += floorplan[checkNewPlace.x, checkNewPlace.y];
+        }
+        return count;
     }
 
-    private int Visit(Vector2Int vector) {
+    private int CheckEmptySpace(Vector2Int vector, RoomShapeEnum shape) {
+        switch (shape) {
+            case RoomShapeEnum.ROOMSHAPE_1x1: {
+                return floorplan[vector.x, vector.y];
+            }
+            case RoomShapeEnum.ROOMSHAPE_2x2: {
+                return floorplan[vector.x, vector.y] +
+                    floorplan[vector.x + 1, vector.y] +
+                    floorplan[vector.x, vector.y + 1] +
+                    floorplan[vector.x + 1, vector.y + 1];
+            }
+            case RoomShapeEnum.ROOMSHAPE_1x2: {
+                return floorplan[vector.x, vector.y] +
+                    floorplan[vector.x + 1, vector.y];
+            }
+            case RoomShapeEnum.ROOMSHAPE_2x1: {
+                return floorplan[vector.x, vector.y] +
+                    floorplan[vector.x, vector.y + 1];
+            }
+        }
+        return 0;
+    }
 
-        if (floorplan[vector.x, vector.y] > 0) {
+    private int Visit(Vector2Int vector, RoomShapeEnum shape, bool firstRoom) {
+
+        // if place already used
+        if (CheckEmptySpace(vector, shape) > 0) {
             return 0;
         }
 
-        if (neighbourCount(vector) > 1) {
-            return 0;
+        if (shape == RoomShapeEnum.ROOMSHAPE_1x1) {
+            if (neighbourCount(vector, shape) > 1) {
+                return 0;
+            }
+        } else {
+            if (neighbourCount(vector, shape) > 2) {
+                return 0;
+            }
         }
-
+        
         if (floorplanCount >= maxRooms) {
             return 0;
         }
@@ -264,183 +288,80 @@ public class DungeonGenerator : MonoBehaviour {
         }
 
         cellQueue.Add(vector);
-        floorplan[vector.x, vector.y] = 1;
+
+        switch (shape) {
+            case RoomShapeEnum.ROOMSHAPE_1x1: {
+                floorplan[vector.x, vector.y] = 1;
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_2x2: {
+                floorplan[vector.x, vector.y] = 1;
+                floorplan[vector.x + 1, vector.y] = 1;
+                floorplan[vector.x, vector.y + 1] = 1;
+                floorplan[vector.x + 1, vector.y + 1] = 1;
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_1x2: {
+                floorplan[vector.x, vector.y] = 1;
+                floorplan[vector.x + 1, vector.y] = 1;
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_2x1: {
+                floorplan[vector.x, vector.y] = 1;
+                floorplan[vector.x, vector.y + 1] = 1;
+                break;
+            }
+        }
+
+        listOfPseudoRoom.Add(new PseudoRoom(vector, shape, firstRoom));
         floorplanCount += 1;
 
         return 1;
 
     }
 
-    /*private PseudoRoom SearchPositionForRoom(Vector2Int currentRoomVector, RoomShapeEnum newRoomShape) {
-        switch (newRoomShape) {
+    private Vector2Int[] SearchPositionByShapes(RoomShapeEnum shape, Vector2Int vector) {
+        switch (shape) {
             case RoomShapeEnum.ROOMSHAPE_1x1: {
-                NeighboorToCheckEnum[] currentRoomEdge = new NeighboorToCheckEnum[] { NeighboorToCheckEnum.T, NeighboorToCheckEnum.B, NeighboorToCheckEnum.L, NeighboorToCheckEnum.R };
-                return CanPlaceRoom(currentRoomEdge, currentRoomVector, RoomShapeEnum.ROOMSHAPE_1x1);
+                Vector2Int t = new Vector2Int(vector.x, vector.y + 1);
+                Vector2Int b = new Vector2Int(vector.x, vector.y - 1);
+                Vector2Int l = new Vector2Int(vector.x - 1, vector.y);
+                Vector2Int r = new Vector2Int(vector.x + 1, vector.y);
+                return new Vector2Int[] { t, b, l, r };
             }
             case RoomShapeEnum.ROOMSHAPE_2x2: {
-
+                Vector2Int tl = new Vector2Int(vector.x, vector.y + 1);
+                Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 1);
+                Vector2Int lt = new Vector2Int(vector.x - 1, vector.y);
+                Vector2Int lb = new Vector2Int(vector.x - 1, vector.y + -1);
+                Vector2Int rt = new Vector2Int(vector.x + 1, vector.y);
+                Vector2Int rb = new Vector2Int(vector.x + 1, vector.y + -1);
+                Vector2Int bl = new Vector2Int(vector.x, vector.y - 1);
+                Vector2Int br = new Vector2Int(vector.x + 1, vector.y - 1);
+                return new Vector2Int[] { tl, tr, lt, lb, rt, rb, bl, br };
             }
-            break;
             case RoomShapeEnum.ROOMSHAPE_1x2: {
-
+                Vector2Int tl = new Vector2Int(vector.x, vector.y + 1);
+                Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 1);
+                Vector2Int bl = new Vector2Int(vector.x, vector.y - 1);
+                Vector2Int br = new Vector2Int(vector.x + 1, vector.y - 1);
+                Vector2Int l = new Vector2Int(vector.x - 1, vector.y);
+                Vector2Int r = new Vector2Int(vector.x + 1, vector.y);
+                return new Vector2Int[] { tl, tr, bl, br, l, r };
             }
-            break;
             case RoomShapeEnum.ROOMSHAPE_2x1: {
-
+                Vector2Int t = new Vector2Int(vector.x, vector.y + 1);
+                Vector2Int b = new Vector2Int(vector.x, vector.y - 1);
+                Vector2Int lt = new Vector2Int(vector.x - 1, vector.y);
+                Vector2Int lb = new Vector2Int(vector.x - 1, vector.y + -1);
+                Vector2Int rt = new Vector2Int(vector.x + 1, vector.y);
+                Vector2Int rb = new Vector2Int(vector.x + 1, vector.y + -1);
+                return new Vector2Int[] { t, b, lt, lb, rt, rb };
             }
-            break;
-        }
-        return null;
-    }*/
-
-    /*private PseudoRoom canPlaceRoom(NeighboorToCheckEnum[] currentRoomEdge, Vector2Int currentRoomVector, ) {
-        List<NeighboorToCheckEnum> toCheck = new List<NeighboorToCheckEnum>(currentRoomEdge);
-        PseudoRoom newPseudoRoom = null;
-        int neighboor = 0;
-        foreach (var checkNewPlace in toCheck) {
-            switch (checkNewPlace) {
-                case NeighboorToCheckEnum.T:
-                Vector2Int t = new Vector2Int(currentRoomVector.x, currentRoomVector.y + 1);
-                newPseudoRoom = CreateRoomOrRemoveCheck(t, toCheck);
-                break;
-                case NeighboorToCheckEnum.B:
-                Vector2Int b = new Vector2Int(currentRoomVector.x, currentRoomVector.y - 1);
-                newPseudoRoom = CreateRoomOrRemoveCheck(b, toCheck);
-                break;
-                case NeighboorToCheckEnum.L:
-                Vector2Int l = new Vector2Int(currentRoomVector.x - 1, currentRoomVector.y);
-                newPseudoRoom = CreateRoomOrRemoveCheck(l, toCheck);
-                break;
-                case NeighboorToCheckEnum.R:
-                Vector2Int r = new Vector2Int(currentRoomVector.x + 1, currentRoomVector.y);
-                newPseudoRoom = CreateRoomOrRemoveCheck(r, toCheck);
-                break;
-
-            }
-        }
-        return newPseudoRoom;
-    }*/
-
-    /*private void CheckIfFreeSlotOrNeightboor(Vector2Int vectorToCheck, List<NeighboorToCheckEnum> toCheck) {
-        if (!IsOutOfBound(vectorToCheck)) {
-            
-        } else {
-            
-        }
-    }*/
-
-    /*private PseudoRoom canPlaceRoom(NeighboorToCheckEnum[] neighboors, Vector2Int roomPos) {
-        List<NeighboorToCheckEnum> toCheck = new List<NeighboorToCheckEnum>(neighboors);
-        PseudoRoom newPseudoRoom = null;
-        while (toCheck.Count > 0 && newPseudoRoom == null) {
-            int randomDirection = Random.Range(0, (toCheck.Count));
-            switch (toCheck[randomDirection]) {
-                case NeighboorToCheckEnum.T:
-                Vector2Int t = new Vector2Int(roomPos.x, roomPos.y + 1);
-                newPseudoRoom = CreateRoomOrRemoveCheck(t, toCheck, randomDirection);
-                break;
-                case NeighboorToCheckEnum.B:
-                Vector2Int b = new Vector2Int(roomPos.x, roomPos.y - 1);
-                newPseudoRoom = CreateRoomOrRemoveCheck(b, toCheck, randomDirection);
-                break;
-                case NeighboorToCheckEnum.L:
-                Vector2Int l = new Vector2Int(roomPos.x - 1, roomPos.y);
-                newPseudoRoom = CreateRoomOrRemoveCheck(l, toCheck, randomDirection);
-                break;
-                case NeighboorToCheckEnum.R:
-                Vector2Int r = new Vector2Int(roomPos.x + 1, roomPos.y);
-                newPseudoRoom = CreateRoomOrRemoveCheck(r, toCheck, randomDirection);
-                break;
-            }
-        }
-        return newPseudoRoom;
-    }*/
-
-    /*private PseudoRoom CanPlaceRoom(NeighboorToCheckEnum[] neighboors, Vector2Int roomPos, RoomShapeEnum shape) {
-
-        List<NeighboorToCheckEnum> toCheck = new List<NeighboorToCheckEnum>(neighboors);
-        List<Vector2Int> vectorToCheck = new List<Vector2Int>();
-        PseudoRoom newPseudoRoom = null;
-        int neighboorsRoom = 0;
-        foreach (var searchFreeSpace in toCheck) {
-            switch (searchFreeSpace) {
-                case NeighboorToCheckEnum.T:
-                Vector2Int t = new Vector2Int(roomPos.x, roomPos.y + 1);
-                if (!IsOutOfBound(t)) {
-                    foreach (var usedSpace in listOfUsingSpace) {
-                        if (t != usedSpace) {
-                            vectorToCheck.Add(t);
-                        } else {
-                            neighboorsRoom++;
-                        }
-                    }
-                }
-                break;
-                case NeighboorToCheckEnum.B:
-                Vector2Int b = new Vector2Int(roomPos.x, roomPos.y - 1);
-                if (!IsOutOfBound(b)) {
-                    foreach (var usedSpace in listOfUsingSpace) {
-                        if (b != usedSpace) {
-                            vectorToCheck.Add(b);
-                        } else {
-                            neighboorsRoom++;
-                        }
-                    }
-                }
-                break;
-                case NeighboorToCheckEnum.L:
-                Vector2Int l = new Vector2Int(roomPos.x - 1, roomPos.y);
-                if (!IsOutOfBound(l)) {
-                    foreach (var usedSpace in listOfUsingSpace) {
-                        if (l != usedSpace) {
-                            vectorToCheck.Add(l);
-                        } else {
-                            neighboorsRoom++;
-                        }
-                    }
-                }
-                break;
-                case NeighboorToCheckEnum.R:
-                Vector2Int r = new Vector2Int(roomPos.x + 1, roomPos.y);
-                if (!IsOutOfBound(r)) {
-                    foreach (var usedSpace in listOfUsingSpace) {
-                        if (r != usedSpace) {
-                            vectorToCheck.Add(r);
-                        } else {
-                            neighboorsRoom++;
-                        }
-                    }
-                }
-                break;
-            }
-        }
-        if (neighboorsRoom <= 1) {
-            int randomDirection = Random.Range(0, (vectorToCheck.Count));
-            newPseudoRoom = new PseudoRoom(vectorToCheck[randomDirection], shape);
-        }
-        return newPseudoRoom;
-    }*/
-    /*
-    private PseudoRoom CreateRoomOrRemoveCheck(Vector2Int vectorToCheck, List<NeighboorToCheckEnum> toCheck, int randomDirection) {
-        if (!IsOutOfBound(vectorToCheck)) {
-            foreach (var itm in listOfUsingSpace) {
-                if (itm == vectorToCheck) {
-                    toCheck.Remove(toCheck[randomDirection]);
-                    return null;
-                }
-            }
-            return new PseudoRoom(vectorToCheck, RoomShapeEnum.ROOMSHAPE_1x1);
-        } else {
-            toCheck.Remove(toCheck[randomDirection]);
         }
         return null;
     }
-    */
-    private bool IsOutOfBound(Vector2Int vector) {
-        return vector.x < 0 || vector.x > maxCol || vector.y < 0 || vector.y > maxCol;
-    }
 
-    // toDo rewrite !!!!!!!!!!!!!
     private RoomShapeEnum GetRandomShapeRoom() {
         if (Random.value > 0.7 && current_ROOMSHAPE_2x2 < max_ROOMSHAPE_2x2) {
             current_ROOMSHAPE_2x2 = 1;
@@ -457,7 +378,44 @@ public class DungeonGenerator : MonoBehaviour {
         return RoomShapeEnum.ROOMSHAPE_1x1;
     }
 
-    private DoorWithVector2[] GetDoorsByShape(RoomShapeEnum shape) {
+    private void CreateRooms() {
+        foreach (PseudoRoom room in listOfPseudoRoom) {
+            GameObject roomGo = null;
+            // long fileInfo = new System.IO.FileInfo(folder).Length;
+            // create get room
+            if (room.isStartRoom) {
+                roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetStarterPathRoomByBiome() + 0);
+            } else {
+                // toDO refacto et manage avec un pool de piece déjà prise !!!
+                int rnd = 0;
+                if(room.roomShape == RoomShapeEnum.ROOMSHAPE_1x1) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_1x1)).Length);
+                    rnd = Random.Range(0, 23);
+                }
+                if (room.roomShape == RoomShapeEnum.ROOMSHAPE_1x2) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_1x2)).Length);
+                    rnd = Random.Range(0, 1);
+                }
+                if (room.roomShape == RoomShapeEnum.ROOMSHAPE_2x2) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_2x1)).Length);
+                    rnd = Random.Range(0, 1);
+                }
+                if (room.roomShape == RoomShapeEnum.ROOMSHAPE_2x1) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_2x2)).Length);
+                    rnd = Random.Range(0, 1);
+                }
+                roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), room.roomShape) + rnd);
+            }
+            Vector2Int pos = new Vector2Int(room.position.x * 61, room.position.x * 31);
+            Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
+            obj.transform.parent = level.transform;
+            obj.Setup(room.position, room.roomShape);
+            // room.room = obj;
+            // gridOfRoom.Add(obj);
+        }
+    }
+
+    /*private DoorWithVector2[] GetDoorsByShape(RoomShapeEnum shape) {
         switch (shape) {
             case RoomShapeEnum.ROOMSHAPE_1x1:
             return new DoorWithVector2[] {
@@ -501,49 +459,15 @@ public class DungeonGenerator : MonoBehaviour {
             default:
             return null;
         }
-    }
-    private void CreateRooms() {
-        foreach (PseudoRoom room in listOfPseudoRoom) {
-            GameObject roomGo = null;
-            // long fileInfo = new System.IO.FileInfo(folder).Length;
-            // create get room
-            if (room.isStartRoom) {
-                roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(DifficultyEnum.Easy, room.roomShape) + 0);
-            } else {
-                roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetStarterPathRoomByBiome() + 0);
-            }
-            // Vector2Int pos = new Vector2Int(room.worldPosition.x * 61, room.worldPosition.y * 31);
-            // Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
-            // obj.transform.parent = level.transform;
-            // obj.Setup(room.rootPos, room.roomShape, room.id);
-            // room.room = obj;
-            // gridOfRoom.Add(obj);
-        }
-    }
+    }*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private Room CreateRoom(Vector2Int position, RoomShapeEnum shape, bool isStartRoom) {
+    /*private Room CreateRoom(Vector2Int position, RoomShapeEnum shape, bool isStartRoom) {
         Room newRoom = gameObject.AddComponent<Room>();
         newRoom.Setup(position, shape);
         newRoom.isStartRoom = isStartRoom;
         // newRoom.getDoorsByShape(shape);
         return newRoom;
-    }
+    }*/
 
     /*private void InsertNewRoomInListPosition(Vector2Int rootPos, RoomShapeEnum roomToCreate, int id) {
         id++;
@@ -628,15 +552,11 @@ public class DungeonGenerator : MonoBehaviour {
     }*/
 
     /*
-     * Getting a room to find an adject empty space
-     */
-
-    /*
      * Instead of SearchNewPositionForRoom, we start with one that only as one neighbor.
      * This will make it more likely that it returns a room that branches out
      */
 
-    private int GetNumberOfNeighborsByRoomShape(Vector2Int checkingPos, List<Vector2Int> usedPositions, RoomShapeEnum roomToCreate) {
+    /*private int GetNumberOfNeighborsByRoomShape(Vector2Int checkingPos, List<Vector2Int> usedPositions, RoomShapeEnum roomToCreate) {
         int numberOfNeighboor = 0;
         switch (roomToCreate) {
             case RoomShapeEnum.ROOMSHAPE_1x1:
@@ -664,9 +584,9 @@ public class DungeonGenerator : MonoBehaviour {
             break;
         }
         return numberOfNeighboor;
-    }
+    }*/
 
-    private int GetNumberOfNeighbors(Vector2Int checkingPos, List<Vector2Int> usedPositions) {
+    /*private int GetNumberOfNeighbors(Vector2Int checkingPos, List<Vector2Int> usedPositions) {
         int ngbh = 0; // start at zero, add 1 for each side there is already a room
         if (usedPositions.Contains(checkingPos + Vector2Int.right)) {
             ngbh++;
@@ -681,7 +601,7 @@ public class DungeonGenerator : MonoBehaviour {
             ngbh++;
         }
         return ngbh;
-    }
+    }*/
 
     /*private void CreateRooms() {
         foreach (RoomModel room in rooms) {
