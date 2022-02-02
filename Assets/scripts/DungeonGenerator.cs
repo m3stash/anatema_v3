@@ -55,61 +55,69 @@ public class PseudoRoom {
 }
 
 public class DungeonGenerator : MonoBehaviour {
+
     private int maxCol = 8;
     private RoomModel[,] rooms;
     private List<Room> gridOfRoom = new List<Room>();
     private readonly List<Vector2Int> roomListPositions = new List<Vector2Int>();
-    // private readonly List<Vector2Int> roomGrid = new List<Vector2Int>();
-
-
-
     private GridOfRooms[,] gridOfRooms;
     private readonly List<Room> roomList = new List<Room>();
-
     private List<Vector2Int> listOfUsingSpace;
-    private List<PseudoRoom> listOfPseudoRoom;
     private int maxTry = 4;
     private int currentTry = 0;
     private Dictionary<int, List<int>> tree = new Dictionary<int, List<int>>();
-
     private List<Vector2Int> roomGrid = new List<Vector2Int>();
     private List<GameObject> room_1x1 = new List<GameObject>();
     private List<GameObject> room_1x2 = new List<GameObject>();
     private List<GameObject> room_2x1 = new List<GameObject>();
     private List<GameObject> room_2x2 = new List<GameObject>();
     private int numberOfRooms;
+
+
+    private int current_ROOMSHAPE_2x2, current_ROOMSHAPE_1x2, current_ROOMSHAPE_2x1 = 0;
     private readonly int max_ROOMSHAPE_2x2 = 1;
     private readonly int max_ROOMSHAPE_1x2 = 1;
     private readonly int max_ROOMSHAPE_2x1 = 1;
-    private int current_ROOMSHAPE_2x2 = 0;
-    private int current_ROOMSHAPE_1x2, current_ROOMSHAPE_2x1 = 0;
-    private GameObject level;
+    private float luckForSpecialSHape = 0.5f;
+
+    // InitValues
+    private int[,] floorplan;
+    private int bound;
+    private int roomMaxBound;
+    private List<Vector2Int> cellQueue;
+    private List<Vector2Int> endRooms;
+    private int floorplanCount;
     private DungeonConfig currentDungeonConfig;
+    private int maxRooms;
+    private Vector2Int vectorStart;
+    private int totalLoop = 0;
+    private GameObject floor;
+    private List<PseudoRoom> listOfPseudoRoom;
 
-
-
-
-
-
-
-
-    /***************************************** */
-    int[,] floorplan;
-    List<Vector2Int> cellQueue;
-    List<Vector2Int> endRooms;
-    int floorplanCount;
-    int maxRooms; // toDo a dynamiser par rapport à la difficulté du level courant !
-    Vector2Int vectorStart;
-    int totalLoop = 0;
-    /******************************/
-
-    public void StartGeneration(GameObject level, DungeonConfig config) {
+    private void InitValues(GameObject floor, DungeonConfig config) {
+        floorplan = new int[12, 12];
+        bound = floorplan.GetLength(0);
+        roomMaxBound = floorplan.GetLength(0) - 2;
         currentDungeonConfig = config;
-        numberOfRooms = (int)config.GetRoomSize();
-        this.level = level;
-        if (numberOfRooms >= 64) {
-            numberOfRooms = 64;
-        }
+        maxRooms = (int)config.GetRoomSize();
+        vectorStart = new Vector2Int(bound / 2, bound / 2);
+        totalLoop = 0;
+        this.floor = floor;
+    }
+
+    private void InitGenerateValues() {
+        current_ROOMSHAPE_2x2 = 0;
+        current_ROOMSHAPE_1x2 = 0;
+        current_ROOMSHAPE_2x1 = 0;
+        floorplan = new int[12, 12];
+        cellQueue = new List<Vector2Int>();
+        endRooms = new List<Vector2Int>();
+        listOfPseudoRoom = new List<PseudoRoom>();
+        floorplanCount = 0;
+    }
+
+    public void StartGeneration(GameObject floor, DungeonConfig config) {
+        InitValues(floor, config);
         // CreatePool();
         Generate();
         CreateRooms();
@@ -144,23 +152,11 @@ public class DungeonGenerator : MonoBehaviour {
     }*/
 
     private void Generate() {
-        // Vector2Int startPos = new Vector2Int(maxCol / 2, maxCol / 2);
-        /*Vector2Int startPos = new Vector2Int(0, 0);
-        listOfUsingSpace = new List<Vector2Int>();
-        listOfUsingSpace.Add(startPos);
-        listOfPseudoRoom = new List<PseudoRoom>();
-        listOfPseudoRoom.Add(new PseudoRoom(startPos, RoomShapeEnum.ROOMSHAPE_1x1, true));*/
-        floorplanCount = 0;
-        maxRooms = 15;
-        floorplan = new int[11, 11];
-        vectorStart = new Vector2Int(5, 5);
-        cellQueue = new List<Vector2Int>();
-        endRooms = new List<Vector2Int>();
-        listOfPseudoRoom = new List<PseudoRoom>();
+        InitGenerateValues();
         // Start Breadth First Pattern
         Visit(vectorStart, RoomShapeEnum.ROOMSHAPE_1x1, true);
 
-        while (cellQueue.Count > 0) {
+        while (cellQueue.Count > 0 && floorplanCount < maxRooms) {
             RoomShapeEnum roomShape = GetRandomShapeRoom();
             Vector2Int vector = cellQueue[0];
             cellQueue.RemoveAt(0);
@@ -168,7 +164,28 @@ public class DungeonGenerator : MonoBehaviour {
 
             Vector2Int[] shapesToCheck = SearchPositionByShapes(roomShape, vector);
             foreach (var vectorToCheck in shapesToCheck) {
-                if (vectorToCheck.x > 1 && vectorToCheck.x < 9 && vectorToCheck.y > 1 && vectorToCheck.y < 9) {
+                bool stopSearch = false;
+                switch (roomShape) {
+                    case RoomShapeEnum.ROOMSHAPE_2x2: {
+                        if (current_ROOMSHAPE_2x2 > max_ROOMSHAPE_2x2) {
+                            stopSearch = true;
+                        }
+                        break;
+                    }
+                    case RoomShapeEnum.ROOMSHAPE_1x2: {
+                        if (current_ROOMSHAPE_1x2 > max_ROOMSHAPE_1x2) {
+                            stopSearch = true;
+                        }
+                        break;
+                    }
+                    case RoomShapeEnum.ROOMSHAPE_2x1: {
+                        if (current_ROOMSHAPE_2x1 > max_ROOMSHAPE_2x1) {
+                            stopSearch = true;
+                        }
+                        break;
+                    }
+                }
+                if (!stopSearch && vectorToCheck.x > 1 && vectorToCheck.x < roomMaxBound && vectorToCheck.y > 1 && vectorToCheck.y < roomMaxBound) {
                     createdCount += Visit(vectorToCheck, roomShape, false);
                 }
             }
@@ -182,20 +199,9 @@ public class DungeonGenerator : MonoBehaviour {
             Generate();
         } else {
             Debug.Log("END " + totalLoop);
-
-            /*
-             * 
-                PENSER A RESET LES VARS!
-                int[,] floorplan;
-                List<Vector2Int> cellQueue;
-                List<Vector2Int> endRooms;
-                int floorplanCount;
-                int maxRooms; // toDo a dynamiser par rapport à la difficulté du level courant !
-                Vector2Int vectorStart;
-                int totalLoop = 0;
-             * 
-             */
-            totalLoop = 0;
+            Debug.Log("max_ROOMSHAPE_1x2 " + max_ROOMSHAPE_1x2);
+            Debug.Log("max_ROOMSHAPE_2x1 " + max_ROOMSHAPE_2x1);
+            Debug.Log("max_ROOMSHAPE_1x2 " + max_ROOMSHAPE_1x2);
         }
         /*
          * 
@@ -230,6 +236,67 @@ public class DungeonGenerator : MonoBehaviour {
 
     }
 
+    private int Visit(Vector2Int vector, RoomShapeEnum shape, bool firstRoom) {
+
+        // if place already used
+        if (CheckEmptySpace(vector, shape) > 0) {
+            return 0;
+        }
+
+        if (shape == RoomShapeEnum.ROOMSHAPE_1x1) {
+            if (neighbourCount(vector, shape) > 1) {
+                return 0;
+            }
+        } else {
+            if (neighbourCount(vector, shape) > 2) {
+                return 0;
+            }
+        }
+
+        if (floorplanCount >= maxRooms) {
+            return 0;
+        }
+
+        if (Random.value < 0.5f && vector != vectorStart) {
+            return 0;
+        }
+
+        cellQueue.Add(vector);
+
+        switch (shape) {
+            case RoomShapeEnum.ROOMSHAPE_1x1: {
+                floorplan[vector.x, vector.y] = 1;
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_2x2: {
+                floorplan[vector.x, vector.y] = 1;
+                floorplan[vector.x + 1, vector.y] = 1;
+                floorplan[vector.x, vector.y + 1] = 1;
+                floorplan[vector.x + 1, vector.y + 1] = 1;
+                current_ROOMSHAPE_2x2++;
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_1x2: {
+                floorplan[vector.x, vector.y] = 1;
+                floorplan[vector.x, vector.y + 1] = 1;
+                current_ROOMSHAPE_1x2++;
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_2x1: {
+                floorplan[vector.x, vector.y] = 1;
+                floorplan[vector.x + 1, vector.y] = 1;
+                current_ROOMSHAPE_2x1++;
+                break;
+            }
+        }
+
+        listOfPseudoRoom.Add(new PseudoRoom(vector, shape, firstRoom));
+        floorplanCount += 1;
+
+        return 1;
+
+    }
+
     private int neighbourCount(Vector2Int vector, RoomShapeEnum shape) {
         int count = 0;
         Vector2Int[] shapesToCheck = SearchPositionByShapes(shape, vector);
@@ -252,72 +319,14 @@ public class DungeonGenerator : MonoBehaviour {
             }
             case RoomShapeEnum.ROOMSHAPE_1x2: {
                 return floorplan[vector.x, vector.y] +
-                    floorplan[vector.x + 1, vector.y];
+                    floorplan[vector.x, vector.y + 1];
             }
             case RoomShapeEnum.ROOMSHAPE_2x1: {
                 return floorplan[vector.x, vector.y] +
-                    floorplan[vector.x, vector.y + 1];
+                    floorplan[vector.x + 1, vector.y];
             }
         }
         return 0;
-    }
-
-    private int Visit(Vector2Int vector, RoomShapeEnum shape, bool firstRoom) {
-
-        // if place already used
-        if (CheckEmptySpace(vector, shape) > 0) {
-            return 0;
-        }
-
-        if (shape == RoomShapeEnum.ROOMSHAPE_1x1) {
-            if (neighbourCount(vector, shape) > 1) {
-                return 0;
-            }
-        } else {
-            if (neighbourCount(vector, shape) > 2) {
-                return 0;
-            }
-        }
-        
-        if (floorplanCount >= maxRooms) {
-            return 0;
-        }
-
-        if (Random.value < 0.5f && vector != vectorStart) {
-            return 0;
-        }
-
-        cellQueue.Add(vector);
-
-        switch (shape) {
-            case RoomShapeEnum.ROOMSHAPE_1x1: {
-                floorplan[vector.x, vector.y] = 1;
-                break;
-            }
-            case RoomShapeEnum.ROOMSHAPE_2x2: {
-                floorplan[vector.x, vector.y] = 1;
-                floorplan[vector.x + 1, vector.y] = 1;
-                floorplan[vector.x, vector.y + 1] = 1;
-                floorplan[vector.x + 1, vector.y + 1] = 1;
-                break;
-            }
-            case RoomShapeEnum.ROOMSHAPE_1x2: {
-                floorplan[vector.x, vector.y] = 1;
-                floorplan[vector.x + 1, vector.y] = 1;
-                break;
-            }
-            case RoomShapeEnum.ROOMSHAPE_2x1: {
-                floorplan[vector.x, vector.y] = 1;
-                floorplan[vector.x, vector.y + 1] = 1;
-                break;
-            }
-        }
-
-        listOfPseudoRoom.Add(new PseudoRoom(vector, shape, firstRoom));
-        floorplanCount += 1;
-
-        return 1;
-
     }
 
     private Vector2Int[] SearchPositionByShapes(RoomShapeEnum shape, Vector2Int vector) {
@@ -340,7 +349,7 @@ public class DungeonGenerator : MonoBehaviour {
                 Vector2Int br = new Vector2Int(vector.x + 1, vector.y - 1);
                 return new Vector2Int[] { tl, tr, lt, lb, rt, rb, bl, br };
             }
-            case RoomShapeEnum.ROOMSHAPE_1x2: {
+            case RoomShapeEnum.ROOMSHAPE_2x1: {
                 Vector2Int tl = new Vector2Int(vector.x, vector.y + 1);
                 Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 1);
                 Vector2Int bl = new Vector2Int(vector.x, vector.y - 1);
@@ -349,7 +358,7 @@ public class DungeonGenerator : MonoBehaviour {
                 Vector2Int r = new Vector2Int(vector.x + 1, vector.y);
                 return new Vector2Int[] { tl, tr, bl, br, l, r };
             }
-            case RoomShapeEnum.ROOMSHAPE_2x1: {
+            case RoomShapeEnum.ROOMSHAPE_1x2: {
                 Vector2Int t = new Vector2Int(vector.x, vector.y + 1);
                 Vector2Int b = new Vector2Int(vector.x, vector.y - 1);
                 Vector2Int lt = new Vector2Int(vector.x - 1, vector.y);
@@ -359,21 +368,35 @@ public class DungeonGenerator : MonoBehaviour {
                 return new Vector2Int[] { t, b, lt, lb, rt, rb };
             }
         }
+        // REVOIR LE SYSTEM CA MARCHE PAS !!!!!!!
         return null;
     }
 
     private RoomShapeEnum GetRandomShapeRoom() {
-        if (Random.value > 0.7 && current_ROOMSHAPE_2x2 < max_ROOMSHAPE_2x2) {
-            current_ROOMSHAPE_2x2 = 1;
-            return RoomShapeEnum.ROOMSHAPE_2x2;
+        float rng = Random.value;
+        if (rng < 0.3) {
+            if (Random.value < 0.5f) {
+                return 0;
+            }
+            if (current_ROOMSHAPE_2x2 < max_ROOMSHAPE_2x2) {
+                return RoomShapeEnum.ROOMSHAPE_2x2;
+            }
         }
-        if (Random.value > 0.7 && current_ROOMSHAPE_1x2 < max_ROOMSHAPE_1x2) {
-            current_ROOMSHAPE_1x2 = 1;
-            return RoomShapeEnum.ROOMSHAPE_1x2;
+        if (rng > 0.3 && Random.value < 0.6) {
+            if (Random.value < 0.5f) {
+                return 0;
+            }
+            if (current_ROOMSHAPE_1x2 < max_ROOMSHAPE_1x2) {
+                return RoomShapeEnum.ROOMSHAPE_1x2;
+            }
         }
-        if (Random.value > 0.7 && current_ROOMSHAPE_2x1 < max_ROOMSHAPE_2x1) {
-            current_ROOMSHAPE_2x1 = 1;
-            return RoomShapeEnum.ROOMSHAPE_2x1;
+        if (rng > 0.6) {
+            if (Random.value < 0.5f) {
+                return 0;
+            }
+            if (current_ROOMSHAPE_2x1 < max_ROOMSHAPE_2x1) {
+                return RoomShapeEnum.ROOMSHAPE_2x1;
+            }
         }
         return RoomShapeEnum.ROOMSHAPE_1x1;
     }
@@ -388,7 +411,7 @@ public class DungeonGenerator : MonoBehaviour {
             } else {
                 // toDO refacto et manage avec un pool de piece déjà prise !!!
                 int rnd = 0;
-                if(room.roomShape == RoomShapeEnum.ROOMSHAPE_1x1) {
+                if (room.roomShape == RoomShapeEnum.ROOMSHAPE_1x1) {
                     // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_1x1)).Length);
                     rnd = Random.Range(0, 23);
                 }
@@ -406,9 +429,9 @@ public class DungeonGenerator : MonoBehaviour {
                 }
                 roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), room.roomShape) + rnd);
             }
-            Vector2Int pos = new Vector2Int(room.position.x * 61, room.position.x * 31);
+            Vector2Int pos = new Vector2Int(room.position.x * 61, room.position.y * 31);
             Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
-            obj.transform.parent = level.transform;
+            obj.transform.parent = floor.transform;
             obj.Setup(room.position, room.roomShape);
             // room.room = obj;
             // gridOfRoom.Add(obj);
