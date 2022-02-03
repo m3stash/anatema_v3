@@ -106,10 +106,10 @@ public class DungeonGenerator : MonoBehaviour {
     }
 
     private void InitGenerateValues() {
+        floorplan = new int[12, 12];
         current_ROOMSHAPE_2x2 = 0;
         current_ROOMSHAPE_1x2 = 0;
         current_ROOMSHAPE_2x1 = 0;
-        floorplan = new int[12, 12];
         cellQueue = new List<Vector2Int>();
         endRooms = new List<Vector2Int>();
         listOfPseudoRoom = new List<PseudoRoom>();
@@ -162,34 +162,18 @@ public class DungeonGenerator : MonoBehaviour {
             cellQueue.RemoveAt(0);
             int createdCount = 0;
 
-            Vector2Int[] shapesToCheck = SearchPositionByShapes(roomShape, vector);
-            foreach (var vectorToCheck in shapesToCheck) {
-                bool stopSearch = false;
-                switch (roomShape) {
-                    case RoomShapeEnum.ROOMSHAPE_2x2: {
-                        if (current_ROOMSHAPE_2x2 > max_ROOMSHAPE_2x2) {
-                            stopSearch = true;
-                        }
-                        break;
-                    }
-                    case RoomShapeEnum.ROOMSHAPE_1x2: {
-                        if (current_ROOMSHAPE_1x2 > max_ROOMSHAPE_1x2) {
-                            stopSearch = true;
-                        }
-                        break;
-                    }
-                    case RoomShapeEnum.ROOMSHAPE_2x1: {
-                        if (current_ROOMSHAPE_2x1 > max_ROOMSHAPE_2x1) {
-                            stopSearch = true;
-                        }
-                        break;
-                    }
-                }
-                if (!stopSearch && vectorToCheck.x > 1 && vectorToCheck.x < roomMaxBound && vectorToCheck.y > 1 && vectorToCheck.y < roomMaxBound) {
-                    createdCount += Visit(vectorToCheck, roomShape, false);
-                }
+            if (vector.x > 1 && !checkLimitOfSpecialRooms(roomShape)) {
+                createdCount += Visit(new Vector2Int(vector.x - 1, vector.y), roomShape, false);
             }
-
+            if (vector.x < roomMaxBound && !checkLimitOfSpecialRooms(roomShape)) {
+                createdCount += Visit(new Vector2Int(vector.x + 1, vector.y), roomShape, false);
+            }
+            if (vector.y > 1 && !checkLimitOfSpecialRooms(roomShape)) {
+                createdCount += Visit(new Vector2Int(vector.x, vector.y - 1), roomShape, false);
+            }
+            if (vector.y < roomMaxBound && !checkLimitOfSpecialRooms(roomShape)) {
+                createdCount += Visit(new Vector2Int(vector.x, vector.y + 1), roomShape, false);
+            }
             if (createdCount == 0) {
                 endRooms.Add(vector);
             }
@@ -236,28 +220,47 @@ public class DungeonGenerator : MonoBehaviour {
 
     }
 
+    private bool checkLimitOfSpecialRooms(RoomShapeEnum roomShape) {
+        switch (roomShape) {
+            case RoomShapeEnum.ROOMSHAPE_2x2: {
+                if (current_ROOMSHAPE_2x2 > max_ROOMSHAPE_2x2) {
+                    return true;
+                }
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_1x2: {
+                if (current_ROOMSHAPE_1x2 > max_ROOMSHAPE_1x2) {
+                    return true;
+                }
+                break;
+            }
+            case RoomShapeEnum.ROOMSHAPE_2x1: {
+                if (current_ROOMSHAPE_2x1 > max_ROOMSHAPE_2x1) {
+                    return true;
+                }
+                break;
+            }
+        }
+        return false;
+    }
+
     private int Visit(Vector2Int vector, RoomShapeEnum shape, bool firstRoom) {
-
-        // if place already used
-        if (CheckEmptySpace(vector, shape) > 0) {
-            return 0;
-        }
-
-        if (shape == RoomShapeEnum.ROOMSHAPE_1x1) {
-            if (neighbourCount(vector, shape) > 1) {
-                return 0;
-            }
-        } else {
-            if (neighbourCount(vector, shape) > 2) {
-                return 0;
-            }
-        }
 
         if (floorplanCount >= maxRooms) {
             return 0;
         }
 
         if (Random.value < 0.5f && vector != vectorStart) {
+            return 0;
+        }
+
+        // toDO rajouter le sens T L R B du visite afin de prendre les bonnes distances ex : si 2x2 et sens = L alors on enlève -1 en X 
+        // si 2x2 && sens = T alors on ajoute +1 en y
+        if (CheckEmptySpace(vector, shape) > 0) {
+            return 0;
+        }
+
+        if (neighbourCount(vector, shape) > 1) {
             return 0;
         }
 
@@ -298,8 +301,17 @@ public class DungeonGenerator : MonoBehaviour {
     }
 
     private int neighbourCount(Vector2Int vector, RoomShapeEnum shape) {
+
         int count = 0;
-        Vector2Int[] shapesToCheck = SearchPositionByShapes(shape, vector);
+        Vector2Int[] shapesToCheck = SearchNeighboorsByShapes(shape, vector);
+        /* case
+        * if x or y == 1 
+        * || x or y == bound -1 
+        * if search to check neightboor of big room like 2x2 so -1 + -2 is out of bound!
+        */
+        if (shapesToCheck.Length == 0) {
+            return 99;
+        }
         foreach (var checkNewPlace in shapesToCheck) {
             count += floorplan[checkNewPlace.x, checkNewPlace.y];
         }
@@ -329,7 +341,7 @@ public class DungeonGenerator : MonoBehaviour {
         return 0;
     }
 
-    private Vector2Int[] SearchPositionByShapes(RoomShapeEnum shape, Vector2Int vector) {
+    private Vector2Int[] SearchNeighboorsByShapes(RoomShapeEnum shape, Vector2Int vector) {
         switch (shape) {
             case RoomShapeEnum.ROOMSHAPE_1x1: {
                 Vector2Int t = new Vector2Int(vector.x, vector.y + 1);
@@ -339,36 +351,44 @@ public class DungeonGenerator : MonoBehaviour {
                 return new Vector2Int[] { t, b, l, r };
             }
             case RoomShapeEnum.ROOMSHAPE_2x2: {
-                Vector2Int tl = new Vector2Int(vector.x, vector.y + 1);
-                Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 1);
-                Vector2Int lt = new Vector2Int(vector.x - 1, vector.y);
-                Vector2Int lb = new Vector2Int(vector.x - 1, vector.y + -1);
-                Vector2Int rt = new Vector2Int(vector.x + 1, vector.y);
-                Vector2Int rb = new Vector2Int(vector.x + 1, vector.y + -1);
+                if(vector.y + 2 >= bound) {
+                    return new Vector2Int[] { };
+                }
+                Vector2Int tl = new Vector2Int(vector.x, vector.y + 2);
+                Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 2);
+                Vector2Int lt = new Vector2Int(vector.x - 1, vector.y + 1);
+                Vector2Int lb = new Vector2Int(vector.x - 1, vector.y);
+                Vector2Int rt = new Vector2Int(vector.x + 1, vector.y + 1);
+                Vector2Int rb = new Vector2Int(vector.x + 1, vector.y);
                 Vector2Int bl = new Vector2Int(vector.x, vector.y - 1);
                 Vector2Int br = new Vector2Int(vector.x + 1, vector.y - 1);
                 return new Vector2Int[] { tl, tr, lt, lb, rt, rb, bl, br };
             }
             case RoomShapeEnum.ROOMSHAPE_2x1: {
+                if (vector.x + 2 >= bound) {
+                    return new Vector2Int[] { };
+                }
                 Vector2Int tl = new Vector2Int(vector.x, vector.y + 1);
                 Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 1);
                 Vector2Int bl = new Vector2Int(vector.x, vector.y - 1);
                 Vector2Int br = new Vector2Int(vector.x + 1, vector.y - 1);
                 Vector2Int l = new Vector2Int(vector.x - 1, vector.y);
-                Vector2Int r = new Vector2Int(vector.x + 1, vector.y);
+                Vector2Int r = new Vector2Int(vector.x + 2, vector.y);
                 return new Vector2Int[] { tl, tr, bl, br, l, r };
             }
             case RoomShapeEnum.ROOMSHAPE_1x2: {
-                Vector2Int t = new Vector2Int(vector.x, vector.y + 1);
+                if (vector.y + 2 >= bound) {
+                    return new Vector2Int[] { };
+                }
+                Vector2Int t = new Vector2Int(vector.x, vector.y + 2);
                 Vector2Int b = new Vector2Int(vector.x, vector.y - 1);
-                Vector2Int lt = new Vector2Int(vector.x - 1, vector.y);
-                Vector2Int lb = new Vector2Int(vector.x - 1, vector.y + -1);
-                Vector2Int rt = new Vector2Int(vector.x + 1, vector.y);
-                Vector2Int rb = new Vector2Int(vector.x + 1, vector.y + -1);
+                Vector2Int lt = new Vector2Int(vector.x - 1, vector.y + 1);
+                Vector2Int lb = new Vector2Int(vector.x - 1, vector.y);
+                Vector2Int rt = new Vector2Int(vector.x + 1, vector.y + 1);
+                Vector2Int rb = new Vector2Int(vector.x + 1, vector.y);
                 return new Vector2Int[] { t, b, lt, lb, rt, rb };
             }
         }
-        // REVOIR LE SYSTEM CA MARCHE PAS !!!!!!!
         return null;
     }
 
