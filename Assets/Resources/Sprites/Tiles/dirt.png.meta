@@ -111,7 +111,7 @@ TextureImporter:
       213: 4162261161075656089
     second: dirt_35
   externalObjects: {}
-  serializedVersion: 10
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -131,6 +131,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -139,9 +141,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -162,11 +164,15 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 1
   platformSettings:
-  - serializedVersion: 2
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -177,7 +183,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -188,6 +195,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -957,6 +965,43 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      dirt_33: -535955754643264456
+      dirt_21: -4643241923584157249
+      dirt_6: 1741364125068972350
+      dirt_22: -307551692407819652
+      dirt_20: 903708101836699179
+      dirt_34: 1943859967494798541
+      dirt_26: -9113066901439858745
+      dirt_12: -2650713670310062566
+      dirt_9: -6252486248573733601
+      dirt_8: 4840285518514534099
+      dirt_7: 8069240933849549733
+      dirt_15: 3849479111998487501
+      dirt_11: 703120487251447869
+      dirt_18: -2890310287067007835
+      dirt_19: -6855718002261116278
+      dirt_4: 8945134245928345701
+      dirt_31: 1684332461669216695
+      dirt_30: -2250979663647398285
+      dirt_27: -1789677753036037815
+      dirt_14: 2211203847774832394
+      dirt_24: 7971986067615452217
+      dirt_10: 8723449380172197769
+      dirt_5: -7463445084774042835
+      dirt_32: -256096827188923388
+      dirt_29: -7194069241667589499
+      dirt_16: 1584959600808551503
+      dirt_1: 4599323450485179080
+      dirt_23: -3057520779992004693
+      dirt_2: 8148967778456589955
+      dirt_28: 1792825530352931239
+      dirt_35: 4162261161075656089
+      dirt_13: -4590260581976899338
+      dirt_17: 204613489817746490
+      dirt_25: -867320447883301778
+      dirt_0: 5634026908348037240
+      dirt_3: 4340402923186232840
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

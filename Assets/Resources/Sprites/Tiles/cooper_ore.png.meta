@@ -129,6 +129,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -137,9 +138,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -944,6 +945,42 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      cooper_ore_4: 6808735555797485441
+      cooper_ore_25: 7292813599963702282
+      cooper_ore_1: -4954334370365205737
+      cooper_ore_29: 3728206780388079416
+      cooper_ore_17: 591942220774449098
+      cooper_ore_7: 200434409485458134
+      cooper_ore_18: -4231791202912812348
+      cooper_ore_22: 2542266634585073235
+      cooper_ore_11: -4150112099283568133
+      cooper_ore_9: -7544037907094443354
+      cooper_ore_0: 8403556442121363228
+      cooper_ore_6: -2119297745934300141
+      cooper_ore_24: 8989813205851696649
+      cooper_ore_19: -4747015561539002481
+      cooper_ore_27: -534975452582762978
+      cooper_ore_30: 7225253554249344317
+      cooper_ore_10: 6916782673156120205
+      cooper_ore_33: 3617429261959028866
+      cooper_ore_34: 3297421816972827925
+      cooper_ore_23: -5984261828380535728
+      cooper_ore_3: 2668704765903048432
+      cooper_ore_2: 4016695133945450177
+      cooper_ore_12: -5646402259982536830
+      cooper_ore_13: -3358824834978566485
+      cooper_ore_28: 8694272389645919416
+      cooper_ore_14: 6394358276119405334
+      cooper_ore_32: -2382087098387865732
+      cooper_ore_31: 7759971677470287286
+      cooper_ore_5: -5704905776400293243
+      cooper_ore_26: -8521783382824228094
+      cooper_ore_21: 1707639924790369463
+      cooper_ore_16: -2613222921275906369
+      cooper_ore_15: -8633285747502831689
+      cooper_ore_8: 2986246309015248582
+      cooper_ore_20: 7100307446112015288
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

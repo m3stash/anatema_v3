@@ -25,6 +25,7 @@ ScriptedImporter:
     streamingMipmaps: 1
     streamingMipmapsPriority: 0
     vTOnly: 0
+    ignoreMasterTextureLimit: 0
     nPOTScale: 1
     sRGBTexture: 1
     spriteMode: 2
@@ -79,7 +80,6 @@ ScriptedImporter:
       width: 0
       height: 0
     spriteID: 
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -103,7 +103,6 @@ ScriptedImporter:
       width: 63
       height: 36
     spriteID: 33509657b6c574b40aa3bdd5d433c896
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -125,7 +124,6 @@ ScriptedImporter:
       width: 55
       height: 59
     spriteID: 9da66cfd8a753f5429e7219bd7740f34
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -147,7 +145,6 @@ ScriptedImporter:
       width: 100
       height: 50
     spriteID: 02c5c407b665e42449b41346718aa9fc
-    internalID: 0
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -157,32 +154,46 @@ ScriptedImporter:
     tessellationDetail: 0
     parentGroupIndex: -1
     uvTransform: {x: 4, y: 4}
+  characterData:
+    bones: []
+    parts: []
+    dimension: {x: 0, y: 0}
+    characterGroups: []
+    boneReadOnly: 0
+  sharedRigSpriteImportData: []
+  sharedRigCharacterData:
+    bones: []
+    parts: []
+    dimension: {x: 0, y: 0}
+    characterGroups: []
+    boneReadOnly: 0
   platformSettings: []
   mosaicLayers: 1
+  characterMode: 1
   documentPivot: {x: 0, y: 0}
   documentAlignment: 7
   importHiddenLayers: 0
-  importedTextureWidth: 128
-  importedTextureHeight: 256
-  documentSize: {x: 100, y: 100}
+  layerMappingOption: 2
+  generatePhysicsShape: 0
   paperDollMode: 0
   keepDupilcateSpriteName: 0
+  skeletonAssetReferenceID: 
   spriteCategoryList:
     categories: []
-  textureActualWidth: 128
-  textureActualHeight: 256
   spritePackingTag: 
   resliceFromLayer: 0
-  characterMode: 1
   mosaicPSDLayers: []
   rigPSDLayers:
   - name: Groupe 1
     spriteName: 
     isGroup: 1
     parentIndex: -1
-    spriteID: 00000000000000000000000000000000
+    spriteID: 5daf48f6a52f9dc4aa4a9bbea778c771
     layerID: 13
     mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
   - name: Objet dynamique vectoriel
     spriteName: Objet dynamique vectoriel
     isGroup: 0
@@ -190,6 +201,9 @@ ScriptedImporter:
     spriteID: 33509657b6c574b40aa3bdd5d433c896
     layerID: 8
     mosaicPosition: {x: 4, y: 129}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
   - name: Objet dynamique vectoriel
     spriteName: Objet dynamique vectoriel_1
     isGroup: 0
@@ -197,6 +211,9 @@ ScriptedImporter:
     spriteID: 9da66cfd8a753f5429e7219bd7740f34
     layerID: 6
     mosaicPosition: {x: 4, y: 62}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
   - name: Objet dynamique vectoriel
     spriteName: Objet dynamique vectoriel_2
     isGroup: 0
@@ -204,13 +221,14 @@ ScriptedImporter:
     spriteID: 02c5c407b665e42449b41346718aa9fc
     layerID: 4
     mosaicPosition: {x: 4, y: 4}
-  characterData:
-    bones: []
-    parts: []
-    dimension: {x: 0, y: 0}
-    characterGroups: []
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  sharedRigPSDLayers: []
+  pSDLayerImportSetting: []
   generateGOHierarchy: 0
   textureAssetName: grass_1 Texture
   prefabAssetName: grass_1 Prefab
   spriteLibAssetName: grass_1 Sprite Lib
+  skeletonAssetName: 
   secondarySpriteTextures: []

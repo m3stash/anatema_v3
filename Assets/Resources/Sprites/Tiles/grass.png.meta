@@ -132,6 +132,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -140,9 +141,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -163,6 +164,8 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
@@ -962,6 +965,43 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      grass_9: -7650045499417364637
+      grass_19: 7485028316761915057
+      grass_10: -7102782719272619346
+      grass_16: 7882093760513265202
+      grass_27: 4763473756237327555
+      grass_11: 5760560697798805154
+      grass_24: 8161109568162413996
+      grass_30: 1433647835158291232
+      grass_0: 7932798033344189819
+      grass_3: -4875790746840711183
+      grass_17: 1221758358402831077
+      grass_23: -5984118509526019633
+      grass_25: -5222378910249604682
+      grass_2: -6996743899038756316
+      grass_33: 5924365043941166966
+      grass_4: 7008057662264404087
+      grass_22: -2140708771399861022
+      grass_18: 1549955567050341098
+      grass_31: 3925414852906784594
+      grass_5: -4331507780233467490
+      grass_32: 6399507840787211314
+      grass_29: 7090553169098523241
+      grass_34: -116850080281690458
+      grass_12: 5979050371840818550
+      grass_13: -4157006506167928481
+      grass_15: -6402286615853794283
+      grass_6: 3947305696912312628
+      grass_1: 917857947829267716
+      grass_26: 7948030905998602369
+      grass_7: 1511364853548294097
+      grass_20: -3605513636885208035
+      grass_28: 1635801129053076270
+      grass_8: -1196767453120055481
+      grass_21: -6742746201946172663
+      grass_14: 7062079563280921139
+      grass_35: 6772836760113797712
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
