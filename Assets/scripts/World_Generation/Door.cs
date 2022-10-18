@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class Door : MonoBehaviour {
 
-    [SerializeField] private DoorEnum doorType;
+    private Vector2Int position;
+    private DoorType doorType;
+    private Vector2Int NeighBoorDoor;
+
+    // [SerializeField] private DoorEnum doorType;
 
     public delegate void OnDoorEnter(Door door);
     public static event OnDoorEnter OnChangeRoom;
@@ -15,8 +19,16 @@ public class Door : MonoBehaviour {
         }
     }
 
-    public DoorEnum GetDoorType() {
+    public DoorType GetDoorType() {
         return doorType;
+    }
+
+    public void SetDoorType(DoorType doorType) {
+        this.doorType = doorType;
+    }
+
+    public void SetPosition(Vector2Int position) {
+        this.position = position;
     }
 
 }

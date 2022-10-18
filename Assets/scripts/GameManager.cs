@@ -51,55 +51,54 @@ public class GameManager : MonoBehaviour {
     }
 
     private void ChangeRoom(Door door) {
-        switch (door.GetDoorType()) {
+        /*switch (door.GetDoorType()) {
             case DoorEnum.T:
-            GoToNeighboorDoor(door, 0, 1);
+            GoToNeighborDoor(door, 0, 1);
             break;
             case DoorEnum.TL:
-            GoToNeighboorDoor(door, 0, 1);
+            GoToNeighborDoor(door, 0, 1);
             break;
             case DoorEnum.TR:
-            GoToNeighboorDoor(door, 0, 1);
+            GoToNeighborDoor(door, 0, 1);
             break;
             case DoorEnum.B:
-            GoToNeighboorDoor(door, 0, -1);
+            GoToNeighborDoor(door, 0, -1);
             break;
             case DoorEnum.BL:
-            GoToNeighboorDoor(door, 0, -1);
+            GoToNeighborDoor(door, 0, -1);
             break;
             case DoorEnum.BR:
-            GoToNeighboorDoor(door, 0, -1);
+            GoToNeighborDoor(door, 0, -1);
             break;
             case DoorEnum.L:
-            GoToNeighboorDoor(door, -1, 0);
+            GoToNeighborDoor(door, -1, 0);
             break;
             case DoorEnum.LT:
-            GoToNeighboorDoor(door, -1, 0);
+            GoToNeighborDoor(door, -1, 0);
             break;
             case DoorEnum.LB:
-            GoToNeighboorDoor(door, -1, 0);
+            GoToNeighborDoor(door, -1, 0);
             break;
             case DoorEnum.R:
-            GoToNeighboorDoor(door, 1, 0);
+            GoToNeighborDoor(door, 1, 0);
             break;
             case DoorEnum.RT:
-            GoToNeighboorDoor(door, 1, 0);
+            GoToNeighborDoor(door, 1, 0);
             break;
             case DoorEnum.RB:
-            GoToNeighboorDoor(door, 1, 0);
+            GoToNeighborDoor(door, 1, 0);
             break;
-        }
+        }*/
+        Debug.Log("PLAYER AS CHANGE ROOM");
     }
 
-    private void GoToNeighboorDoor(Door door, int xTo, int yTo) {
+    /*private void GoToNeighborDoor(Door door, int xTo, int yTo) {
         Vector2Int pos = currentRoom.rootPos;
         Room roomTo = null;
         int x = pos.x + xTo;
         int y = pos.y + yTo;
-        /*
-         * if room > 1*1 so room pos is not a good position player can be in top of room or top right of room
-         * then yo must add a position of player in room not only root position !
-        */
+         // if room > 1*1 so room pos is not a good position player can be in top of room or top right of room
+         // then yo must add a position of player in room not only root position !
         if (currentRoom.GetRoomShape() != RoomShapeEnum.ROOMSHAPE_1x1) {
             int playerGridPosInRoomX = (int)player.transform.position.x / 61;
             int playerGridPosInRoomY = (int)player.transform.position.y / 31;
@@ -114,16 +113,16 @@ public class GameManager : MonoBehaviour {
         }
         roomTo = generator.GetRoomFromVector2Int(new Vector2Int(x, y));
         currentRoom = roomTo;
-        Vector3 neighboor = new Vector3(door.transform.position.x + xTo, door.transform.position.y + yTo, door.transform.position.z);
+        Vector3 neighbor = new Vector3(door.transform.position.x + xTo, door.transform.position.y + yTo, door.transform.position.z);
         List<Door> doorList = roomTo.GetDoorsForRoom();
-        Door neighboorDoor = doorList.Find(d => d.transform.position == neighboor);
-         if (neighboorDoor != null) {
+        Door neighborDoor = doorList.Find(d => d.transform.position == neighbor);
+         if (neighborDoor != null) {
             // *2 because if tp just on door then player is infinit re TP on other room etc..
-            player.transform.position = new Vector3(neighboorDoor.transform.position.x + xTo, neighboorDoor.transform.position.y + yTo, player.transform.position.z);
+            player.transform.position = new Vector3(neighborDoor.transform.position.x + xTo, neighborDoor.transform.position.y + yTo, player.transform.position.z);
         } else {
-            Debug.Log("ERROR NO DOORS FIND at => GoToNeighboorDoor()");
+            Debug.Log("ERROR NO DOORS FIND at => GoToNeighborDoor()");
         }
-    }
+    }*/
 
     private void OnDisable() {
         Door.OnChangeRoom -= ChangeRoom;
