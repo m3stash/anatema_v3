@@ -1,3 +1,3 @@
 ﻿public enum BiomeEnum {
-    CAVE,
+    Cave,
 }

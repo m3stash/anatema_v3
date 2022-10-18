@@ -108,7 +108,7 @@ TextureImporter:
       213: 5610825937107016284
     second: silver_ore_34
   externalObjects: {}
-  serializedVersion: 10
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -128,6 +128,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -136,9 +138,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -159,11 +161,15 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 1
   platformSettings:
-  - serializedVersion: 2
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -174,7 +180,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -185,6 +192,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -933,6 +941,42 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      silver_ore_31: 908332000752676318
+      silver_ore_4: -8422910671532568062
+      silver_ore_9: 6202842018314964913
+      silver_ore_27: 6388901175097525699
+      silver_ore_5: 6128657331781472194
+      silver_ore_2: -8318053184243273790
+      silver_ore_12: 452774404729104237
+      silver_ore_29: -3416132523542359514
+      silver_ore_0: -6606649680277887094
+      silver_ore_26: -8255958045340309170
+      silver_ore_1: -5140475663560305770
+      silver_ore_22: 2008095592168108860
+      silver_ore_21: -3376813902337258062
+      silver_ore_28: 2831499033495622288
+      silver_ore_13: -6326656945670906939
+      silver_ore_15: 1608902634056757336
+      silver_ore_24: -7433978578515031089
+      silver_ore_19: 602382610975319399
+      silver_ore_8: -8643480440768073853
+      silver_ore_20: 5976727995274789737
+      silver_ore_7: -12069437745018281
+      silver_ore_14: -3079801047381615330
+      silver_ore_3: -7163282398697338173
+      silver_ore_30: 8748756958073587199
+      silver_ore_32: -4395246705734801420
+      silver_ore_33: -9124046118479857352
+      silver_ore_18: 3476682335832861000
+      silver_ore_17: 6926724634130665880
+      silver_ore_11: 1747365045506926130
+      silver_ore_23: 212931869092819419
+      silver_ore_10: -7512408114377700189
+      silver_ore_6: -5985267426228674582
+      silver_ore_25: 1881877346211597194
+      silver_ore_16: 6935709819801705622
+      silver_ore_34: 5610825937107016284
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

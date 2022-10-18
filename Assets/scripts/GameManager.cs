@@ -44,10 +44,10 @@ public class GameManager : MonoBehaviour {
     private void Start() {
         generator = GetComponent<DungeonGenerator>();
         currentDungeon = dungeonContainer.GetComponent<Dungeon>();
-        currentDungeon.Setup(new DungeonConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L));
+        currentDungeon.Setup(new DungeonConfig(BiomeEnum.Cave, DifficultyEnum.Easy, RoomSizeEnum.L));
         generator.StartGeneration(dungeonContainer, currentDungeon.GetConfig());
-        currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
-        player = GameObject.FindGameObjectWithTag("Player");
+        /*currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
+        player = GameObject.FindGameObjectWithTag("Player");*/
     }
 
     private void ChangeRoom(Door door) {

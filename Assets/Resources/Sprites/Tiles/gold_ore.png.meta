@@ -129,6 +129,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -137,9 +138,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -160,6 +161,8 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
@@ -938,6 +941,42 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      gold_ore_14: -4323939442480823578
+      gold_ore_18: 2708115896602275271
+      gold_ore_16: 4444049916178765108
+      gold_ore_2: -1381765328810033470
+      gold_ore_19: 8795826382443729717
+      gold_ore_30: 3754905548412487895
+      gold_ore_15: -2776259344274748260
+      gold_ore_17: -5022622467718711307
+      gold_ore_24: 7182172691014068065
+      gold_ore_0: 8218093861608600074
+      gold_ore_9: 4457471057990740385
+      gold_ore_3: 5218114769925476993
+      gold_ore_22: -7795967626961791854
+      gold_ore_8: 8016011768000817399
+      gold_ore_13: 3460555821549650115
+      gold_ore_1: 5395143017015888626
+      gold_ore_29: -8960385471506996758
+      gold_ore_7: 841056136077854730
+      gold_ore_32: 2454071479336846064
+      gold_ore_28: 3318539806134792218
+      gold_ore_5: -2140206823733890561
+      gold_ore_10: 8961806414799418019
+      gold_ore_11: 7486515432870598762
+      gold_ore_27: -79711903867100613
+      gold_ore_34: -1660148242168814052
+      gold_ore_31: 2730373716489136991
+      gold_ore_20: 7707018619314722875
+      gold_ore_25: -7384641252556130873
+      gold_ore_23: -8076193886682535688
+      gold_ore_12: -2365263400189496622
+      gold_ore_4: 3970194524502264318
+      gold_ore_6: 6822255083451511981
+      gold_ore_21: -1271319920800904296
+      gold_ore_26: 4416560384317057465
+      gold_ore_33: -7838528633438473972
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

@@ -108,7 +108,7 @@ TextureImporter:
       213: 2827737617178691921
     second: iron_ore_34
   externalObjects: {}
-  serializedVersion: 10
+  serializedVersion: 11
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -128,6 +128,8 @@ TextureImporter:
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -136,9 +138,9 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: -1
-    aniso: -1
-    mipBias: -100
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
     wrapW: 1
@@ -159,11 +161,15 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 1
   platformSettings:
-  - serializedVersion: 2
+  - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -174,7 +180,8 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-  - serializedVersion: 2
+    forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -185,6 +192,7 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 1
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -933,6 +941,42 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      iron_ore_4: 1851010568119062482
+      iron_ore_8: -3826519049790700445
+      iron_ore_5: -1609583543018341450
+      iron_ore_13: 655919267929267219
+      iron_ore_25: 26810042706856232
+      iron_ore_12: 4351358856773336974
+      iron_ore_10: -977835456424232912
+      iron_ore_15: 4733689594355366405
+      iron_ore_27: -3548798942383456789
+      iron_ore_18: -4423429581620569811
+      iron_ore_17: 3100774867726961481
+      iron_ore_1: -8601977518263204293
+      iron_ore_22: 3916425943694015041
+      iron_ore_14: -2175132304635278347
+      iron_ore_24: 7517442498937970200
+      iron_ore_2: 5697898353776938728
+      iron_ore_9: -4688954386486517421
+      iron_ore_19: -6796774126797215088
+      iron_ore_23: 7140528899035582009
+      iron_ore_30: 652485720116195569
+      iron_ore_21: 7215482318284816611
+      iron_ore_16: -1683917053061942183
+      iron_ore_32: 5162888358983538156
+      iron_ore_34: 2827737617178691921
+      iron_ore_7: 5804603124861344546
+      iron_ore_26: -1126629032504277294
+      iron_ore_29: -4781114454188155052
+      iron_ore_20: 3522894315824356604
+      iron_ore_11: 8451230103092036981
+      iron_ore_31: 4737577709136084447
+      iron_ore_28: 8050767158914469157
+      iron_ore_3: -6528803402586090280
+      iron_ore_0: -3730300019221377472
+      iron_ore_6: 7810676396537226461
+      iron_ore_33: -7331261425038750259
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
