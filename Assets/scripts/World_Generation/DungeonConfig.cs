@@ -27,7 +27,7 @@ public class DungeonConfig {
         return roomSize;
     }
 
-    public string GetRoomsFolderPathByBiomeDifficultyAndRoomSize(DifficultyEnum roomDifficulty, RoomShapeEnum shape) {
+    public string GetRoomsFolderPathByBiomeDifficultyAndRoomSize(DifficultyEnum roomDifficulty, RoomShape shape) {
         return roomPath + "/" + biomeType + "/" + roomDifficulty + "/" + getFolderByEnumShape(shape) + "/";
     }
 
@@ -35,15 +35,15 @@ public class DungeonConfig {
         return roomPath + "/" + biomeType + "/Starter/";
     }
 
-    private string getFolderByEnumShape(RoomShapeEnum shape) {
+    private string getFolderByEnumShape(RoomShape shape) {
         switch (shape) {
-            case RoomShapeEnum.ROOMSHAPE_1x1:
+            case RoomShape.ROOMSHAPE_1x1:
             return "1x1";
-            case RoomShapeEnum.ROOMSHAPE_1x2:
+            case RoomShape.ROOMSHAPE_1x2:
             return "1x2";
-            case RoomShapeEnum.ROOMSHAPE_2x1:
+            case RoomShape.ROOMSHAPE_2x1:
             return "2x1";
-            case RoomShapeEnum.ROOMSHAPE_2x2:
+            case RoomShape.ROOMSHAPE_2x2:
             return "2x2";
             default:
             return "1x1";

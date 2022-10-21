@@ -10,8 +10,9 @@ public class Room : MonoBehaviour {
     [SerializeField] public RoomConfig roomConfig;
     [SerializeField] public GameObject tilemapEnnemiesGo;
     [SerializeField] public GameObject tilemapGo;
-    [SerializeField] public GameObject tilemapDoorsGo;
     [SerializeField] public GameObject tilemapLimitsGo;
+    [SerializeField] public GameObject DoorsContainer;
+    [SerializeField] public GameObject Door;
 
     public delegate void OnPlayerEnterRoom(Room room);
     public static event OnPlayerEnterRoom OnPlayerEnter;
@@ -19,12 +20,11 @@ public class Room : MonoBehaviour {
     public bool isRootRoom;
     public bool isStartRoom = false;
     public Vector2Int rootPos;
-    private RoomShapeEnum roomShape;
+    private RoomShape roomShape;
     [SerializeField] private int id;
     private List<Door> doors;
     private Tilemap tilemap;
     private Tilemap tilemapEnnemies;
-    private Tilemap tilemapDoors;
     private Tilemap tilemapLimits;
     private CinemachineTransposer camTransposer;
 
@@ -32,7 +32,7 @@ public class Room : MonoBehaviour {
         return doors;
     }
 
-    public RoomShapeEnum GetRoomShape() {
+    public RoomShape GetRoomShape() {
         return roomShape;
     }
 
@@ -40,7 +40,7 @@ public class Room : MonoBehaviour {
         return id;
     }
 
-    public void Setup(Vector2Int rootPos, RoomShapeEnum roomShape/*, int id*/) {
+    public void Setup(Vector2Int rootPos, RoomShape roomShape/*, int id*/) {
         this.rootPos = rootPos;
         this.roomShape = roomShape;
         // this.id = id;
@@ -49,10 +49,8 @@ public class Room : MonoBehaviour {
     private void Start() {
         tilemapEnnemies = tilemapEnnemiesGo.GetComponent<Tilemap>();
         tilemap = tilemapGo.GetComponent<Tilemap>();
-        tilemapDoors = tilemapDoorsGo.GetComponent<Tilemap>();
         tilemapLimits = tilemapLimitsGo.GetComponent<Tilemap>();
         doors = new List<Door>();
-        doors.AddRange(tilemapDoors.GetComponentsInChildren<Door>());
         // ManageDoor();
     }
 
@@ -69,7 +67,7 @@ public class Room : MonoBehaviour {
             tilemapEnnemiesGo.SetActive(true);
             cam.SetActive(true);
             CinemachineVirtualCamera vcam = cam.GetComponent<CinemachineVirtualCamera>();
-            vcam.m_Lens.OrthographicSize = 5; //camera lens
+            vcam.m_Lens.OrthographicSize = 8; //camera lens
             vcam.m_Follow = collision.transform;
             OnPlayerEnter(this);
         }

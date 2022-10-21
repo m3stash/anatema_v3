@@ -2,21 +2,69 @@
 using UnityEngine;
 
 public class PseudoRoom {
+
     private Vector2Int position;
-    private RoomShapeEnum roomShape;
+    protected RoomShape roomShape;
     private bool isStartRoom;
     private bool isEndRoom;
-    protected List<Door> doors;
+    private List<PseudoDoor> doors = new List<PseudoDoor>();
 
-    public PseudoRoom(Vector2Int position, RoomShapeEnum roomShape, bool isStartRoom = false) {
+    public PseudoRoom(Vector2Int position, bool isStartRoom = false) {
         this.position = position;
-        this.roomShape = roomShape;
         this.isStartRoom = isStartRoom;
     }
 
-    // public virtual void GetCurrentNeightboorsByShape(PseudoRoom room) { }
+    public void SeachNeighbors(List<PseudoRoom> pseudoRooms) {
+        Vector2Int[] currentSectionsRoom = WorldUtils.GetSectionPerRoom(GetRoomShape(), GetPosition());
+        // base.SeachNeighbors(listOfPseudoRoom);
+        foreach (PseudoRoom neighboor in pseudoRooms) {
+            if (neighboor != this) {
+                Vector2Int[] neighborSectionsRoom = WorldUtils.GetSectionPerRoom(neighboor.GetRoomShape(), neighboor.GetPosition());
+                foreach (var currentSections in currentSectionsRoom) {
+                    foreach (var neighborSection in neighborSectionsRoom) {
+                        DirectionalEnum doorDirection = SearchNeighborAndGetDoorDirection(currentSections, neighborSection);
+                        if (doorDirection  != DirectionalEnum.DEFAULT) {
+                            PseudoDoor newDoor = new PseudoDoor(CalculDoorPosition(doorDirection), doorDirection);
+                            newDoor.SetDoorNeighbor(new Vector3(neighborSection.x, neighborSection.y, 0));
+                            doors.Add(newDoor);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-    public virtual void SeachNeightboors(List<PseudoRoom> listOfPseudoRoom, int bound) {}
+    private DirectionalEnum SearchNeighborAndGetDoorDirection(Vector2Int sectionPos, Vector2Int neightborSectionPos) {
+        if (new Vector2Int(sectionPos.x, sectionPos.y + 1) == neightborSectionPos) {
+            return DirectionalEnum.T;
+        }
+        if (new Vector2Int(sectionPos.x + 1, sectionPos.y) == neightborSectionPos) {
+            return DirectionalEnum.R;
+        }
+        if (new Vector2Int(sectionPos.x - 1, sectionPos.y) == neightborSectionPos) {
+            return  DirectionalEnum.L;
+        }
+        if (new Vector2Int(sectionPos.x, sectionPos.y - 1) == neightborSectionPos) {
+            return DirectionalEnum.B;
+        }
+        return DirectionalEnum.DEFAULT;
+    }
+
+    private Vector3 CalculDoorPosition(DirectionalEnum direction) {
+        switch (direction) {
+            case DirectionalEnum.T:
+            return new Vector3((float)(DungeonConsts.roomSize.x / 2) + .5f, DungeonConsts.roomSize.y - .5f, 0);
+            case DirectionalEnum.R:
+            return new Vector3((float)DungeonConsts.roomSize.x - .5f, (float)DungeonConsts.roomSize.y / 2, 0);
+            case DirectionalEnum.B:
+            return new Vector3((float)DungeonConsts.roomSize.x / 2, .5f, 0);
+            case DirectionalEnum.L:
+            return new Vector3(.5f, (float)DungeonConsts.roomSize.y / 2, 0);
+            default:
+            Debug.Log("ERROR CalculateDoorPosition");
+            return Vector3Int.zero;
+        }
+    }
 
     public void SetIsEndRoom(bool value) {
         isEndRoom = value;
@@ -34,7 +82,11 @@ public class PseudoRoom {
         return position;
     }
 
-    public RoomShapeEnum GetRoomShape() {
+    public RoomShape GetRoomShape() {
         return roomShape;
+    }
+
+    public List<PseudoDoor> GetDoors() {
+        return doors;
     }
 }

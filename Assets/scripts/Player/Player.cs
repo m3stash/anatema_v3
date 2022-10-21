@@ -13,7 +13,7 @@ public class Player : MonoBehaviour {
     private bool hMove;
     private bool vMove;
     private Vector2 m_Velocity = Vector2.zero;
-    private float speed = 25f;
+    private float speed = 0;
     private float m_MovementSmoothing = .05f;
 
     // Start is called before the first frame update

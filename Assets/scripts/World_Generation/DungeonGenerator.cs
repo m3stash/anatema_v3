@@ -8,9 +8,6 @@ public class DungeonGenerator : MonoBehaviour {
 
     private Vector2Int roomSize = new Vector2Int(61, 31);
     private int current_ROOMSHAPE_2x2, current_ROOMSHAPE_1x2, current_ROOMSHAPE_2x1 = 0;
-    private readonly int max_ROOMSHAPE_2x2 = 1;
-    private readonly int max_ROOMSHAPE_1x2 = 1;
-    private readonly int max_ROOMSHAPE_2x1 = 1;
     // private float luckForSpecialSHape = 0.5f;
 
     // InitValues
@@ -56,15 +53,15 @@ public class DungeonGenerator : MonoBehaviour {
             Generate();
         } else {
             Debug.Log("END " + totalLoop);
-            Debug.Log("max_ROOMSHAPE_1x2 " + max_ROOMSHAPE_1x2);
-            Debug.Log("max_ROOMSHAPE_2x1 " + max_ROOMSHAPE_2x1);
-            Debug.Log("max_ROOMSHAPE_1x2 " + max_ROOMSHAPE_1x2);
+            Debug.Log("max_ROOMSHAPE_1x2 " + DungeonConsts.max_ROOMSHAPE_1x2);
+            Debug.Log("max_ROOMSHAPE_2x1 " + DungeonConsts.max_ROOMSHAPE_2x1);
+            Debug.Log("max_ROOMSHAPE_1x2 " + DungeonConsts.max_ROOMSHAPE_1x2);
         }
     }
 
     private void ManageRoomsDoors() {
         foreach (PseudoRoom room in listOfPseudoRoom) {
-            room.SeachNeightboors(listOfPseudoRoom, bound);
+            room.SeachNeighbors(listOfPseudoRoom);
         }
     }
 
@@ -78,20 +75,20 @@ public class DungeonGenerator : MonoBehaviour {
             } else {
                 // toDO refacto et manage avec un pool de piece déjà prise !!!
                 int rnd = 0;
-                if (room.GetRoomShape() == RoomShapeEnum.ROOMSHAPE_1x1) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_1x1)).Length);
+                if (room.GetRoomShape() == RoomShape.ROOMSHAPE_1x1) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_1x1)).Length);
                     rnd = Random.Range(0, 23);
                 }
-                if (room.GetRoomShape() == RoomShapeEnum.ROOMSHAPE_1x2) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_1x2)).Length);
+                if (room.GetRoomShape() == RoomShape.ROOMSHAPE_1x2) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_1x2)).Length);
                     rnd = Random.Range(0, 1);
                 }
-                if (room.GetRoomShape() == RoomShapeEnum.ROOMSHAPE_2x2) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_2x1)).Length);
+                if (room.GetRoomShape() == RoomShape.ROOMSHAPE_2x2) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_2x1)).Length);
                     rnd = Random.Range(0, 1);
                 }
-                if (room.GetRoomShape() == RoomShapeEnum.ROOMSHAPE_2x1) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShapeEnum.ROOMSHAPE_2x2)).Length);
+                if (room.GetRoomShape() == RoomShape.ROOMSHAPE_2x1) {
+                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_2x2)).Length);
                     rnd = Random.Range(0, 1);
                 }
                 roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), room.GetRoomShape()) + rnd);
@@ -101,6 +98,14 @@ public class DungeonGenerator : MonoBehaviour {
             Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
             obj.transform.parent = floor.transform;
             obj.Setup(roomPos, room.GetRoomShape());
+            if (room.GetDoors().Count > 0) {
+                foreach (PseudoDoor door in room.GetDoors()) {
+                    GameObject doorGo = Instantiate(Resources.Load<GameObject>("Prefabs/Doors/Door"), Vector3.zero, transform.rotation);
+                    doorGo.GetComponent<Door>().SetDirection(door.GetDirection());
+                    doorGo.transform.SetParent(obj.DoorsContainer.transform);
+                    doorGo.transform.localPosition = door.GetLocalPosition();
+                }
+            }
             // room.room = obj;
             // gridOfRoom.Add(obj);
         }
@@ -117,9 +122,9 @@ public class DungeonGenerator : MonoBehaviour {
         floorplanCount = 0;
     }
     private void InitSpawnRoom() {
-        Visit(vectorStart, RoomShapeEnum.ROOMSHAPE_1x1);
+        Visit(vectorStart, RoomShape.ROOMSHAPE_1x1);
         cellQueue.Add(vectorStart);
-        listOfPseudoRoom.Add(new PseudoRoom(vectorStart, RoomShapeEnum.ROOMSHAPE_1x1, true));
+        listOfPseudoRoom.Add(new PseudoRoom(vectorStart, true));
     }
 
     /*public Room GetRoomFromVector2Int(Vector2Int position) {
@@ -130,7 +135,7 @@ public class DungeonGenerator : MonoBehaviour {
         floorplanCount = 0;
         // Start BFS pattern
         while (cellQueue.Count > 0 && floorplanCount < maxRooms) {
-            RoomShapeEnum roomShape = GetRandomShapeRoom(bound);
+            RoomShape roomShape = GetRandomShapeRoom(bound);
             Vector2Int vector = cellQueue[0];
             cellQueue.RemoveAt(0); // get the first of list
             int createdCount = 0;
@@ -154,34 +159,54 @@ public class DungeonGenerator : MonoBehaviour {
         }
         return floorplanCount;
     }
-    private bool CheckIsEmtyPlaceAndAddRoomToQueue(Vector2Int vector, RoomShapeEnum shape) {
+    private bool CheckIsEmtyPlaceAndAddRoomToQueue(Vector2Int vector, RoomShape shape) {
         if (floorplanCount >= maxRooms)
             return false;
         bool isEmptyPlace = Visit(vector, shape);
         if (isEmptyPlace) {
             cellQueue.Add(vector);
-            listOfPseudoRoom.Add(new PseudoRoom(vector, shape, false));
+            InstanciateRoomByShape(vector, shape);
             floorplanCount += 1;
         }
         return isEmptyPlace;
     }
 
-    private bool CheckLimitOfSpecialRooms(RoomShapeEnum roomShape) {
+    private void InstanciateRoomByShape(Vector2Int vector, RoomShape shape) {
+        switch (shape) {
+            case RoomShape.ROOMSHAPE_2x2:
+                listOfPseudoRoom.Add(new Room_2x2(vector));
+            break;
+            case RoomShape.ROOMSHAPE_1x1:
+                listOfPseudoRoom.Add(new Room_1x1(vector));
+            break;
+            case RoomShape.ROOMSHAPE_2x1:
+                listOfPseudoRoom.Add(new Room_2x1(vector));
+            break;
+            case RoomShape.ROOMSHAPE_1x2:
+            listOfPseudoRoom.Add(new Room_1x2(vector));
+            break;
+            default:
+            Debug.Log("ERROR InstanciateRoomByShape -> no shape type found...");
+            break;
+        }
+    }
+
+    private bool CheckLimitOfSpecialRooms(RoomShape roomShape) {
         switch (roomShape) {
-            case RoomShapeEnum.ROOMSHAPE_2x2: {
-                if (current_ROOMSHAPE_2x2 > max_ROOMSHAPE_2x2) {
+            case RoomShape.ROOMSHAPE_2x2: {
+                if (current_ROOMSHAPE_2x2 > DungeonConsts.max_ROOMSHAPE_2x2) {
                     return true;
                 }
                 break;
             }
-            case RoomShapeEnum.ROOMSHAPE_1x2: {
-                if (current_ROOMSHAPE_1x2 > max_ROOMSHAPE_1x2) {
+            case RoomShape.ROOMSHAPE_1x2: {
+                if (current_ROOMSHAPE_1x2 > DungeonConsts.max_ROOMSHAPE_1x2) {
                     return true;
                 }
                 break;
             }
-            case RoomShapeEnum.ROOMSHAPE_2x1: {
-                if (current_ROOMSHAPE_2x1 > max_ROOMSHAPE_2x1) {
+            case RoomShape.ROOMSHAPE_2x1: {
+                if (current_ROOMSHAPE_2x1 > DungeonConsts.max_ROOMSHAPE_2x1) {
                     return true;
                 }
                 break;
@@ -190,7 +215,7 @@ public class DungeonGenerator : MonoBehaviour {
         return false;
     }
 
-    private bool Visit(Vector2Int vector, RoomShapeEnum shape) {
+    private bool Visit(Vector2Int vector, RoomShape shape) {
 
         if (Random.value < 0.5f && vector != vectorStart || NeighbourCount(vector, shape) > 1) {
             return false;
@@ -203,11 +228,11 @@ public class DungeonGenerator : MonoBehaviour {
         }
 
         switch (shape) {
-            case RoomShapeEnum.ROOMSHAPE_1x1: {
+            case RoomShape.ROOMSHAPE_1x1: {
                 floorplan[vector.x, vector.y] = 1;
                 break;
             }
-            case RoomShapeEnum.ROOMSHAPE_2x2: {
+            case RoomShape.ROOMSHAPE_2x2: {
                 floorplan[vector.x, vector.y] = 1;
                 floorplan[vector.x + 1, vector.y] = 1;
                 floorplan[vector.x, vector.y + 1] = 1;
@@ -215,13 +240,13 @@ public class DungeonGenerator : MonoBehaviour {
                 current_ROOMSHAPE_2x2++;
                 break;
             }
-            case RoomShapeEnum.ROOMSHAPE_1x2: {
+            case RoomShape.ROOMSHAPE_1x2: {
                 floorplan[vector.x, vector.y] = 1;
                 floorplan[vector.x, vector.y + 1] = 1;
                 current_ROOMSHAPE_1x2++;
                 break;
             }
-            case RoomShapeEnum.ROOMSHAPE_2x1: {
+            case RoomShape.ROOMSHAPE_2x1: {
                 floorplan[vector.x, vector.y] = 1;
                 floorplan[vector.x + 1, vector.y] = 1;
                 current_ROOMSHAPE_2x1++;
@@ -233,14 +258,14 @@ public class DungeonGenerator : MonoBehaviour {
 
     }
 
-    private int NeighbourCount(Vector2Int vector, RoomShapeEnum shape) {
+    private int NeighbourCount(Vector2Int vector, RoomShape shape) {
 
         int count = 0;
         Vector2Int[] shapesToCheck = WorldUtils.GetNeighborsByShapes(shape, vector, bound);
         /* case
         * if x or y == 1 
         * || x or y == bound -1 
-        * if search to check neightboor of big room like 2x2 so -1 + -2 is out of bound!
+        * if search to check neighbor of big room like 2x2 so -1 + -2 is out of bound!
         */
         if (shapesToCheck.Length == 0) {
             return 99;
@@ -251,22 +276,22 @@ public class DungeonGenerator : MonoBehaviour {
         return count;
     }
 
-    private int CheckEmptySpace(Vector2Int vector, RoomShapeEnum shape) {
+    private int CheckEmptySpace(Vector2Int vector, RoomShape shape) {
         switch (shape) {
-            case RoomShapeEnum.ROOMSHAPE_1x1: {
+            case RoomShape.ROOMSHAPE_1x1: {
                 return floorplan[vector.x, vector.y];
             }
-            case RoomShapeEnum.ROOMSHAPE_2x2: {
+            case RoomShape.ROOMSHAPE_2x2: {
                 return floorplan[vector.x, vector.y] +
                     floorplan[vector.x + 1, vector.y] +
                     floorplan[vector.x, vector.y + 1] +
                     floorplan[vector.x + 1, vector.y + 1];
             }
-            case RoomShapeEnum.ROOMSHAPE_1x2: {
+            case RoomShape.ROOMSHAPE_1x2: {
                 return floorplan[vector.x, vector.y] +
                     floorplan[vector.x, vector.y + 1];
             }
-            case RoomShapeEnum.ROOMSHAPE_2x1: {
+            case RoomShape.ROOMSHAPE_2x1: {
                 return floorplan[vector.x, vector.y] +
                     floorplan[vector.x + 1, vector.y];
             }
@@ -274,33 +299,33 @@ public class DungeonGenerator : MonoBehaviour {
         return 0;
     }
 
-    private RoomShapeEnum GetRandomShapeRoom(int bound) {
+    private RoomShape GetRandomShapeRoom(int bound) {
         float rng = Random.value;
         if (rng < 0.3) {
             if (Random.value < 0.5f) {
                 return 0;
             }
-            if (current_ROOMSHAPE_2x2 < max_ROOMSHAPE_2x2) {
-                return RoomShapeEnum.ROOMSHAPE_2x2;
+            if (current_ROOMSHAPE_2x2 < DungeonConsts.max_ROOMSHAPE_2x2) {
+                return RoomShape.ROOMSHAPE_2x2;
             }
         }
         if (rng > 0.3 && Random.value < 0.6) {
             if (Random.value < 0.5f) {
                 return 0;
             }
-            if (current_ROOMSHAPE_1x2 < max_ROOMSHAPE_1x2) {
-                return RoomShapeEnum.ROOMSHAPE_1x2;
+            if (current_ROOMSHAPE_1x2 < DungeonConsts.max_ROOMSHAPE_1x2) {
+                return RoomShape.ROOMSHAPE_1x2;
             }
         }
         if (rng > 0.6) {
             if (Random.value < 0.5f) {
                 return 0;
             }
-            if (current_ROOMSHAPE_2x1 < max_ROOMSHAPE_2x1) {
-                return RoomShapeEnum.ROOMSHAPE_2x1;
+            if (current_ROOMSHAPE_2x1 < DungeonConsts.max_ROOMSHAPE_2x1) {
+                return RoomShape.ROOMSHAPE_2x1;
             }
         }
-        return RoomShapeEnum.ROOMSHAPE_1x1;
+        return RoomShape.ROOMSHAPE_1x1;
     }
 
 }

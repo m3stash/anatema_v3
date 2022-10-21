@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum RoomShapeEnum {
+public enum RoomShape {
     ROOMSHAPE_1x1,
     ROOMSHAPE_1x2,
     ROOMSHAPE_2x1,

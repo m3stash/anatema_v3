@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Door : MonoBehaviour {
-
-    private Vector2Int position;
-    private DoorType doorType;
-    private Vector2Int NeighBoorDoor;
+    //toDO remove serialisable field..
+    [SerializeField] private DoorType doorType;
+    [SerializeField] private Vector2Int NeighBoorDoor;
+    [SerializeField] private DirectionalEnum direction;
+    [SerializeField] private Vector3Int localPosition;
 
     // [SerializeField] private DoorEnum doorType;
 
@@ -27,8 +28,19 @@ public class Door : MonoBehaviour {
         this.doorType = doorType;
     }
 
-    public void SetPosition(Vector2Int position) {
-        this.position = position;
+    public void SetDirection(DirectionalEnum direction) {
+        this.direction = direction;
+    }
+
+    public DirectionalEnum GetDirection() {
+        return direction;
+    }
+
+    public void SetLocalPosition(Vector3Int worldPosition) {
+        this.localPosition = worldPosition;
+    }
+    public Vector3Int GetLocalPosition() {
+        return localPosition;
     }
 
 }

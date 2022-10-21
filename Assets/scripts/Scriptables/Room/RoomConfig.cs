@@ -5,7 +5,7 @@ using UnityEngine;
 public class RoomConfig : ScriptableObject {
     [Header("Main Settings")]
 
-    [SerializeField] private RoomShapeEnum RoomShape;
+    [SerializeField] private RoomShape RoomShape;
     [SerializeField] private bool disable_door_T = false;
     [SerializeField] private bool disable_door_TL = false;
     [SerializeField] private bool disable_door_TR = false;
