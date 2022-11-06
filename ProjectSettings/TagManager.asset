@@ -45,6 +45,15 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Tilemap
+    uniqueID: 1485559539
+    locked: 0
+  - name: Tilemap_Object
+    uniqueID: 3480193385
+    locked: 0
+  - name: Door
+    uniqueID: 3411564805
+    locked: 0
   - name: Characters
     uniqueID: 2563818617
     locked: 0

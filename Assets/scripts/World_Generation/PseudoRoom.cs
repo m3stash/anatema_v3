@@ -14,7 +14,7 @@ public class PseudoRoom {
         this.isStartRoom = isStartRoom;
     }
 
-    public void SeachNeighbors(List<PseudoRoom> pseudoRooms) {
+    public void SeachNeighborsAndCreateDoor(List<PseudoRoom> pseudoRooms) {
         Vector2Int[] currentSectionsRoom = WorldUtils.GetSectionPerRoom(GetRoomShape(), GetPosition());
         // base.SeachNeighbors(listOfPseudoRoom);
         foreach (PseudoRoom neighboor in pseudoRooms) {

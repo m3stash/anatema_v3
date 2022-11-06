@@ -8,6 +8,7 @@ public class Door : MonoBehaviour {
     [SerializeField] private Vector2Int NeighBoorDoor;
     [SerializeField] private DirectionalEnum direction;
     [SerializeField] private Vector3Int localPosition;
+    [SerializeField] private Sprite sprite;
 
     // [SerializeField] private DoorEnum doorType;
 
@@ -41,6 +42,10 @@ public class Door : MonoBehaviour {
     }
     public Vector3Int GetLocalPosition() {
         return localPosition;
+    }
+
+    public void SetSprite(Sprite sprite) {
+        this.sprite = sprite;
     }
 
 }

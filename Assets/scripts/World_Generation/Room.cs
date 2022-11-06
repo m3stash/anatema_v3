@@ -7,7 +7,6 @@ using Cinemachine;
 
 public class Room : MonoBehaviour {
     [SerializeField] public GameObject cam;
-    [SerializeField] public RoomConfig roomConfig;
     [SerializeField] public GameObject tilemapEnnemiesGo;
     [SerializeField] public GameObject tilemapGo;
     [SerializeField] public GameObject tilemapLimitsGo;

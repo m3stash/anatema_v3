@@ -28,6 +28,7 @@ public class DungeonGenerator : MonoBehaviour {
         InitValues(floor, config);
         // CreatePool();
         Generate();
+        SetSpecialRooms();
         ManageRoomsDoors();
         CreateRooms();
         // SetRoomNeighborsDoors();
@@ -59,9 +60,15 @@ public class DungeonGenerator : MonoBehaviour {
         }
     }
 
+    private void SetSpecialRooms() {
+        foreach(Vector2Int room in endRooms) {
+            Debug.Log("ICI"+room);
+        }
+    }
+
     private void ManageRoomsDoors() {
         foreach (PseudoRoom room in listOfPseudoRoom) {
-            room.SeachNeighbors(listOfPseudoRoom);
+            room.SeachNeighborsAndCreateDoor(listOfPseudoRoom);
         }
     }
 
