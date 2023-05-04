@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
 
 public class DungeonGenerator : MonoBehaviour {
 
@@ -47,7 +44,7 @@ public class DungeonGenerator : MonoBehaviour {
     private void Generate() {
         InitGenerateValues();
         InitSpawnRoom();
-        int totalRoomPlaced = TryToGenerateAllRoomFloor();
+        int totalRoomPlaced = TryToGenerateAllRoomsFloor();
         // if all the pieces have not been successfully placed then we start again
         if (totalRoomPlaced < maxRooms) {
             totalLoop++;
@@ -74,8 +71,10 @@ public class DungeonGenerator : MonoBehaviour {
 
     private void CreateRooms() {
         foreach (PseudoRoom room in listOfPseudoRoom) {
+            //print("--------------------------------------");
+            //Object[] ROOMS = Resources.LoadAll(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), room.GetRoomShape()));
+            //print("ROOMS------> " + ROOMS.Length);
             GameObject roomGo = null;
-            // long fileInfo = new System.IO.FileInfo(folder).Length;
             // create get room
             if (room.GetIsStartRoom()) {
                 roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetStarterPathRoomByBiome() + 0);
@@ -83,19 +82,15 @@ public class DungeonGenerator : MonoBehaviour {
                 // toDO refacto et manage avec un pool de piece déjà prise !!!
                 int rnd = 0;
                 if (room.GetRoomShape() == RoomShape.ROOMSHAPE_1x1) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_1x1)).Length);
-                    rnd = Random.Range(0, 23);
+                    rnd = Random.Range(0, 22);
                 }
                 if (room.GetRoomShape() == RoomShape.ROOMSHAPE_1x2) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_1x2)).Length);
                     rnd = Random.Range(0, 1);
                 }
                 if (room.GetRoomShape() == RoomShape.ROOMSHAPE_2x2) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_2x1)).Length);
                     rnd = Random.Range(0, 1);
                 }
                 if (room.GetRoomShape() == RoomShape.ROOMSHAPE_2x1) {
-                    // rnd = Random.Range(0, (int)new System.IO.FileInfo(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), RoomShape.ROOMSHAPE_2x2)).Length);
                     rnd = Random.Range(0, 1);
                 }
                 roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), room.GetRoomShape()) + rnd);
@@ -138,7 +133,7 @@ public class DungeonGenerator : MonoBehaviour {
         return gridOfRoom.Find(room => room.GetId() == rooms[position.x + maxCol / 2, position.y + maxCol / 2].id);
     }*/
 
-    private int TryToGenerateAllRoomFloor() {
+    private int TryToGenerateAllRoomsFloor() {
         floorplanCount = 0;
         // Start BFS pattern
         while (cellQueue.Count > 0 && floorplanCount < maxRooms) {

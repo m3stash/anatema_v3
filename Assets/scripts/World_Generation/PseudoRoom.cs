@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PseudoRoom {
@@ -15,15 +16,16 @@ public class PseudoRoom {
     }
 
     public void SeachNeighborsAndCreateDoor(List<PseudoRoom> pseudoRooms) {
+        List<PseudoRoom> roomList = new List<PseudoRoom>(pseudoRooms);
         Vector2Int[] currentSectionsRoom = WorldUtils.GetSectionPerRoom(GetRoomShape(), GetPosition());
         // base.SeachNeighbors(listOfPseudoRoom);
-        foreach (PseudoRoom neighboor in pseudoRooms) {
-            if (neighboor != this) {
-                Vector2Int[] neighborSectionsRoom = WorldUtils.GetSectionPerRoom(neighboor.GetRoomShape(), neighboor.GetPosition());
+        foreach (PseudoRoom room in roomList.ToList()) {
+            if (room != this) {
+                Vector2Int[] neighborSectionsRoom = WorldUtils.GetSectionPerRoom(room.GetRoomShape(), room.GetPosition());
                 foreach (var currentSections in currentSectionsRoom) {
                     foreach (var neighborSection in neighborSectionsRoom) {
                         DirectionalEnum doorDirection = SearchNeighborAndGetDoorDirection(currentSections, neighborSection);
-                        if (doorDirection  != DirectionalEnum.DEFAULT) {
+                        if (doorDirection != DirectionalEnum.DEFAULT) {
                             PseudoDoor newDoor = new PseudoDoor(CalculDoorPosition(doorDirection), doorDirection);
                             newDoor.SetDoorNeighbor(new Vector3(neighborSection.x, neighborSection.y, 0));
                             doors.Add(newDoor);
@@ -31,6 +33,10 @@ public class PseudoRoom {
                     }
                 }
             }
+            Debug.Log("roomList"+roomList.Count);
+            Debug.Log("--------------");
+            Debug.Log("pseudoRooms"+pseudoRooms.Count);
+            roomList.Remove(room);
         }
     }
 

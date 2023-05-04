@@ -65,7 +65,22 @@ public class GameManager : MonoBehaviour {
                 player.transform.position = new Vector3(door.GetLocalPosition().x - 10, door.GetLocalPosition().y, player.transform.position.z);
             break;
         }*/
-        Debug.Log("PLAYER AS CHANGE ROOM");
+        print(GetPlayer());
+        switch (door.GetDirection()) {
+            case DirectionalEnum.L:
+            player.transform.position = new Vector3(door.GetLocalPosition().x - 10, door.GetLocalPosition().y, player.transform.position.z);
+            break;
+            case DirectionalEnum.R:
+            player.transform.position = new Vector3(door.GetLocalPosition().x + 10, door.GetLocalPosition().y, player.transform.position.z);
+            break;
+            case DirectionalEnum.T:
+            player.transform.position = new Vector3(door.GetLocalPosition().x + 10, door.GetLocalPosition().y, player.transform.position.z);
+            break;
+            case DirectionalEnum.B:
+            player.transform.position = new Vector3(door.GetLocalPosition().x - 10, door.GetLocalPosition().y, player.transform.position.z);
+            break;
+        }
+        Debug.Log("PLAYER AS CHANGE ROOM "+door.GetLocalPosition());
     }
 
     private void OnDisable() {

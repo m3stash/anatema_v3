@@ -38,10 +38,13 @@ public class Door : MonoBehaviour {
     }
 
     public void SetLocalPosition(Vector3Int worldPosition) {
-        this.localPosition = worldPosition;
+        Debug.Log("worldPosition" + worldPosition);
+        localPosition = worldPosition;
     }
-    public Vector3Int GetLocalPosition() {
-        return localPosition;
+    public Vector3 GetLocalPosition() {
+        print(transform.localPosition.y);
+        print(transform.localPosition.x);
+        return transform.localPosition;
     }
 
     public void SetSprite(Sprite sprite) {
