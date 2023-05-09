@@ -33,9 +33,6 @@ public class PseudoRoom {
                     }
                 }
             }
-            Debug.Log("roomList"+roomList.Count);
-            Debug.Log("--------------");
-            Debug.Log("pseudoRooms"+pseudoRooms.Count);
             roomList.Remove(room);
         }
     }

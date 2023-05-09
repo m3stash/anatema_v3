@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
+using System.Xml.Linq;
 
 public class DungeonGenerator : MonoBehaviour {
 
@@ -20,8 +22,10 @@ public class DungeonGenerator : MonoBehaviour {
     private int totalLoop = 0;
     private GameObject floor;
     private List<PseudoRoom> listOfPseudoRoom;
+    private TextAsset jsonFile;
 
     public void StartGeneration(GameObject floor, DungeonConfig config) {
+        jsonFile = Resources.Load<TextAsset>("Prefabs/Rooms/rooms_prefab_config");
         InitValues(floor, config);
         // CreatePool();
         Generate();
@@ -71,9 +75,17 @@ public class DungeonGenerator : MonoBehaviour {
 
     private void CreateRooms() {
         foreach (PseudoRoom room in listOfPseudoRoom) {
-            //print("--------------------------------------");
-            //Object[] ROOMS = Resources.LoadAll(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), room.GetRoomShape()));
-            //print("ROOMS------> " + ROOMS.Length);
+            Difficulties currentRoomFolder;
+            if (jsonFile != null) {
+                string jsonString = jsonFile.text;
+                RoomsJsonConfig data = JsonUtility.FromJson<RoomsJsonConfig>(jsonString);
+                currentRoomFolder = data.biomes.Find(b => b.name == currentDungeonConfig.GetBiomeType()).difficulties.Find(d => d.name == currentDungeonConfig.GetDifficulty());
+                var toto = currentRoomFolder.shapes.Find(s => s.name == RoomShape.ROOMSHAPE_1x1);
+            } else {
+                currentRoomFolder = null;
+                Debug.LogError("File not found at Resources/myData");
+            }
+
             GameObject roomGo = null;
             // create get room
             if (room.GetIsStartRoom()) {
@@ -81,18 +93,19 @@ public class DungeonGenerator : MonoBehaviour {
             } else {
                 // toDO refacto et manage avec un pool de piece déjà prise !!!
                 int rnd = 0;
-                if (room.GetRoomShape() == RoomShape.ROOMSHAPE_1x1) {
-                    rnd = Random.Range(0, 22);
+                /*if (room.GetRoomShape() == RoomShape.ROOMSHAPE_1x1) {
+                    rnd = Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetRoomShape()).count);
                 }
                 if (room.GetRoomShape() == RoomShape.ROOMSHAPE_1x2) {
-                    rnd = Random.Range(0, 1);
+                    rnd = Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetRoomShape()).count);
                 }
                 if (room.GetRoomShape() == RoomShape.ROOMSHAPE_2x2) {
-                    rnd = Random.Range(0, 1);
+                    rnd = Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetRoomShape()).count);
                 }
                 if (room.GetRoomShape() == RoomShape.ROOMSHAPE_2x1) {
-                    rnd = Random.Range(0, 1);
-                }
+                    rnd = Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetRoomShape()).count);
+                }*/
+                rnd = Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetRoomShape()).count);
                 roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeDifficultyAndRoomSize(currentDungeonConfig.GetDifficulty(), room.GetRoomShape()) + rnd);
             }
             Vector2Int roomPos = room.GetPosition();

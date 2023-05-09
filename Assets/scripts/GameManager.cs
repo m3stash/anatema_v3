@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour {
         Door.OnChangeRoom += ChangeRoom;
         Room.OnPlayerEnter += PlayerEnterRoom;
     }
-
+ 
     public void PlayerEnterRoom(Room room) {
         if (!firstRoomInit) {
             firstRoomInit = true;
