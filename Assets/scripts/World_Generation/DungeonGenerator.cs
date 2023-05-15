@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
-using System.Xml.Linq;
 
 public class DungeonGenerator : MonoBehaviour {
 
@@ -25,7 +23,7 @@ public class DungeonGenerator : MonoBehaviour {
     private TextAsset jsonFile;
 
     public void StartGeneration(GameObject floor, DungeonConfig config) {
-        jsonFile = Resources.Load<TextAsset>("Prefabs/Rooms/rooms_prefab_config");
+        jsonFile = Resources.Load<TextAsset>(GlobalConfig.prefabsRoomConfigJsonFile);
         InitValues(floor, config);
         // CreatePool();
         Generate();
@@ -115,7 +113,7 @@ public class DungeonGenerator : MonoBehaviour {
             obj.Setup(roomPos, room.GetRoomShape());
             if (room.GetDoors().Count > 0) {
                 foreach (PseudoDoor door in room.GetDoors()) {
-                    GameObject doorGo = Instantiate(Resources.Load<GameObject>("Prefabs/Doors/Door"), Vector3.zero, transform.rotation);
+                    GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.prefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
                     doorGo.GetComponent<Door>().SetDirection(door.GetDirection());
                     doorGo.transform.SetParent(obj.DoorsContainer.transform);
                     doorGo.transform.localPosition = door.GetLocalPosition();

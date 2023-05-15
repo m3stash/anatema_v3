@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1992361127423442000, guid: dd39f5abb6bd3f246b516113b6886819,
@@ -15,7 +16,7 @@ PrefabInstance:
     - target: {fileID: 5048269463782527268, guid: dd39f5abb6bd3f246b516113b6886819,
         type: 3}
       propertyPath: m_Name
-      value: Room_2x2 (1) Variant
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5048269463782527268, guid: dd39f5abb6bd3f246b516113b6886819,
         type: 3}
@@ -31547,4 +31548,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dd39f5abb6bd3f246b516113b6886819, type: 3}

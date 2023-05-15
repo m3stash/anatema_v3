@@ -15,11 +15,11 @@ public class DebugMode : MonoBehaviour {
         GUI.Box(new Rect(10, 10, 240, 200), "Debug Menu");
 
         if (GUI.Button(new Rect(30, 40, 200, 25), "Create Json Room Config")) {
-            RoomsJsonConfig.GetInstance();
+            RoomsJsonConfig.CreateJson();
         }
 
         if (GUI.Button(new Rect(30, 80, 200, 25), "Clear Json Room Config")) {
-            RoomsJsonConfig.DeleteInstance();
+            // 
         }
     }
 
