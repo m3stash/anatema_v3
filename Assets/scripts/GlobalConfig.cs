@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class GlobalConfig {
 
     private static readonly GlobalConfig instance = new GlobalConfig();

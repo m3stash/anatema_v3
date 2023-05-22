@@ -1,19 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Cinemachine;
+﻿using UnityEngine;
+using DungeonNs;
+using RoomNs;
+using DoorNs;
 
 public class GameManager : MonoBehaviour {
 
     [SerializeField] static private GameObject player;
     [SerializeField] private GameObject dungeonContainer;
 
-    private DungeonGenerator generator;
-    private Vector2Int playerSpawnPoint;
+    private Generator generator;
+    // private Vector2Int playerSpawnPoint;
     private static Room currentRoom;
-    private DungeonConfig dungeon;
+    private Config dungeon;
     private bool firstRoomInit = false;
-    private Dungeon currentDungeon;
+    private RoomRepartition currentDungeon;
 
     public static GameManager instance;
 
@@ -42,9 +42,9 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Start() {
-        generator = GetComponent<DungeonGenerator>();
-        currentDungeon = dungeonContainer.GetComponent<Dungeon>();
-        currentDungeon.Setup(new DungeonConfig(BiomeEnum.Cave, DifficultyEnum.Easy, RoomSizeEnum.L));
+        generator = GetComponent<Generator>();
+        currentDungeon = dungeonContainer.GetComponent<RoomRepartition>();
+        currentDungeon.Setup(new Config(BiomeEnum.Cave, DifficultyEnum.Easy, RoomSizeEnum.L));
         generator.StartGeneration(dungeonContainer, currentDungeon.GetConfig());
         /*currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
         player = GameObject.FindGameObjectWithTag("Player");*/

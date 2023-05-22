@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System.IO;
+using RoomNs;
 
 [System.Serializable]
 [ExecuteInEditMode]
@@ -17,9 +18,9 @@ public class RoomsJsonConfig {
         }
     }
 
-    private static int CountPrefbabs(BiomeEnum biome, DifficultyEnum difficulty, RoomShape shape) {
+    private static int CountPrefbabs(BiomeEnum biome, RoomShape shape) {
         string shapeFolder = shape.ToString().Split("ROOMSHAPE_").Last();
-        string path = Application.dataPath + GlobalConfig.resourcesPath + GlobalConfig.prefabRoomsPath + biome + "/" + difficulty + "/" + shapeFolder;
+        string path = Application.dataPath + GlobalConfig.resourcesPath + GlobalConfig.prefabRoomsPath + biome + "/" + shapeFolder;
         int count = 0;
         if (Directory.Exists(path)) {
             string[] prefabs = Directory.GetFiles(path);
@@ -37,18 +38,12 @@ public class RoomsJsonConfig {
         Enum.GetValues(typeof(BiomeEnum)).Cast<BiomeEnum>().ToList().ForEach(delegate (BiomeEnum biome) {
             instance.biomes.Add(new Biomes() {
                 name = biome,
-                difficulties = new List<Difficulties>()
+                shapes = new List<Shapes>()
             });
-            Enum.GetValues(typeof(DifficultyEnum)).Cast<DifficultyEnum>().ToList().ForEach(delegate (DifficultyEnum difficulty) {
-                instance.biomes.Find(b => b.name == biome).difficulties.Add(new Difficulties() {
-                    name = difficulty,
-                    shapes = new List<Shapes>()
-                });
-                Enum.GetValues(typeof(RoomShape)).Cast<RoomShape>().ToList().ForEach(delegate (RoomShape shape) {
-                    instance.biomes.Find(b => b.name == biome).difficulties.Find(d => d.name == difficulty).shapes.Add(new Shapes() {
-                        name = shape,
-                        count = CountPrefbabs(biome, difficulty, shape)
-                    });
+            Enum.GetValues(typeof(RoomShape)).Cast<RoomShape>().ToList().ForEach(delegate (RoomShape shape) {
+                instance.biomes.Find(b => b.name == biome).shapes.Add(new Shapes() {
+                    name = shape,
+                    count = CountPrefbabs(biome, shape)
                 });
             });
         });
@@ -62,12 +57,6 @@ public class RoomsJsonConfig {
 [System.Serializable]
 public class Biomes {
     public BiomeEnum name;
-    public List<Difficulties> difficulties;
-}
-
-[System.Serializable]
-public class Difficulties {
-    public DifficultyEnum name;
     public List<Shapes> shapes;
 }
 

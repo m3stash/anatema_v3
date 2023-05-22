@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
+using RoomNs;
 
 
 /* TODO ====> trouver le moyen de créer un objet plus complexe qui aura : 

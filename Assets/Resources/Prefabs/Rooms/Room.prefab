@@ -155,7 +155,7 @@ TilemapRenderer:
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
---- !u!1 &2743819498009644843
+--- !u!1 &1716101533130740840
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -163,8 +163,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3219978122483031024}
-  - component: {fileID: 5276253962793866653}
+  - component: {fileID: 8674501372332492255}
+  - component: {fileID: 8417178218723817883}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -172,13 +172,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3219978122483031024
+--- !u!4 &8674501372332492255
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2743819498009644843}
+  m_GameObject: {fileID: 1716101533130740840}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -187,13 +187,13 @@ Transform:
   m_Father: {fileID: 8750667608225905702}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!156049354 &5276253962793866653
+--- !u!156049354 &8417178218723817883
 Grid:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2743819498009644843}
+  m_GameObject: {fileID: 1716101533130740840}
   m_Enabled: 1
   m_CellSize: {x: 1, y: 1, z: 0}
   m_CellGap: {x: 0, y: 0, z: 0}
@@ -3396,7 +3396,7 @@ Transform:
   - {fileID: 1628736083272417339}
   - {fileID: 2168928688307536300}
   - {fileID: 5414807823218432478}
-  - {fileID: 3219978122483031024}
+  - {fileID: 8674501372332492255}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
