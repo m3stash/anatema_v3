@@ -6,11 +6,17 @@ namespace DungeonNs {
         private BiomeEnum biomeType;
         private DifficultyEnum difficulty;
         private RoomSizeEnum roomSize;
+        private int currentFloor;
 
-        public Config(BiomeEnum biomeType, DifficultyEnum difficulty, RoomSizeEnum roomSize) {
+        public Config(BiomeEnum biomeType, DifficultyEnum difficulty, RoomSizeEnum roomSize, int currentFloor) {
             this.biomeType = biomeType;
             this.difficulty = difficulty;
             this.roomSize = roomSize;
+            this.currentFloor = currentFloor;
+        }
+
+        public int GetCurrentFloorNumber() {
+            return currentFloor;
         }
 
         public BiomeEnum GetBiomeType() {

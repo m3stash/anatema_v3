@@ -7,7 +7,7 @@ using UnityEngine;
 public class DebugMode : MonoBehaviour {
 
     void Awake() {
-        Debug.Log("COUCOU");
+        // Debug.Log("COUCOU");
     }
 
     void OnGUI() {

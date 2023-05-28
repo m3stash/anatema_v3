@@ -20,7 +20,6 @@ namespace RoomNs {
         public static event OnPlayerEnterRoom OnPlayerEnter;
 
         public bool isRootRoom;
-        public bool isStartRoom = false;
         public Vector2Int rootPos;
         private RoomShape roomShape;
         [SerializeField] private int id;

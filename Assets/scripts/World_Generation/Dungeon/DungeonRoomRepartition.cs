@@ -4,29 +4,13 @@ using RoomNs;
 
 namespace DungeonNs {
 
-    public class RoomRepartition : MonoBehaviour {
-        /*
-         * toDO => rajouter la répartition des rooms dans la gestion de la difficulté des ennemies au moment de la génération de l'étage !
-         */
-        private Dictionary<DifficultyEnum, float> roomRepartition = new Dictionary<DifficultyEnum, float>();
-
-        [SerializeField] private Config config;
-
-        public void Setup(Config config) {
-            this.config = config;
-            // GetRoomRepartition(config.GetDifficulty(), config.GetRoomSize());
-        }
-
-        public Config GetConfig() {
-            return config;
-        }
+    public class RoomRepartition {
 
         /*public void InitBackgroundContainer() {
             Instantiate(Resources.Load<GameObject>("Prefabs/Backgrounds/Background_3/BackgroundParallax_" + config.GetBiomeType()));
         }*/
 
-        private void GetRoomRepartition(DifficultyEnum difficulty, RoomSizeEnum size) {
-            int sizeFloor = (int)size;
+        public static Dictionary<DifficultyEnum, float> SetRoomRepartition(DifficultyEnum difficulty, int sizeFloor, Dictionary<DifficultyEnum, float> roomRepartition) {
             switch (difficulty) {
                 case (DifficultyEnum.Easy):
                 /*
@@ -35,8 +19,8 @@ namespace DungeonNs {
                  * 10% Hard
                  */
                 roomRepartition[DifficultyEnum.Easy] = Mathf.Round(sizeFloor * 0.7f);
-                roomRepartition[DifficultyEnum.Normal] = Mathf.Round(sizeFloor * 0.2f);
-                roomRepartition[DifficultyEnum.Hard] = Mathf.Round(sizeFloor * 0.1f);
+                roomRepartition[DifficultyEnum.Normal] = Mathf.Round(sizeFloor * 0.3f);
+                roomRepartition[DifficultyEnum.Hard] = 0;
                 break;
                 case (DifficultyEnum.Normal):
                 /*
@@ -59,6 +43,8 @@ namespace DungeonNs {
                 roomRepartition[DifficultyEnum.Hard] = Mathf.Round(sizeFloor * 0.6f);
                 break;
             }
+
+            return roomRepartition;
             /*Debug.Log("TOTAL ROOM FLOOR - " + (int)(roomRepartition[DifficultyEnum.Easy] + roomRepartition[DifficultyEnum.Normal] + roomRepartition[DifficultyEnum.Hard]));
             Debug.Log("EASY ROOM - " + roomRepartition[DifficultyEnum.Easy]);
             Debug.Log("NORML ROOM - " + roomRepartition[DifficultyEnum.Normal]);

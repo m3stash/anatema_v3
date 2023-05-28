@@ -6,14 +6,13 @@ using DoorNs;
 public class GameManager : MonoBehaviour {
 
     [SerializeField] static private GameObject player;
-    [SerializeField] private GameObject dungeonContainer;
+    [SerializeField] private GameObject floorContainer;
 
     private Generator generator;
     // private Vector2Int playerSpawnPoint;
     private static Room currentRoom;
-    private Config dungeon;
+    private Config config;
     private bool firstRoomInit = false;
-    private RoomRepartition currentDungeon;
 
     public static GameManager instance;
 
@@ -43,9 +42,8 @@ public class GameManager : MonoBehaviour {
 
     private void Start() {
         generator = GetComponent<Generator>();
-        currentDungeon = dungeonContainer.GetComponent<RoomRepartition>();
-        currentDungeon.Setup(new Config(BiomeEnum.Cave, DifficultyEnum.Easy, RoomSizeEnum.L));
-        generator.StartGeneration(dungeonContainer, currentDungeon.GetConfig());
+        config = new Config(BiomeEnum.Cave, DifficultyEnum.Easy, RoomSizeEnum.L, 1);
+        generator.StartGeneration(floorContainer, config);
         /*currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
         player = GameObject.FindGameObjectWithTag("Player");*/
     }
