@@ -2,13 +2,14 @@
 using UnityEngine;
 using RoomNs;
 using DoorNs;
+using System.Collections;
 
 namespace DungeonNs {
 
     public class Generator : MonoBehaviour {
 
         private Vector2Int roomSize = new Vector2Int(61, 31);
-        private int current_ROOMSHAPE_2x2, current_ROOMSHAPE_1x2, current_ROOMSHAPE_2x1 = 0;
+        private int current_R2X2, current_R1X2, current_R2X1 = 0;
         // private float luckForSpecialSHape = 0.5f;
 
         // InitValues
@@ -23,21 +24,12 @@ namespace DungeonNs {
         private List<Vector2Int> endRooms;
         private List<PseudoRoom> listOfPseudoRoom;
         private Config currentDungeonConfig;
-        private RoomsJsonConfig roomJsonData;
+        private Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>> roomDico = RoomsJsonConfig.GetRoomDictionary();
         private TextAsset jsonFile;
         private Pool<Room> roomPool;
         private GameObject floorGO;
         private Dictionary<DifficultyEnum, float> roomRepartition = new Dictionary<DifficultyEnum, float>();
         DungeonValues dungeonValues;
-
-        private void GetJsonConfiguration() {
-            jsonFile = Resources.Load<TextAsset>(GlobalConfig.prefabsRoomConfigJsonFile);
-            if (jsonFile != null) {
-                roomJsonData = JsonUtility.FromJson<RoomsJsonConfig>(jsonFile.text);
-            } else {
-                Debug.LogError("File not found at Resources/myData");
-            }
-        }
 
         public string SeedGenerator(int length) {
             const string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -52,7 +44,6 @@ namespace DungeonNs {
 
         public void StartGeneration(GameObject floorGO, Config config) {
             InitValues(floorGO, config);
-            GetJsonConfiguration();
             // CreatePool();
             GenerateRooms();
             SetSpecialRooms();
@@ -83,9 +74,9 @@ namespace DungeonNs {
                 GenerateRooms();
             } else {
                 Debug.Log("END " + totalLoop);
-                Debug.Log("max_ROOMSHAPE_1x2 " + DungeonConsts.max_ROOMSHAPE_1x2);
-                Debug.Log("max_ROOMSHAPE_2x1 " + DungeonConsts.max_ROOMSHAPE_2x1);
-                Debug.Log("max_ROOMSHAPE_1x2 " + DungeonConsts.max_ROOMSHAPE_1x2);
+                Debug.Log("max_R1X2 " + DungeonConsts.max_R1X2);
+                Debug.Log("max_R2X1 " + DungeonConsts.max_R2X1);
+                Debug.Log("max_R1X2 " + DungeonConsts.max_R1X2);
             }
         }
 
@@ -102,37 +93,113 @@ namespace DungeonNs {
         }
 
         private void CreateRooms() {
+
+            foreach (KeyValuePair<DifficultyEnum, float> values in roomRepartition) {
+
+                DifficultyEnum diff = values.Key;
+
+                for(var i = 0; i < values.Value; i++) {
+
+                    PseudoRoom room = null;
+
+                    if (listOfPseudoRoom.Count > 0) {
+                        // get last element
+                        room = listOfPseudoRoom[listOfPseudoRoom.Count - 1];
+                        listOfPseudoRoom.RemoveAt(listOfPseudoRoom.Count - 1);
+                    } else {
+                        Debug.LogError("CreateRooms : error the number of parts to be added is greater than the number of parts distributed");
+                        return;
+                    }
+
+                    GameObject roomGo = null;
+
+                    if (room.GetIsStartRoom()) {
+                        List<string> rooms = roomDico[currentDungeonConfig.GetBiomeType()][diff][RoomTypeEnum.STARTER][room.GetShape()];
+                        if (rooms.Count == 0) {
+                            Debug.LogError("CreateRooms : no room available for this configuration : " + currentDungeonConfig.GetBiomeType() + "/" + diff + "/" + RoomTypeEnum.STANDARD + "/" + room.GetShape());
+                            return;
+                        }
+                        int rnd = Random.Range(0, rooms.Count - 1);
+                        roomGo = Resources.Load<GameObject>(GlobalConfig.prefabRoomsVariantsPath + rooms[rnd]);
+                        if(roomGo == null) {
+                            Debug.LogError("CreateRooms : no starter found for : " + roomDico[currentDungeonConfig.GetBiomeType()][diff][RoomTypeEnum.STARTER][room.GetShape()]);
+                            return;
+                        }
+                    } else {
+                        List<string> rooms = roomDico[currentDungeonConfig.GetBiomeType()][diff][RoomTypeEnum.STANDARD][room.GetShape()];
+                        if (rooms.Count == 0) {
+                            Debug.LogError("CreateRooms : no room available for this configuration : " + currentDungeonConfig.GetBiomeType() + "/" + diff + "/" + RoomTypeEnum.STANDARD + "/" + room.GetShape());
+                            return;
+                        }
+                        int rnd = Random.Range(0, rooms.Count - 1);
+                        roomGo = Resources.Load<GameObject>(GlobalConfig.prefabRoomsVariantsPath + rooms[rnd]);
+                        if (roomGo == null) {
+                            Debug.LogError("CreateRooms : no starter found for path : " + GlobalConfig.prefabRoomsVariantsPath + rooms[rnd]);
+                            return;
+                        }
+                    }
+
+                    // toDO refacto tout ça pour trouver mieux et ajouter tous les params que pourra utiliser la room
+
+                    Vector2Int roomPos = room.GetPosition();
+                    Vector2Int pos = new Vector2Int(roomPos.x * roomSize.x, roomPos.y * roomSize.y);
+
+                    Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
+                    obj.transform.parent = floorGO.transform;
+                    obj.Setup(roomPos, room.GetShape());
+                    if (room.GetDoors().Count > 0) {
+                        foreach (PseudoDoor door in room.GetDoors()) {
+                            GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.prefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
+                            doorGo.GetComponent<Door>().SetDirection(door.GetDirection());
+                            doorGo.transform.SetParent(obj.DoorsContainer.transform);
+                            doorGo.transform.localPosition = door.GetLocalPosition();
+                        }
+                    }
+
+                }
+            }
+
+
+
+
+
+
+
+
+
             // roomPool.Setup()
-
-            // Biomes currentRoomFolder = roomJsonData.biomes.Find(b => b.name == currentDungeonConfig.GetBiomeType());
-
             foreach (KeyValuePair<DifficultyEnum, float> paire in roomRepartition) {
                 DifficultyEnum diff = paire.Key;
                 float valeur = paire.Value;
-                // int rnd = Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetRoomShape()).count);
-                // roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeAndRoomSize(room.GetRoomShape()) + rnd);
+                // currentDungeonConfig.GetBiomeType()
+                
+                // roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeAndRoomSize(room.GetShape()) + rnd);
                 // Faire quelque chose avec la clé et la valeur
                 Debug.Log("Clé : " + diff + ", Valeur : " + valeur);
+                
             }
 
-            foreach (PseudoRoom room in listOfPseudoRoom) {
-                Biomes currentRoomFolder = roomJsonData.biomes.Find(b => b.name == currentDungeonConfig.GetBiomeType()); // décplacer ça au dessus plutot que dans une boucle ??
+            /*foreach (PseudoRoom room in listOfPseudoRoom) {
+
+                int rnd = Random.Range(0, roomJson[currentDungeonConfig.GetBiomeType()][diff][RoomTypeEnum.STANDARD][].count);
 
                 GameObject roomGo = null;
                 // create get room
                 if (room.GetIsStartRoom()) {
-                    roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetStarterPathRoomByBiome() + 0);
+                    // roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetStarterPathRoomByBiome() + 0);
                 } else {
                     // toDO refacto et manage avec un pool de piece déjà prise !!!
                     int rnd = 0;
-                    rnd = UnityEngine.Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetRoomShape()).count);
-                    roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeAndRoomSize(room.GetRoomShape()) + rnd);
+                    //rnd = UnityEngine.Random.Range(0, currentRoomFolder.shapes.Find(s => s.name == room.GetShape()).count);
+                    // TODO UTILISER LA NOUVELLE FACON  !!!!!!!!!!!!!!!!!!
+                    
+                    // roomGo = Resources.Load<GameObject>(currentDungeonConfig.GetRoomsFolderPathByBiomeAndRoomSize(room.GetShape()) + rnd);
                 }
                 Vector2Int roomPos = room.GetPosition();
                 Vector2Int pos = new Vector2Int(roomPos.x * roomSize.x, roomPos.y * roomSize.y);
                 Room obj = Instantiate(roomGo, new Vector3(pos.x, pos.y, 0), transform.rotation).GetComponent<Room>();
                 obj.transform.parent = floorGO.transform;
-                obj.Setup(roomPos, room.GetRoomShape());
+                obj.Setup(roomPos, room.GetShape());
                 if (room.GetDoors().Count > 0) {
                     foreach (PseudoDoor door in room.GetDoors()) {
                         GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.prefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
@@ -143,23 +210,23 @@ namespace DungeonNs {
                 }
                 // room.room = obj;
                 // gridOfRoom.Add(obj);
-            }
+            }*/
         }
 
         private void InitGenerateValues() {
             floorplan = new int[12, 12];
-            current_ROOMSHAPE_2x2 = 0;
-            current_ROOMSHAPE_1x2 = 0;
-            current_ROOMSHAPE_2x1 = 0;
+            current_R2X2 = 0;
+            current_R1X2 = 0;
+            current_R2X1 = 0;
             cellQueue = new List<Vector2Int>();
             endRooms = new List<Vector2Int>();
             listOfPseudoRoom = new List<PseudoRoom>();
             floorplanCount = 0;
         }
         private void InitSpawnRoom() {
-            Visit(vectorStart, RoomShape.ROOMSHAPE_1x1);
+            Visit(vectorStart, RoomShapeEnum.R1X1);
             cellQueue.Add(vectorStart);
-            listOfPseudoRoom.Add(new PseudoRoom(vectorStart, true));
+            listOfPseudoRoom.Add(new PseudoRoom(vectorStart, RoomTypeEnum.STARTER));
         }
 
         /*public Room GetRoomFromVector2Int(Vector2Int position) {
@@ -170,7 +237,7 @@ namespace DungeonNs {
             floorplanCount = 0;
             // Start BFS pattern
             while (cellQueue.Count > 0 && floorplanCount < dungeonValues.GetNumberOfRooms()) {
-                RoomShape roomShape = GetRandomShapeRoom(bound);
+                RoomShapeEnum roomShape = GetRandomShapeRoom(bound);
                 Vector2Int vector = cellQueue[0];
                 cellQueue.RemoveAt(0); // get the first of list
                 int createdCount = 0;
@@ -194,54 +261,34 @@ namespace DungeonNs {
             }
             return floorplanCount;
         }
-        private bool CheckIsEmtyPlaceAndAddRoomToQueue(Vector2Int vector, RoomShape shape) {
+        private bool CheckIsEmtyPlaceAndAddRoomToQueue(Vector2Int vector, RoomShapeEnum shape) {
             if (floorplanCount >= dungeonValues.GetNumberOfRooms())
                 return false;
             bool isEmptyPlace = Visit(vector, shape);
             if (isEmptyPlace) {
                 cellQueue.Add(vector);
-                InstanciateRoomByShape(vector, shape);
+                listOfPseudoRoom.Add(new PseudoRoom(vector, RoomTypeEnum.STANDARD));
                 floorplanCount += 1;
             }
             return isEmptyPlace;
         }
 
-        private void InstanciateRoomByShape(Vector2Int vector, RoomShape shape) {
-            switch (shape) {
-                case RoomShape.ROOMSHAPE_2x2:
-                listOfPseudoRoom.Add(new Room_2x2(vector));
-                break;
-                case RoomShape.ROOMSHAPE_1x1:
-                listOfPseudoRoom.Add(new Room_1x1(vector));
-                break;
-                case RoomShape.ROOMSHAPE_2x1:
-                listOfPseudoRoom.Add(new Room_2x1(vector));
-                break;
-                case RoomShape.ROOMSHAPE_1x2:
-                listOfPseudoRoom.Add(new Room_1x2(vector));
-                break;
-                default:
-                Debug.Log("ERROR InstanciateRoomByShape -> no shape type found...");
-                break;
-            }
-        }
-
-        private bool CheckLimitOfSpecialRooms(RoomShape roomShape) {
+        private bool CheckLimitOfSpecialRooms(RoomShapeEnum roomShape) {
             switch (roomShape) {
-                case RoomShape.ROOMSHAPE_2x2: {
-                    if (current_ROOMSHAPE_2x2 > DungeonConsts.max_ROOMSHAPE_2x2) {
+                case RoomShapeEnum.R2X2: {
+                    if (current_R2X2 > DungeonConsts.max_R2X2) {
                         return true;
                     }
                     break;
                 }
-                case RoomShape.ROOMSHAPE_1x2: {
-                    if (current_ROOMSHAPE_1x2 > DungeonConsts.max_ROOMSHAPE_1x2) {
+                case RoomShapeEnum.R1X2: {
+                    if (current_R1X2 > DungeonConsts.max_R1X2) {
                         return true;
                     }
                     break;
                 }
-                case RoomShape.ROOMSHAPE_2x1: {
-                    if (current_ROOMSHAPE_2x1 > DungeonConsts.max_ROOMSHAPE_2x1) {
+                case RoomShapeEnum.R2X1: {
+                    if (current_R2X1 > DungeonConsts.max_R2X1) {
                         return true;
                     }
                     break;
@@ -250,7 +297,7 @@ namespace DungeonNs {
             return false;
         }
 
-        private bool Visit(Vector2Int vector, RoomShape shape) {
+        private bool Visit(Vector2Int vector, RoomShapeEnum shape) {
 
             if (UnityEngine.Random.value < 0.5f && vector != vectorStart || NeighbourCount(vector, shape) > 1) {
                 return false;
@@ -263,28 +310,28 @@ namespace DungeonNs {
             }
 
             switch (shape) {
-                case RoomShape.ROOMSHAPE_1x1: {
+                case RoomShapeEnum.R1X1: {
                     floorplan[vector.x, vector.y] = 1;
                     break;
                 }
-                case RoomShape.ROOMSHAPE_2x2: {
+                case RoomShapeEnum.R2X2: {
                     floorplan[vector.x, vector.y] = 1;
                     floorplan[vector.x + 1, vector.y] = 1;
                     floorplan[vector.x, vector.y + 1] = 1;
                     floorplan[vector.x + 1, vector.y + 1] = 1;
-                    current_ROOMSHAPE_2x2++;
+                    current_R2X2++;
                     break;
                 }
-                case RoomShape.ROOMSHAPE_1x2: {
+                case RoomShapeEnum.R1X2: {
                     floorplan[vector.x, vector.y] = 1;
                     floorplan[vector.x, vector.y + 1] = 1;
-                    current_ROOMSHAPE_1x2++;
+                    current_R1X2++;
                     break;
                 }
-                case RoomShape.ROOMSHAPE_2x1: {
+                case RoomShapeEnum.R2X1: {
                     floorplan[vector.x, vector.y] = 1;
                     floorplan[vector.x + 1, vector.y] = 1;
-                    current_ROOMSHAPE_2x1++;
+                    current_R2X1++;
                     break;
                 }
             }
@@ -293,7 +340,7 @@ namespace DungeonNs {
 
         }
 
-        private int NeighbourCount(Vector2Int vector, RoomShape shape) {
+        private int NeighbourCount(Vector2Int vector, RoomShapeEnum shape) {
 
             int count = 0;
             Vector2Int[] shapesToCheck = WorldUtils.GetNeighborsByShapes(shape, vector, bound);
@@ -311,22 +358,22 @@ namespace DungeonNs {
             return count;
         }
 
-        private int CheckEmptySpace(Vector2Int vector, RoomShape shape) {
+        private int CheckEmptySpace(Vector2Int vector, RoomShapeEnum shape) {
             switch (shape) {
-                case RoomShape.ROOMSHAPE_1x1: {
+                case RoomShapeEnum.R1X1: {
                     return floorplan[vector.x, vector.y];
                 }
-                case RoomShape.ROOMSHAPE_2x2: {
+                case RoomShapeEnum.R2X2: {
                     return floorplan[vector.x, vector.y] +
                         floorplan[vector.x + 1, vector.y] +
                         floorplan[vector.x, vector.y + 1] +
                         floorplan[vector.x + 1, vector.y + 1];
                 }
-                case RoomShape.ROOMSHAPE_1x2: {
+                case RoomShapeEnum.R1X2: {
                     return floorplan[vector.x, vector.y] +
                         floorplan[vector.x, vector.y + 1];
                 }
-                case RoomShape.ROOMSHAPE_2x1: {
+                case RoomShapeEnum.R2X1: {
                     return floorplan[vector.x, vector.y] +
                         floorplan[vector.x + 1, vector.y];
                 }
@@ -334,33 +381,33 @@ namespace DungeonNs {
             return 0;
         }
 
-        private RoomShape GetRandomShapeRoom(int bound) {
+        private RoomShapeEnum GetRandomShapeRoom(int bound) {
             float rng = UnityEngine.Random.value;
             if (rng < 0.3) {
                 if (UnityEngine.Random.value < 0.5f) {
                     return 0;
                 }
-                if (current_ROOMSHAPE_2x2 < DungeonConsts.max_ROOMSHAPE_2x2) {
-                    return RoomShape.ROOMSHAPE_2x2;
+                if (current_R2X2 < DungeonConsts.max_R2X2) {
+                    return RoomShapeEnum.R2X2;
                 }
             }
             if (rng > 0.3 && UnityEngine.Random.value < 0.6) {
                 if (UnityEngine.Random.value < 0.5f) {
                     return 0;
                 }
-                if (current_ROOMSHAPE_1x2 < DungeonConsts.max_ROOMSHAPE_1x2) {
-                    return RoomShape.ROOMSHAPE_1x2;
+                if (current_R1X2 < DungeonConsts.max_R1X2) {
+                    return RoomShapeEnum.R1X2;
                 }
             }
             if (rng > 0.6) {
                 if (UnityEngine.Random.value < 0.5f) {
                     return 0;
                 }
-                if (current_ROOMSHAPE_2x1 < DungeonConsts.max_ROOMSHAPE_2x1) {
-                    return RoomShape.ROOMSHAPE_2x1;
+                if (current_R2X1 < DungeonConsts.max_R2X1) {
+                    return RoomShapeEnum.R2X1;
                 }
             }
-            return RoomShape.ROOMSHAPE_1x1;
+            return RoomShapeEnum.R1X1;
         }
 
     }

@@ -1,4 +1,5 @@
 ﻿using RoomNs;
+using System.Diagnostics;
 
 namespace DungeonNs {
     public class Config {
@@ -31,27 +32,5 @@ namespace DungeonNs {
             return roomSize;
         }
 
-        public string GetRoomsFolderPathByBiomeAndRoomSize(RoomShape shape) {
-            return GlobalConfig.prefabRoomsPath + biomeType + "/" + getFolderByEnumShape(shape) + "/";
-        }
-
-        public string GetStarterPathRoomByBiome() {
-            return GlobalConfig.prefabRoomsPath + biomeType + "/Starter/";
-        }
-
-        private string getFolderByEnumShape(RoomShape shape) {
-            switch (shape) {
-                case RoomShape.ROOMSHAPE_1x1:
-                return "1x1";
-                case RoomShape.ROOMSHAPE_1x2:
-                return "1x2";
-                case RoomShape.ROOMSHAPE_2x1:
-                return "2x1";
-                case RoomShape.ROOMSHAPE_2x2:
-                return "2x2";
-                default:
-                return "1x1";
-            }
-        }
     }
 }

@@ -9,7 +9,7 @@ class CustomBuildProcessor : IPreprocessBuildWithReport {
     public void OnPreprocessBuild(BuildReport report) {
         Debug.Log("Custom Build Task");
         Debug.Log("-- Create Json Rooms Config Files --");
-        RoomsJsonConfig.CreateJson();
+        RoomNs.RoomsJsonConfig.CreateJson();
         // Debug.Log("-------------------------MyCustomBuildProcessor.OnPreprocessBuild for target " + report.summary.platform + " at path " + report.summary.outputPath);
     }
 }

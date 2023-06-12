@@ -21,7 +21,7 @@ namespace RoomNs {
 
         public bool isRootRoom;
         public Vector2Int rootPos;
-        private RoomShape roomShape;
+        private RoomShapeEnum roomShape;
         [SerializeField] private int id;
         private List<Door> doors;
         private Tilemap tilemap;
@@ -33,7 +33,7 @@ namespace RoomNs {
             return doors;
         }
 
-        public RoomShape GetRoomShape() {
+        public RoomShapeEnum GetShape() {
             return roomShape;
         }
 
@@ -41,7 +41,7 @@ namespace RoomNs {
             return id;
         }
 
-        public void Setup(Vector2Int rootPos, RoomShape roomShape/*, int id*/) {
+        public void Setup(Vector2Int rootPos, RoomShapeEnum roomShape/*, int id*/) {
             this.rootPos = rootPos;
             this.roomShape = roomShape;
             // this.id = id;

@@ -7,23 +7,26 @@ namespace RoomNs {
     public class PseudoRoom {
 
         private Vector2Int position;
-        protected RoomShape roomShape;
+        protected RoomShapeEnum roomShape;
+        private RoomTypeEnum roomType;
         private bool isStartRoom;
         private bool isEndRoom;
         private List<PseudoDoor> doors = new List<PseudoDoor>();
 
-        public PseudoRoom(Vector2Int position, bool isStartRoom = false) {
-            this.position = position;
-            this.isStartRoom = isStartRoom;
+        public PseudoRoom(Vector2Int _position, RoomTypeEnum _roomType) {
+            position = _position;
+            roomType = _roomType;
         }
+
+        public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
 
         public void SeachNeighborsAndCreateDoor(List<PseudoRoom> pseudoRooms) {
             List<PseudoRoom> roomList = new List<PseudoRoom>(pseudoRooms);
-            Vector2Int[] currentSectionsRoom = WorldUtils.GetSectionPerRoom(GetRoomShape(), GetPosition());
+            Vector2Int[] currentSectionsRoom = WorldUtils.GetSectionPerRoom(GetShape(), GetPosition());
             // base.SeachNeighbors(listOfPseudoRoom);
             foreach (PseudoRoom room in roomList.ToList()) {
                 if (room != this) {
-                    Vector2Int[] neighborSectionsRoom = WorldUtils.GetSectionPerRoom(room.GetRoomShape(), room.GetPosition());
+                    Vector2Int[] neighborSectionsRoom = WorldUtils.GetSectionPerRoom(room.GetShape(), room.GetPosition());
                     foreach (var currentSections in currentSectionsRoom) {
                         foreach (var neighborSection in neighborSectionsRoom) {
                             DirectionalEnum doorDirection = SearchNeighborAndGetDoorDirection(currentSections, neighborSection);
@@ -87,7 +90,7 @@ namespace RoomNs {
             return position;
         }
 
-        public RoomShape GetRoomShape() {
+        public RoomShapeEnum GetShape() {
             return roomShape;
         }
 

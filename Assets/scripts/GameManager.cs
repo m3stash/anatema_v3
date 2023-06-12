@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour {
 
     private void Start() {
         generator = GetComponent<Generator>();
-        config = new Config(BiomeEnum.Cave, DifficultyEnum.Easy, RoomSizeEnum.L, 1);
+        config = new Config(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L, 1);
         generator.StartGeneration(floorContainer, config);
         /*currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
         player = GameObject.FindGameObjectWithTag("Player");*/

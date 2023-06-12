@@ -12,35 +12,35 @@ namespace DungeonNs {
 
         public static Dictionary<DifficultyEnum, float> SetRoomRepartition(DifficultyEnum difficulty, int sizeFloor, Dictionary<DifficultyEnum, float> roomRepartition) {
             switch (difficulty) {
-                case (DifficultyEnum.Easy):
+                case (DifficultyEnum.EASY):
                 /*
                  * 70% Easy
                  * 20% Normal
                  * 10% Hard
                  */
-                roomRepartition[DifficultyEnum.Easy] = Mathf.Round(sizeFloor * 0.7f);
-                roomRepartition[DifficultyEnum.Normal] = Mathf.Round(sizeFloor * 0.3f);
-                roomRepartition[DifficultyEnum.Hard] = 0;
+                roomRepartition[DifficultyEnum.EASY] = Mathf.Round(sizeFloor * 0.7f);
+                roomRepartition[DifficultyEnum.NORMAL] = Mathf.Round(sizeFloor * 0.3f);
+                roomRepartition[DifficultyEnum.HARD] = 0;
                 break;
-                case (DifficultyEnum.Normal):
+                case (DifficultyEnum.NORMAL):
                 /*
                 * 20% Easy
                 * 50% Normal
                 * 30% Hard
                 */
-                roomRepartition[DifficultyEnum.Easy] = Mathf.Round(sizeFloor * 0.2f);
-                roomRepartition[DifficultyEnum.Normal] = Mathf.Round(sizeFloor * 0.5f);
-                roomRepartition[DifficultyEnum.Hard] = Mathf.Round(sizeFloor * 0.3f);
+                roomRepartition[DifficultyEnum.EASY] = Mathf.Round(sizeFloor * 0.2f);
+                roomRepartition[DifficultyEnum.NORMAL] = Mathf.Round(sizeFloor * 0.5f);
+                roomRepartition[DifficultyEnum.HARD] = Mathf.Round(sizeFloor * 0.3f);
                 break;
-                case (DifficultyEnum.Hard):
+                case (DifficultyEnum.HARD):
                 /*
                 * 10% Easy
                 * 30% Normal
                 * 60% Hard
                 */
-                roomRepartition[DifficultyEnum.Easy] = Mathf.Round(sizeFloor * 0.1f);
-                roomRepartition[DifficultyEnum.Normal] = Mathf.Round(sizeFloor * 0.3f);
-                roomRepartition[DifficultyEnum.Hard] = Mathf.Round(sizeFloor * 0.6f);
+                roomRepartition[DifficultyEnum.EASY] = Mathf.Round(sizeFloor * 0.1f);
+                roomRepartition[DifficultyEnum.NORMAL] = Mathf.Round(sizeFloor * 0.3f);
+                roomRepartition[DifficultyEnum.HARD] = Mathf.Round(sizeFloor * 0.6f);
                 break;
             }
 
