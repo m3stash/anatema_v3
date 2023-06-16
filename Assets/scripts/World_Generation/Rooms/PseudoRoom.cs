@@ -9,13 +9,13 @@ namespace RoomNs {
         private Vector2Int position;
         protected RoomShapeEnum roomShape;
         private RoomTypeEnum roomType;
-        private bool isStartRoom;
         private bool isEndRoom;
         private List<PseudoDoor> doors = new List<PseudoDoor>();
 
-        public PseudoRoom(Vector2Int _position, RoomTypeEnum _roomType) {
+        public PseudoRoom(Vector2Int _position, RoomTypeEnum _roomType, RoomShapeEnum _shape) {
             position = _position;
             roomType = _roomType;
+            roomShape = _shape;
         }
 
         public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
@@ -23,7 +23,6 @@ namespace RoomNs {
         public void SeachNeighborsAndCreateDoor(List<PseudoRoom> pseudoRooms) {
             List<PseudoRoom> roomList = new List<PseudoRoom>(pseudoRooms);
             Vector2Int[] currentSectionsRoom = WorldUtils.GetSectionPerRoom(GetShape(), GetPosition());
-            // base.SeachNeighbors(listOfPseudoRoom);
             foreach (PseudoRoom room in roomList.ToList()) {
                 if (room != this) {
                     Vector2Int[] neighborSectionsRoom = WorldUtils.GetSectionPerRoom(room.GetShape(), room.GetPosition());
@@ -61,25 +60,21 @@ namespace RoomNs {
         private Vector3 CalculDoorPosition(DirectionalEnum direction) {
             switch (direction) {
                 case DirectionalEnum.T:
-                return new Vector3((float)(DungeonConsts.roomSize.x / 2) + .5f, DungeonConsts.roomSize.y - .5f, 0);
+                    return new Vector3((float)(DungeonConsts.roomSize.x / 2) + .5f, DungeonConsts.roomSize.y - .5f, 0);
                 case DirectionalEnum.R:
-                return new Vector3((float)DungeonConsts.roomSize.x - .5f, (float)DungeonConsts.roomSize.y / 2, 0);
+                    return new Vector3((float)DungeonConsts.roomSize.x - .5f, (float)DungeonConsts.roomSize.y / 2, 0);
                 case DirectionalEnum.B:
-                return new Vector3((float)DungeonConsts.roomSize.x / 2, .5f, 0);
+                    return new Vector3((float)DungeonConsts.roomSize.x / 2, .5f, 0);
                 case DirectionalEnum.L:
-                return new Vector3(.5f, (float)DungeonConsts.roomSize.y / 2, 0);
+                    return new Vector3(.5f, (float)DungeonConsts.roomSize.y / 2, 0);
                 default:
-                Debug.Log("ERROR CalculateDoorPosition");
-                return Vector3Int.zero;
+                    Debug.LogError("ERROR CalculateDoorPosition");
+                    return Vector3Int.zero;
             }
         }
 
         public void SetIsEndRoom(bool value) {
             isEndRoom = value;
-        }
-
-        public bool GetIsStartRoom() {
-            return isStartRoom;
         }
 
         public bool GetIsEndRoom() {

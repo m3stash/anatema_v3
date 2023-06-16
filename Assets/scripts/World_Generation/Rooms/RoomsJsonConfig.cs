@@ -45,7 +45,7 @@ namespace RoomNs {
             string[] prefabs = Directory.GetFiles(path);
             foreach (var prefab in prefabs) {
                 if (prefab.Contains(".meta"))
-                    return;
+                    continue;
                 BiomeEnum biomeEnum;
                 DifficultyEnum diffEnum;
                 RoomShapeEnum shapeEnum;
