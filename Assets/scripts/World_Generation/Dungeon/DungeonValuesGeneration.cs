@@ -37,10 +37,16 @@ namespace DungeonNs {
         }
 
         private static int GetNumberBySeedIndex(int index, string seed) {
-            if (char.IsLetter(seed[index])) {
-                return seed[index] - 'A' + 1;
+            int number = index;
+            if(number > seed.Length) {
+                // Debug.LogError("GetNumberBySeedIndex index: "+ index + "is > than " + seed.Length);
+                number = number % seed.Length;
             }
-            return Convert.ToInt32(seed[index]);
+            Debug.LogWarning("number " + number);
+            if (char.IsLetter(seed[number])) {
+                return seed[number] - 'A' + 1;
+            }
+            return Convert.ToInt32(seed[number]);
         }
 
         public static RoomShapeEnum[] GenerateRandomShapeByBiome(int numberRooms, string seed, int currentFloor) {
@@ -83,7 +89,10 @@ namespace DungeonNs {
         }
 
         public static bool TossUp(int index, string seed) {
+            Debug.Log("ICI --- " + index);
             int rng = GetNumberBySeedIndex(index, seed);
+            Debug.Log("LA --- " + rng);
+            return true;
             return (rng > 9 ? (rng / 10) % 10 : rng) > 4 ? true : false;
         }
 
