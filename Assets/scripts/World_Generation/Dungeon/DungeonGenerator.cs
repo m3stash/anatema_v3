@@ -2,6 +2,7 @@
 using UnityEngine;
 using RoomNs;
 using DoorNs;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -177,13 +178,43 @@ namespace DungeonNs {
             floorplanCount = 0;
         }
 
+        private void setFloorPlan(RoomShapeEnum shape, Vector2Int vector) {
+            switch (shape) {
+                case RoomShapeEnum.R1X1: {
+                    floorplan[vector.x, vector.y] = 1;
+                    break;
+                }
+                case RoomShapeEnum.R2X2: {
+                    floorplan[vector.x, vector.y] = 1;
+                    floorplan[vector.x + 1, vector.y] = 1;
+                    floorplan[vector.x, vector.y + 1] = 1;
+                    floorplan[vector.x + 1, vector.y + 1] = 1;
+                    current_R2X2++;
+                    break;
+                }
+                case RoomShapeEnum.R1X2: {
+                    floorplan[vector.x, vector.y] = 1;
+                    floorplan[vector.x, vector.y + 1] = 1;
+                    current_R1X2++;
+                    break;
+                }
+                case RoomShapeEnum.R2X1: {
+                    floorplan[vector.x, vector.y] = 1;
+                    floorplan[vector.x + 1, vector.y] = 1;
+                    current_R2X1++;
+                    break;
+                }
+
+            }
+        }
+
         private int TryToGenerateAllRoomsFloor() {
 
-            Visit(vectorStart, RoomShapeEnum.R1X1);
             listOfPseudoRoom.Add(new PseudoRoom(vectorStart, RoomTypeEnum.STARTER, RoomShapeEnum.R1X1));
             Queue<PseudoRoom> queue = new Queue<PseudoRoom>();
             queue.Enqueue(listOfPseudoRoom[0]);
-            // floorplanCount = 1; // the first room is already create so we start at 1
+            setFloorPlan(RoomShapeEnum.R1X1, vectorStart);
+
             // Start BFS pattern
             while (queue.Count > 0 && listOfPseudoRoom.Count < dungeonValues.GetNumberOfRooms()) {
 
@@ -193,52 +224,68 @@ namespace DungeonNs {
                 RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
                 Vector2Int roomPosition = room.GetPosition();
 
-                /*bool isEmptyLeft = Visit(new Vector2Int(vector.x - 1, vector.y), roomShape);
-                bool isEmptyRight = Visit(new Vector2Int(vector.x + 1, vector.y), roomShape);
-                bool isEmptyTop = Visit(new Vector2Int(vector.x, vector.y + 1), roomShape);
-                bool isEmptyBottom = Visit(new Vector2Int(vector.x, vector.y - 1), roomShape);*/
+
 
                 switch (newRoomShape) {
                     case RoomShapeEnum.R1X1: {
                         switch (room.GetShape()) {
                             case RoomShapeEnum.R1X1:
-                            // toDO rajouter le moyen de squizz une fois sur deux une salle au hasard
                             List<Vector2Int> emptyVectors = new List<Vector2Int>();
-                            if(roomPosition.x > 1) {
+                            int neighbors = 0;
+                            if (roomPosition.x > 1) {
                                 bool isEmptyLeft = Visit(new Vector2Int(roomPosition.x - 1, roomPosition.y), newRoomShape);
                                 if (isEmptyLeft) {
                                     emptyVectors.Add(new Vector2Int(roomPosition.x - 1, roomPosition.y));
+                                } else {
+                                    neighbors ++;
                                 }
                             }
                             if (roomPosition.x < roomMaxBound) {
                                 bool isEmptyRight = Visit(new Vector2Int(roomPosition.x + 1, roomPosition.y), newRoomShape);
                                 if (isEmptyRight) {
                                     emptyVectors.Add(new Vector2Int(roomPosition.x + 1, roomPosition.y));
+                                } else {
+                                    neighbors++;
                                 }
                             }
                             if (roomPosition.y < roomMaxBound) {
                                 bool isEmptyTop = Visit(new Vector2Int(roomPosition.x, roomPosition.y + 1), newRoomShape);
                                 if (isEmptyTop) {
                                     emptyVectors.Add(new Vector2Int(roomPosition.x, roomPosition.y + 1));
+                                } else {
+                                    neighbors++;
                                 }
                             }
                             if (roomPosition.y > 1) {
                                 bool isEmptyBottom = Visit(new Vector2Int(roomPosition.x, roomPosition.y - 1), newRoomShape);
                                 if (isEmptyBottom) {
                                     emptyVectors.Add(new Vector2Int(roomPosition.x, roomPosition.y - 1));
+                                } else {
+                                    neighbors ++;
                                 }
                             }
-                            int randomIndex = UnityEngine.Random.Range(0, emptyVectors.Count);
-                            if(randomIndex > 0) {
+                            if (emptyVectors.Count > 0) {
+                                /*int randomIndex = UnityEngine.Random.Range(0, emptyVectors.Count);
                                 Vector2Int newPlace = emptyVectors[randomIndex];
                                 PseudoRoom newPseudoRoom = new PseudoRoom(newPlace, RoomTypeEnum.STANDARD, newRoomShape);
                                 listOfPseudoRoom.Add(newPseudoRoom);
-                                floorplan[newPlace.x, newPlace.y] = 1;
-                                // queue.Enqueue(newPseudoRoom);
+                                setFloorPlan(room.GetShape(), newPlace);
 
-                                // test aléatoire queue
-                                int randomQueue = UnityEngine.Random.Range(0, listOfPseudoRoom.Count);
-                                queue.Enqueue(listOfPseudoRoom[randomQueue]);
+                                for (var i = 0; i < emptyVectors.Count; i++) {
+                                    if(randomIndex != i) {
+                                        PseudoRoom neighbor = new PseudoRoom(emptyVectors[i], RoomTypeEnum.STANDARD, newRoomShape);
+                                        queue.Enqueue(neighbor);
+                                    }
+                                }*/
+                                int randomIndex = UnityEngine.Random.Range(1, emptyVectors.Count);
+
+                                for (var i = 0; i < randomIndex; i++) {
+                                    Vector2Int newPlace = emptyVectors[i];
+                                    PseudoRoom newPseudoRoom = new PseudoRoom(newPlace, RoomTypeEnum.STANDARD, newRoomShape);
+                                    listOfPseudoRoom.Add(newPseudoRoom);
+                                    setFloorPlan(room.GetShape(), newPlace);
+                                    queue.Enqueue(newPseudoRoom);
+                                }
                             }
                             break;
                             case RoomShapeEnum.R2X1:
@@ -334,6 +381,90 @@ namespace DungeonNs {
             // return floorplanCount;
 
         }
+
+        /*private int TryToGenerateAllRoomsFloor() {
+
+            listOfPseudoRoom.Add(new PseudoRoom(vectorStart, RoomTypeEnum.STARTER, RoomShapeEnum.R1X1));
+            Queue<PseudoRoom> queue = new Queue<PseudoRoom>();
+            queue.Enqueue(listOfPseudoRoom[0]);
+            setFloorPlan(RoomShapeEnum.R1X1, vectorStart);
+
+            // Start BFS pattern
+            while (queue.Count > 0 && listOfPseudoRoom.Count < dungeonValues.GetNumberOfRooms()) {
+
+                PseudoRoom room = queue.Dequeue();
+
+                // int randomIndex = UnityEngine.Random.Range(0, 3);
+                RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
+                Vector2Int roomPosition = room.GetPosition();
+
+                switch (newRoomShape) {
+                    case RoomShapeEnum.R1X1: {
+                        switch (room.GetShape()) {
+                            case RoomShapeEnum.R1X1:
+                            List<Vector2Int> emptyVectors = new List<Vector2Int>();
+                            if (roomPosition.x > 1) {
+                                bool isEmptyLeft = Visit(new Vector2Int(roomPosition.x - 1, roomPosition.y), newRoomShape);
+                                if (isEmptyLeft) {
+                                    emptyVectors.Add(new Vector2Int(roomPosition.x - 1, roomPosition.y));
+                                }
+                            }
+                            if (roomPosition.x < roomMaxBound) {
+                                bool isEmptyRight = Visit(new Vector2Int(roomPosition.x + 1, roomPosition.y), newRoomShape);
+                                if (isEmptyRight) {
+                                    emptyVectors.Add(new Vector2Int(roomPosition.x + 1, roomPosition.y));
+                                }
+                            }
+                            if (roomPosition.y < roomMaxBound) {
+                                bool isEmptyTop = Visit(new Vector2Int(roomPosition.x, roomPosition.y + 1), newRoomShape);
+                                if (isEmptyTop) {
+                                    emptyVectors.Add(new Vector2Int(roomPosition.x, roomPosition.y + 1));
+                                }
+                            }
+                            if (roomPosition.y > 1) {
+                                bool isEmptyBottom = Visit(new Vector2Int(roomPosition.x, roomPosition.y - 1), newRoomShape);
+                                if (isEmptyBottom) {
+                                    emptyVectors.Add(new Vector2Int(roomPosition.x, roomPosition.y - 1));
+                                }
+                            }
+                            if (emptyVectors.Count > 0) {
+                                int randomIndex = UnityEngine.Random.Range(0, emptyVectors.Count);
+                                Vector2Int newPlace = emptyVectors[randomIndex];
+                                PseudoRoom newPseudoRoom = new PseudoRoom(newPlace, RoomTypeEnum.STANDARD, newRoomShape);
+                                listOfPseudoRoom.Add(newPseudoRoom);
+                                setFloorPlan(room.GetShape(), newPlace);
+
+                                for (var i = 0; i < emptyVectors.Count; i++) {
+                                    if (randomIndex != i) {
+                                        PseudoRoom neighbor = new PseudoRoom(emptyVectors[i], RoomTypeEnum.STANDARD, newRoomShape);
+                                        queue.Enqueue(neighbor);
+                                    }
+                                }
+                            }
+                            break;
+                            case RoomShapeEnum.R2X1:
+                            break;
+                            case RoomShapeEnum.R1X2:
+                            break;
+                            case RoomShapeEnum.R2X2:
+                            break;
+                        }
+                        break;
+                    }
+                    case RoomShapeEnum.R2X2: {
+                        break;
+                    }
+                    case RoomShapeEnum.R1X2: {
+                        break;
+                    }
+                    case RoomShapeEnum.R2X1: {
+                        break;
+                    }
+                }
+            }
+            return listOfPseudoRoom.Count;
+
+        }*/
 
         private bool Visit(Vector2Int vector, RoomShapeEnum shape) {
 

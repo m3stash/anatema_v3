@@ -29,7 +29,8 @@ namespace DungeonNs {
             }
             //numberRoomForFloor = CalculNumberOfRoomPerfFloor(currentFloor);
             int totalRoom = 5 + nbOfRooms + currentFloor;
-            return totalRoom > 20 ? 20 : totalRoom;
+            // return totalRoom > 20 ? 20 : totalRoom;
+            return 20;
         }
 
         private static void GenerateNumberOfChestPerFloor() {
