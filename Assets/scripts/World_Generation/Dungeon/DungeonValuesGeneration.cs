@@ -50,19 +50,19 @@ namespace DungeonNs {
             return Convert.ToInt32(seed[number]);
         }
 
-        public static RoomShapeEnum[] GenerateRandomShapeByBiome(int numberRooms, string seed, int currentFloor) {
+        public static List<RoomShapeEnum> GenerateRandomShapeByBiome(int numberRooms, string seed, int currentFloor) {
 
             int current_R2X2 = 0;
             int current_R1X2 = 0;
             int current_R2X1 = 0;
-            RoomShapeEnum[] enumShapes = new RoomShapeEnum[numberRooms];
-            int value = GetNumberBySeedIndex(4, seed);
+            List<RoomShapeEnum> enumShapes = new List<RoomShapeEnum>();
+            int value = GetNumberBySeedIndex(4, seed); // toDo revoir ça avec un md5 pour la value
 
             for(var i = 0; i < numberRooms; i++) {
 
                 int rng = numberRooms + currentFloor + value + i;
                 bool chanceToCancelRoom = (rng > 9 ? (rng / 10) % 10 : rng) > 4 ? true : false;
-                enumShapes[i] = RoomShapeEnum.R1X1;
+                enumShapes.Add(RoomShapeEnum.R1X1);
 
                 if (chanceToCancelRoom) {
                     continue;
@@ -70,37 +70,24 @@ namespace DungeonNs {
                 if (rng < 16) {
                     if (current_R2X2 < DungeonConsts.max_R2X2) {
                         current_R2X2++;
-                        enumShapes[i] = RoomShapeEnum.R2X2;
+                        enumShapes.Add(RoomShapeEnum.R2X2);
                     }
                 }
                 if (rng > 15 && UnityEngine.Random.value < 31) {
                     if (current_R1X2 < DungeonConsts.max_R1X2) {
                         current_R1X2++;
-                        enumShapes[i] = RoomShapeEnum.R1X2;
+                        enumShapes.Add(RoomShapeEnum.R1X2);
                     }
                 }
                 if (rng > 32) {
                     if (current_R2X1 < DungeonConsts.max_R2X1) {
                         current_R2X1++;
-                        enumShapes[i] = RoomShapeEnum.R2X1;
+                        enumShapes.Add(RoomShapeEnum.R2X1);
                     }
                 }
             }
             return enumShapes;
         }
-
-        public static bool TossUp(int index, string seed) {
-            Debug.Log("ICI --- " + index);
-            int rng = GetNumberBySeedIndex(index, seed);
-            Debug.Log("LA --- " + rng);
-            return true;
-            return (rng > 9 ? (rng / 10) % 10 : rng) > 4 ? true : false;
-        }
-
-        /*private int CalculNumberOfRoomPerfFloor(int floorNbr) {
-            int floorRandValue = Mathf.FloorToInt(floorNbr * 3.4f + UnityEngine.Random.Range(4, 6));
-            return floorRandValue > 20 ? 20 : floorRandValue;
-        }*/
 
     }
 }
