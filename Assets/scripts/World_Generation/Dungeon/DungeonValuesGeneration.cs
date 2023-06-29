@@ -67,22 +67,27 @@ namespace DungeonNs {
                 if (chanceToCancelRoom) {
                     continue;
                 }
-                if (rng < 16) {
+                if (rng < 15) {
                     if (current_R2X2 < DungeonConsts.max_R2X2) {
                         current_R2X2++;
+                        enumShapes.RemoveAt(i);
                         enumShapes.Add(RoomShapeEnum.R2X2);
                     }
                 }
-                if (rng > 15 && UnityEngine.Random.value < 31) {
+                if (rng >= 15 && UnityEngine.Random.value < 32) {
                     if (current_R1X2 < DungeonConsts.max_R1X2) {
                         current_R1X2++;
-                        enumShapes.Add(RoomShapeEnum.R1X2);
+                        enumShapes.RemoveAt(i);
+                        // enumShapes.Add(RoomShapeEnum.R1X2);
+                        enumShapes.Add(RoomShapeEnum.R2X2);
                     }
                 }
-                if (rng > 32) {
+                if (rng >= 32) {
                     if (current_R2X1 < DungeonConsts.max_R2X1) {
                         current_R2X1++;
-                        enumShapes.Add(RoomShapeEnum.R2X1);
+                        enumShapes.RemoveAt(i);
+                        // enumShapes.Add(RoomShapeEnum.R2X1);
+                        enumShapes.Add(RoomShapeEnum.R2X2);
                     }
                 }
             }
