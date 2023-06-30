@@ -21,6 +21,12 @@ public static class WorldUtils {
                 return new Vector2Int[] { t, b, l, r };
             }
             case RoomShapeEnum.R2X2: {
+                if(vector.x < 0) {
+                    Debug.LogError("IMPOSSIBLE d'etre < 0");
+                }
+                if (vector.x > bound) {
+                    Debug.LogError("IMPOSSIBLE d'etre > bound");
+                }
                 if (vector.y + 2 >= bound) {
                     return new Vector2Int[] { };
                 }

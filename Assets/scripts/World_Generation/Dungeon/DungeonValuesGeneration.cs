@@ -1,10 +1,8 @@
 using RoomNs;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
-using UnityEditor.Rendering.BuiltIn.ShaderGraph;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace DungeonNs {
 
@@ -61,10 +59,19 @@ namespace DungeonNs {
             for(var i = 0; i < numberRooms; i++) {
 
                 int rng = numberRooms + currentFloor + value + i;
-                bool chanceToCancelRoom = (rng > 9 ? (rng / 10) % 10 : rng) > 4 ? true : false;
+                // bool chanceToCancelRoom = (rng > 9 ? (rng / 10) % 10 : rng) > 4 ? true : false;
+                int random = Random.Range(0, 3);
                 enumShapes.Add(RoomShapeEnum.R1X1);
 
-                if (chanceToCancelRoom) {
+                if(random == 2) {
+                    if (current_R2X2 < DungeonConsts.max_R2X2) {
+                        current_R2X2++;
+                        enumShapes.RemoveAt(i);
+                        enumShapes.Add(RoomShapeEnum.R2X2);
+                    }
+                }
+
+                /*if (chanceToCancelRoom) {
                     continue;
                 }
                 if (rng < 15) {
@@ -89,7 +96,7 @@ namespace DungeonNs {
                         // enumShapes.Add(RoomShapeEnum.R2X1);
                         enumShapes.Add(RoomShapeEnum.R2X2);
                     }
-                }
+                }*/
             }
             return enumShapes;
         }
