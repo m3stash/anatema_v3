@@ -4,12 +4,6 @@ using System.Numerics;
 using UnityEngine;
 using RoomNs;
 
-
-/* TODO ====> trouver le moyen de créer un objet plus complexe qui aura : 
-    - une liste Vector2
-    - le nom de la porte ex: "T", "B" etc..
-    - le vector 2 de la position de la porte (ex: new Vector2Int(0, 16))
-*/
 public static class WorldUtils {
 
     public static Vector2Int[] GetSectionPerRoom(RoomShapeEnum shape, Vector2Int vector) {

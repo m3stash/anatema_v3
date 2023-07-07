@@ -2,6 +2,8 @@
 using UnityEngine;
 using RoomNs;
 using DoorNs;
+using System;
+using Random = UnityEngine.Random;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -73,7 +75,7 @@ namespace DungeonNs {
             }
         }
 
-        private GameObject RoomInstanciation(GameObject roomGo, DifficultyEnum diff, RoomShapeEnum shape, RoomTypeEnum type) {
+        private GameObject RoomInstanciation(DifficultyEnum diff, RoomShapeEnum shape, RoomTypeEnum type) {
 
             List<string> rooms = roomDico[biome][diff][type][shape];
             if (rooms.Count == 0) {
@@ -81,7 +83,7 @@ namespace DungeonNs {
                 return null;
             }
 
-            int rnd = UnityEngine.Random.Range(0, rooms.Count - 1);
+            int rnd = Random.Range(0, rooms.Count - 1); // toDo ne pas gérer ça ici !!!!
 
             return Resources.Load<GameObject>(GlobalConfig.prefabRoomsVariantsPath + rooms[rnd]);
         }
@@ -104,23 +106,7 @@ namespace DungeonNs {
 
                     RoomShapeEnum shape = room.GetShape();
 
-                    switch (room.GetRoomTypeEnum) {
-                        case RoomTypeEnum.BOSS:
-                        roomGo = RoomInstanciation(roomGo, diff, shape, RoomTypeEnum.BOSS);
-                        break;
-                        case RoomTypeEnum.STARTER:
-                        roomGo = RoomInstanciation(roomGo, diff, shape, RoomTypeEnum.STARTER);
-                        break;
-                        case RoomTypeEnum.ITEMS:
-                        roomGo = RoomInstanciation(roomGo, diff, shape, RoomTypeEnum.ITEMS);
-                        break;
-                        case RoomTypeEnum.STANDARD:
-                        roomGo = RoomInstanciation(roomGo, diff, shape, RoomTypeEnum.STANDARD);
-                        break;
-                        default:
-                        Debug.LogError("CreateRooms : No RoomTypeEnum find for : " + room.GetRoomTypeEnum);
-                        return;
-                    }
+                    roomGo = RoomInstanciation(diff, shape, room.GetRoomTypeEnum);
 
                     if (roomGo == null) {
                         Debug.LogError("CreateRooms : Room GameObject is null");
@@ -151,7 +137,7 @@ namespace DungeonNs {
             listOfPseudoRoom = new List<PseudoRoom>();
         }
 
-        private void SetFloorPlan(IRoom_shape shape, Vector2Int vector) {
+        private void SetFloorPlan(IRoomShape shape, Vector2Int vector) {
 
             Vector2Int[] cells = shape.GetCellToVerify(vector);
             for (int i = 0; i < cells.Length; i++) {
@@ -160,7 +146,7 @@ namespace DungeonNs {
 
         }
 
-        private bool CanAddShape(Vector2Int vector, IRoom_shape shape) {
+        private bool CanAddShape(Vector2Int vector, IRoomShape shape) {
             if (!CheckIsEmptySpace(vector, shape)) {
                 return false;
             }
@@ -175,14 +161,14 @@ namespace DungeonNs {
             int current_R2X2 = 0;
             int current_R1X2 = 0;
             int current_R2X1 = 0;
+
             listOfPseudoRoom.Add(new PseudoRoom(vectorStart, RoomTypeEnum.STARTER, RoomShapeEnum.R1X1));
             Queue<Vector2Int> queue = new Queue<Vector2Int>();
             queue.Enqueue(vectorStart);
-
-            IRoom_shape shape = new Room_R1X1();
+            IRoomShape shape = new Room_R1X1();
             SetFloorPlan(shape, vectorStart);
 
-            // Start BFS pattern
+            // Start BFS Search Pattern
             while (queue.Count > 0 && listOfPseudoRoom.Count < dungeonValues.GetNumberOfRooms()) {
 
                 Vector2Int roomQueue = queue.Dequeue();
@@ -209,27 +195,14 @@ namespace DungeonNs {
                     newRoomShape = specialShape[Random.Range(0, specialShape.Count)];
                 }
 
-                switch (newRoomShape) {
-                    case RoomShapeEnum.R1X1: {
-                        shape = new Room_R1X1();
-                        break;
-                    }
-                    case RoomShapeEnum.R2X2: {
-                        shape = new Room_R2X2();
-                        break;
-                    }
-                    case RoomShapeEnum.R2X1: {
-                        shape = new Room_R2X1();
-                        break;
-                    }
-                    case RoomShapeEnum.R1X2: {
-                        shape = new Room_R1X2();
-                        break;
-                    }
-                    default:
-                    Debug.LogError("TryToGenerateAllRoomsFloor: Shape not exist");
+                Type classType = Type.GetType("Room_" + newRoomShape.ToString());
+
+                // use reflexion to create instance dynamically
+                if (classType != null && typeof(IRoomShape).IsAssignableFrom(classType)) {
+                    shape = (IRoomShape)Activator.CreateInstance(classType);
+                } else {
+                    Debug.LogError("TryToGenerateAllRoomsFloor: Shape does not exist");
                     shape = null;
-                    break;
                 }
 
                 List<Vector2Int> listOfEmptySpaces = new List<Vector2Int>();
@@ -246,9 +219,6 @@ namespace DungeonNs {
 
                         if (listOfEmptySpaces.Count > 0) {
                             for (int i = 0; i < listOfEmptySpaces.Count; i++) {
-                                int random = Random.Range(0, 2);
-                                if (listOfEmptySpaces.Count > 1 && random == 1)
-                                    continue;
                                 queue.Enqueue(listOfEmptySpaces[i]);
                                 listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[i], RoomTypeEnum.STANDARD, newRoomShape));
                                 SetFloorPlan(shape, listOfEmptySpaces[i]);
@@ -264,6 +234,22 @@ namespace DungeonNs {
                             queue.Enqueue(listOfEmptySpaces[randomNeightbor]);
                             listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[randomNeightbor], RoomTypeEnum.STANDARD, newRoomShape));
                             SetFloorPlan(shape, listOfEmptySpaces[randomNeightbor]);
+                            /*bool isPlaced = false;
+                            for (int i = 0; i < listOfEmptySpaces.Count; i++) {
+                                int random = Random.Range(0, 2);
+                                if (listOfEmptySpaces.Count > 1 && random == 1)
+                                    continue;
+                                if (!isPlaced) {
+                                    isPlaced = true;
+                                    queue.Enqueue(listOfEmptySpaces[i]);
+                                    listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[i], RoomTypeEnum.STANDARD, newRoomShape));
+                                    SetFloorPlan(shape, listOfEmptySpaces[i]);
+                                } else {
+                                    queue.Enqueue(listOfEmptySpaces[i]);
+                                    listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[i], RoomTypeEnum.STANDARD, RoomShapeEnum.R1X1));
+                                    SetFloorPlan(new Room_R1X1(), listOfEmptySpaces[i]);
+                                }
+                            }*/
                         }
 
                         break;
@@ -279,7 +265,7 @@ namespace DungeonNs {
 
         }
 
-        private int NeighbourCount(Vector2Int vector, IRoom_shape shape) {
+        private int NeighbourCount(Vector2Int vector, IRoomShape shape) {
 
             int count = 0;
             Vector2Int[] shapesToCheck = shape.GetNeighborsCells(vector);
@@ -303,12 +289,12 @@ namespace DungeonNs {
             return vector.x < 0 || vector.x > bound || vector.y > bound || vector.y < 0;
         }
 
-        private bool CheckIsEmptySpace(Vector2Int vector, IRoom_shape shape) {
+        private bool CheckIsEmptySpace(Vector2Int vector, IRoomShape shape) {
 
             Vector2Int[] cells = shape.GetCellToVerify(vector);
             int usedCells = 0;
             for (int i = 0; i < cells.Length; i++) {
-                if (CheckIsOutOfBound(cells[i], floorplanBound)){
+                if (CheckIsOutOfBound(cells[i], floorplanBound)) {
                     usedCells += 1;
                 } else {
                     usedCells += floorplan[cells[i].x, cells[i].y];

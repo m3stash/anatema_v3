@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IRoom_shape {
+public interface IRoomShape {
 
     /*
      * Get index position of shape

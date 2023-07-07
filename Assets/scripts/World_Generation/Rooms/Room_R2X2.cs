@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Room_R2X2 : IRoom_shape {
+public class Room_R2X2 : IRoomShape {
 
     public Vector2Int[] GetDirections(Vector2Int vector) {
         Vector2Int[] dir = {
