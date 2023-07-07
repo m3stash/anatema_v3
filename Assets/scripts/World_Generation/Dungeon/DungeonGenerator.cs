@@ -151,35 +151,17 @@ namespace DungeonNs {
             listOfPseudoRoom = new List<PseudoRoom>();
         }
 
-        private void SetFloorPlan(RoomShapeEnum shape, Vector2Int vector) {
-            switch (shape) {
-                case RoomShapeEnum.R1X1: {
-                    floorplan[vector.x, vector.y] = 1;
-                    break;
-                }
-                case RoomShapeEnum.R2X2: {
-                    floorplan[vector.x, vector.y] = 1;
-                    floorplan[vector.x + 1, vector.y] = 1;
-                    floorplan[vector.x, vector.y + 1] = 1;
-                    floorplan[vector.x + 1, vector.y + 1] = 1;
-                    break;
-                }
-                case RoomShapeEnum.R1X2: {
-                    floorplan[vector.x, vector.y] = 1;
-                    floorplan[vector.x, vector.y + 1] = 1;
-                    break;
-                }
-                case RoomShapeEnum.R2X1: {
-                    floorplan[vector.x, vector.y] = 1;
-                    floorplan[vector.x + 1, vector.y] = 1;
-                    break;
-                }
+        private void SetFloorPlan(IRoom_shape shape, Vector2Int vector) {
 
+            Vector2Int[] cells = shape.GetCellToVerify(vector);
+            for (int i = 0; i < cells.Length; i++) {
+                floorplan[cells[i].x, cells[i].y] = 1;
             }
+
         }
 
-        private bool CheckEmptySpaceByShape(Vector2Int vector, RoomShapeEnum shape) {
-            if (CheckEmptySpace(vector, shape) > 0) {
+        private bool CanAddShape(Vector2Int vector, IRoom_shape shape) {
+            if (!CheckIsEmptySpace(vector, shape)) {
                 return false;
             }
             if (NeighbourCount(vector, shape) > 1) {
@@ -189,25 +171,24 @@ namespace DungeonNs {
         }
 
         private int TryToGenerateAllRoomsFloor() {
+            // init starter room
             int current_R2X2 = 0;
             int current_R1X2 = 0;
             int current_R2X1 = 0;
-            // init starter room
             listOfPseudoRoom.Add(new PseudoRoom(vectorStart, RoomTypeEnum.STARTER, RoomShapeEnum.R1X1));
             Queue<Vector2Int> queue = new Queue<Vector2Int>();
             queue.Enqueue(vectorStart);
-            SetFloorPlan(RoomShapeEnum.R1X1, vectorStart);
 
-            // List<RoomShapeEnum> enumShapes = DungeonValueGeneration.GenerateRandomShapeByBiome(dungeonValues.GetNumberOfRooms(), GameManager.GetSeed, GameManager.GetCurrentDungeonConfig().GetCurrentFloorNumber());
+            IRoom_shape shape = new Room_R1X1();
+            SetFloorPlan(shape, vectorStart);
 
             // Start BFS pattern
             while (queue.Count > 0 && listOfPseudoRoom.Count < dungeonValues.GetNumberOfRooms()) {
 
                 Vector2Int roomQueue = queue.Dequeue();
-                // RoomShapeEnum newRoomShape = enumShapes[0];
                 RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
 
-                // toDO a ameliorer
+                // toDO a REVOIR et aussi prévoir à calculer dynamiquement le nombre de R2X2 et autre par rapport au niveau du donjon et au nbr de place !
                 bool randoShape_R2X2 = Random.Range(0, 4) == 1 && current_R2X2 < DungeonConsts.max_R2X2;
                 bool randoShape_R1X2 = Random.Range(0, 4) == 1 && current_R1X2 < DungeonConsts.max_R1X2;
                 bool randoShape_R2X1 = Random.Range(0, 4) == 1 && current_R2X1 < DungeonConsts.max_R2X1;
@@ -215,15 +196,12 @@ namespace DungeonNs {
                 List<RoomShapeEnum> specialShape = new List<RoomShapeEnum>();
 
                 if (randoShape_R2X2) {
-                    current_R2X2++;
                     specialShape.Add(RoomShapeEnum.R2X2);
                 }
                 if (randoShape_R1X2) {
-                    current_R1X2++;
                     specialShape.Add(RoomShapeEnum.R1X2);
                 }
                 if (randoShape_R2X1) {
-                    current_R2X1++;
                     specialShape.Add(RoomShapeEnum.R2X1);
                 }
 
@@ -233,21 +211,38 @@ namespace DungeonNs {
 
                 switch (newRoomShape) {
                     case RoomShapeEnum.R1X1: {
+                        shape = new Room_R1X1();
+                        break;
+                    }
+                    case RoomShapeEnum.R2X2: {
+                        shape = new Room_R2X2();
+                        break;
+                    }
+                    case RoomShapeEnum.R2X1: {
+                        shape = new Room_R2X1();
+                        break;
+                    }
+                    case RoomShapeEnum.R1X2: {
+                        shape = new Room_R1X2();
+                        break;
+                    }
+                    default:
+                    Debug.LogError("TryToGenerateAllRoomsFloor: Shape not exist");
+                    shape = null;
+                    break;
+                }
 
-                        Vector2Int[] directions = {
-                            new Vector2Int(roomQueue.x - 1, roomQueue.y),
-                            new Vector2Int(roomQueue.x + 1, roomQueue.y),
-                            new Vector2Int(roomQueue.x, roomQueue.y + 1),
-                            new Vector2Int(roomQueue.x, roomQueue.y - 1)
-                        };
+                List<Vector2Int> listOfEmptySpaces = new List<Vector2Int>();
+                Vector2Int[] directions = shape.GetDirections(roomQueue);
 
-                        List<Vector2Int> listOfEmptySpaces = new List<Vector2Int>();
+                for (int i = 0; i < directions.Length; i++) {
+                    if (CanAddShape(directions[i], shape)) {
+                        listOfEmptySpaces.Add(directions[i]);
+                    }
+                }
 
-                        for (int i = 0; i < directions.Length; i++) {
-                            if (CheckEmptySpaceByShape(directions[i], newRoomShape)) {
-                                listOfEmptySpaces.Add(directions[i]);
-                            }
-                        }
+                switch (newRoomShape) {
+                    case RoomShapeEnum.R1X1: {
 
                         if (listOfEmptySpaces.Count > 0) {
                             for (int i = 0; i < listOfEmptySpaces.Count; i++) {
@@ -256,96 +251,25 @@ namespace DungeonNs {
                                     continue;
                                 queue.Enqueue(listOfEmptySpaces[i]);
                                 listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[i], RoomTypeEnum.STANDARD, newRoomShape));
-                                SetFloorPlan(newRoomShape, listOfEmptySpaces[i]);
+                                SetFloorPlan(shape, listOfEmptySpaces[i]);
                             }
                         }
 
                         break;
                     }
-                    case RoomShapeEnum.R2X2: {
-
-                        Vector2Int[] directions = {
-                            new Vector2Int(roomQueue.x - 2, roomQueue.y),
-                            new Vector2Int(roomQueue.x + 1, roomQueue.y),
-                            new Vector2Int(roomQueue.x, roomQueue.y + 1),
-                            new Vector2Int(roomQueue.x, roomQueue.y - 2)
-                        };
-
-                        List<Vector2Int> listOfEmptySpaces = new List<Vector2Int>();
-
-                        for (int i = 0; i < directions.Length; i++) {
-                            if (CheckEmptySpaceByShape(directions[i], newRoomShape)) {
-                                listOfEmptySpaces.Add(directions[i]);
-                            }
-                        }
+                    default: {
 
                         if (listOfEmptySpaces.Count > 0) {
-                            int randomPlace = Random.Range(0, listOfEmptySpaces.Count);
-                            queue.Enqueue(listOfEmptySpaces[randomPlace]);
-                            listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[randomPlace], RoomTypeEnum.STANDARD, newRoomShape));
-                            SetFloorPlan(newRoomShape, listOfEmptySpaces[randomPlace]);
-                            current_R2X2++;
-                        }
-
-                        break;
-                    }
-                    case RoomShapeEnum.R1X2: {
-
-                        Vector2Int[] directions = {
-                            new Vector2Int(roomQueue.x - 1, roomQueue.y),
-                            new Vector2Int(roomQueue.x + 1, roomQueue.y),
-                            new Vector2Int(roomQueue.x, roomQueue.y + 1),
-                            new Vector2Int(roomQueue.x, roomQueue.y - 2)
-                        };
-
-                        List<Vector2Int> listOfEmptySpaces = new List<Vector2Int>();
-
-                        for (int i = 0; i < directions.Length; i++) {
-                            if (CheckEmptySpaceByShape(directions[i], newRoomShape)) {
-                                listOfEmptySpaces.Add(directions[i]);
-                            }
-                        }
-
-                        if (listOfEmptySpaces.Count > 0) {
-                            int randomPlace = Random.Range(0, listOfEmptySpaces.Count);
-                            queue.Enqueue(listOfEmptySpaces[randomPlace]);
-                            listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[randomPlace], RoomTypeEnum.STANDARD, newRoomShape));
-                            SetFloorPlan(newRoomShape, listOfEmptySpaces[randomPlace]);
-                            current_R1X2++;
-                        }
-
-                        break;
-                    }
-                    case RoomShapeEnum.R2X1: {
-
-                        Vector2Int[] directions = {
-                            new Vector2Int(roomQueue.x - 2, roomQueue.y),
-                            new Vector2Int(roomQueue.x + 1, roomQueue.y),
-                            new Vector2Int(roomQueue.x, roomQueue.y + 1),
-                            new Vector2Int(roomQueue.x, roomQueue.y - 1)
-                        };
-
-                        List<Vector2Int> listOfEmptySpaces = new List<Vector2Int>();
-
-                        for (int i = 0; i < directions.Length; i++) {
-                            if (CheckEmptySpaceByShape(directions[i], newRoomShape)) {
-                                listOfEmptySpaces.Add(directions[i]);
-                            }
-                        }
-
-                        if (listOfEmptySpaces.Count > 0) {
-                            int randomPlace = Random.Range(0, listOfEmptySpaces.Count);
-                            queue.Enqueue(listOfEmptySpaces[randomPlace]);
-                            listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[randomPlace], RoomTypeEnum.STANDARD, newRoomShape));
-                            SetFloorPlan(newRoomShape, listOfEmptySpaces[randomPlace]);
-                            current_R2X1++;
+                            int randomNeightbor = Random.Range(0, listOfEmptySpaces.Count);
+                            queue.Enqueue(listOfEmptySpaces[randomNeightbor]);
+                            listOfPseudoRoom.Add(new PseudoRoom(listOfEmptySpaces[randomNeightbor], RoomTypeEnum.STANDARD, newRoomShape));
+                            SetFloorPlan(shape, listOfEmptySpaces[randomNeightbor]);
                         }
 
                         break;
                     }
 
                 }
-
                 /*if (createdCount == 0) {
                     endRooms.Add(vector);
                     listOfPseudoRoom.Find(room => room.GetPosition() == vector).SetIsEndRoom(true);
@@ -355,10 +279,10 @@ namespace DungeonNs {
 
         }
 
-        private int NeighbourCount(Vector2Int vector, RoomShapeEnum shape) {
+        private int NeighbourCount(Vector2Int vector, IRoom_shape shape) {
 
             int count = 0;
-            Vector2Int[] shapesToCheck = WorldUtils.GetNeighborsByShapes(shape, vector);
+            Vector2Int[] shapesToCheck = shape.GetNeighborsCells(vector);
             /* case
             * if x or y == 1 
             * || x or y == bound -1 
@@ -379,40 +303,19 @@ namespace DungeonNs {
             return vector.x < 0 || vector.x > bound || vector.y > bound || vector.y < 0;
         }
 
-        private int CheckEmptySpace(Vector2Int vector, RoomShapeEnum shape) {
-            switch (shape) {
-                case RoomShapeEnum.R1X1: {
-                    if (CheckIsOutOfBound(vector, floorplanBound))
-                        return 1;
-                    return floorplan[vector.x, vector.y];
-                }
-                case RoomShapeEnum.R2X2: {
-                    if (CheckIsOutOfBound(new Vector2Int(vector.x, vector.y), floorplanBound)
-                        || CheckIsOutOfBound(new Vector2Int(vector.x + 1, vector.y), floorplanBound)
-                        || CheckIsOutOfBound(new Vector2Int(vector.x, vector.y + 1), floorplanBound)
-                        || CheckIsOutOfBound(new Vector2Int(vector.x + 1, vector.y + 1), floorplanBound))
-                        return 1;
-                    return floorplan[vector.x, vector.y] +
-                        floorplan[vector.x + 1, vector.y] +
-                        floorplan[vector.x, vector.y + 1] +
-                        floorplan[vector.x + 1, vector.y + 1];
-                }
-                case RoomShapeEnum.R1X2: {
-                    if (CheckIsOutOfBound(new Vector2Int(vector.x, vector.y), floorplanBound) 
-                        || CheckIsOutOfBound(new Vector2Int(vector.x, vector.y + 1), floorplanBound))
-                        return 1;
-                    return floorplan[vector.x, vector.y] +
-                        floorplan[vector.x, vector.y + 1];
-                }
-                case RoomShapeEnum.R2X1: {
-                    if (CheckIsOutOfBound(new Vector2Int(vector.x, vector.y), floorplanBound)
-                        || CheckIsOutOfBound(new Vector2Int(vector.x + 1, vector.y), floorplanBound))
-                        return 1;
-                    return floorplan[vector.x, vector.y] +
-                        floorplan[vector.x + 1, vector.y];
+        private bool CheckIsEmptySpace(Vector2Int vector, IRoom_shape shape) {
+
+            Vector2Int[] cells = shape.GetCellToVerify(vector);
+            int usedCells = 0;
+            for (int i = 0; i < cells.Length; i++) {
+                if (CheckIsOutOfBound(cells[i], floorplanBound)){
+                    usedCells += 1;
+                } else {
+                    usedCells += floorplan[cells[i].x, cells[i].y];
                 }
             }
-            return 0;
+            return usedCells == 0;
+
         }
 
     }

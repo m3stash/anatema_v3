@@ -41,7 +41,6 @@ namespace DungeonNs {
                 // Debug.LogError("GetNumberBySeedIndex index: "+ index + "is > than " + seed.Length);
                 number = number % seed.Length;
             }
-            Debug.LogWarning("number " + number);
             if (char.IsLetter(seed[number])) {
                 return seed[number] - 'A' + 1;
             }
