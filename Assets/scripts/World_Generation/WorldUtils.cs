@@ -11,7 +11,7 @@ using RoomNs;
     - le vector 2 de la position de la porte (ex: new Vector2Int(0, 16))
 */
 public static class WorldUtils {
-    public static Vector2Int[] GetNeighborsByShapes(RoomShapeEnum shape, Vector2Int vector, int bound) {
+    public static Vector2Int[] GetNeighborsByShapes(RoomShapeEnum shape, Vector2Int vector) {
         switch (shape) {
             case RoomShapeEnum.R1X1: {
                 Vector2Int t = new Vector2Int(vector.x, vector.y + 1);
@@ -21,15 +21,6 @@ public static class WorldUtils {
                 return new Vector2Int[] { t, b, l, r };
             }
             case RoomShapeEnum.R2X2: {
-                if(vector.x < 0) {
-                    Debug.LogError("IMPOSSIBLE d'etre < 0");
-                }
-                if (vector.x > bound) {
-                    Debug.LogError("IMPOSSIBLE d'etre > bound");
-                }
-                if (vector.y + 2 >= bound) {
-                    return new Vector2Int[] { };
-                }
                 Vector2Int tl = new Vector2Int(vector.x, vector.y + 2);
                 Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 2);
                 Vector2Int lt = new Vector2Int(vector.x - 1, vector.y + 1);
@@ -41,9 +32,6 @@ public static class WorldUtils {
                 return new Vector2Int[] { tl, tr, lt, lb, rt, rb, bl, br };
             }
             case RoomShapeEnum.R2X1: {
-                if (vector.x + 2 >= bound) {
-                    return new Vector2Int[] { };
-                }
                 Vector2Int tl = new Vector2Int(vector.x, vector.y + 1);
                 Vector2Int tr = new Vector2Int(vector.x + 1, vector.y + 1);
                 Vector2Int bl = new Vector2Int(vector.x, vector.y - 1);
@@ -53,9 +41,6 @@ public static class WorldUtils {
                 return new Vector2Int[] { tl, tr, bl, br, l, r };
             }
             case RoomShapeEnum.R1X2: {
-                if (vector.y + 2 >= bound) {
-                    return new Vector2Int[] { };
-                }
                 Vector2Int t = new Vector2Int(vector.x, vector.y + 2);
                 Vector2Int b = new Vector2Int(vector.x, vector.y - 1);
                 Vector2Int lt = new Vector2Int(vector.x - 1, vector.y + 1);
