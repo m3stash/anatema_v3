@@ -1,10 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
+using RoomNs;
 using UnityEngine;
 
-public class Room_R1X1 : IRoomShape {
+public class Room_R1X1 : PseudoRoom {
 
-    public Vector2Int[] GetDirections(Vector2Int vector) {
+    public Room_R1X1(Vector2Int pos) : base() {
+        position = pos;
+        roomShape = RoomShapeEnum.R1X1;
+        roomType = RoomTypeEnum.STANDARD;
+    }
+    public Room_R1X1() : base() {
+        roomShape = RoomShapeEnum.R1X1;
+        roomType = RoomTypeEnum.STANDARD;
+    }
+
+    public override Vector2Int[] GetDirections(Vector2Int vector) {
         Vector2Int[] dir = {
             new Vector2Int(vector.x - 1, vector.y),
             new Vector2Int(vector.x + 1, vector.y),
@@ -14,14 +23,14 @@ public class Room_R1X1 : IRoomShape {
         return dir;
     }
 
-    public Vector2Int[] GetCellToVerify(Vector2Int vector) {
+    public override Vector2Int[] GetCellToVerify(Vector2Int vector) {
         Vector2Int[] cells = {
             new Vector2Int(vector.x, vector.y)
         };
         return cells;
     }
 
-    public Vector2Int[] GetNeighborsCells(Vector2Int vector) {
+    public override Vector2Int[] GetNeighborsCells(Vector2Int vector) {
         Vector2Int t = new Vector2Int(vector.x, vector.y + 1);
         Vector2Int b = new Vector2Int(vector.x, vector.y - 1);
         Vector2Int l = new Vector2Int(vector.x - 1, vector.y);

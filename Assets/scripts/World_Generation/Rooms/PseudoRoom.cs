@@ -4,19 +4,30 @@ using UnityEngine;
 using DoorNs;
 using DungeonNs;
 namespace RoomNs {
-    public class PseudoRoom {
+    public abstract class PseudoRoom {
 
-        private Vector2Int position;
+        protected Vector2Int position;
         protected RoomShapeEnum roomShape;
-        private RoomTypeEnum roomType;
+        protected RoomTypeEnum roomType;
         private bool isEndRoom;
         private List<PseudoDoor> doors = new List<PseudoDoor>();
 
-        public PseudoRoom(Vector2Int _position, RoomTypeEnum _roomType, RoomShapeEnum _shape) {
-            position = _position;
-            roomType = _roomType;
-            roomShape = _shape;
-        }
+        public PseudoRoom() {}
+
+        /*
+         * Get index position of shape
+         */
+        public abstract Vector2Int[] GetDirections(Vector2Int vector);
+
+        /*
+         * Get occuped Cell's for shape
+         */
+        public abstract Vector2Int[] GetCellToVerify(Vector2Int vector);
+
+        /*
+         * Get GetNeighbors of cell
+         */
+        public abstract Vector2Int[] GetNeighborsCells(Vector2Int vector);
 
         public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
 
@@ -83,6 +94,14 @@ namespace RoomNs {
 
         public Vector2Int GetPosition() {
             return position;
+        }
+
+        public void SetPosition(Vector2Int pos) {
+            position = pos;
+        }
+
+        public void SetRoomType(RoomTypeEnum type) {
+            roomType = type;
         }
 
         public RoomShapeEnum GetShape() {
