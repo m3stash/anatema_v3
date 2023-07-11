@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour {
             int randomIndex = UnityEngine.Random.Range(0, characters.Length);
             seed += characters[randomIndex];
         }
-        Debug.Log("Seed générée : " + seed);
         return seed;
     }
 

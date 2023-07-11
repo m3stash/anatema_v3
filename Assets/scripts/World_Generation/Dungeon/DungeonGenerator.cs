@@ -4,6 +4,12 @@ using RoomNs;
 using DoorNs;
 using System;
 using Random = UnityEngine.Random;
+using Unity.Mathematics;
+using System.Net;
+using UnityEngine.TextCore.Text;
+using static UnityEditor.VersionControl.Asset;
+using static UnityEngine.UIElements.UxmlAttributeDescription;
+using System.Linq;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -156,11 +162,48 @@ namespace DungeonNs {
             return true;
         }
 
+        // use Knuth Algorithm to random shuffle to ensure that room shapes are evenly distributed throughout the level.
+        private void ShuffleShapes<T>(List<T> list, System.Random random) {
+            int n = list.Count;
+            while (n > 1) {
+                n--;
+                int k = random.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+
+        private bool IsRatioSpecialShape(List<PseudoRoom> rooms) {
+            int specials = 0;
+            int standard = 0;
+            int totalShapes = rooms.Count;
+            rooms.ForEach(r => {
+                if(r.GetShape() == RoomShapeEnum.R1X1) {
+                    standard++;
+                } else {
+                    specials++;
+                }
+            });
+            double currentRatio = (double)specials / totalShapes;
+            return currentRatio  <= 0.25;
+        }
+
         private int TryToGenerateAllRoomsFloor() {
-            // init starter room
-            int current_R2X2 = 0;
-            int current_R1X2 = 0;
-            int current_R2X1 = 0;
+
+            //// toDO voir à bouger ce qui ne doit être calculer qu'une fois par level et non à chaque essaie de génération !!!
+            string seed = GameManager.GetSeed;
+            int seedHash = seed.GetHashCode();
+            System.Random random = new System.Random(seedHash);
+            int currentShapeIndex = 0;
+
+            // toDo dynamiser avec une boucle
+            List<RoomShapeEnum> roomShapes = new List<RoomShapeEnum> {
+                //RoomShapeEnum.R1X1,
+                RoomShapeEnum.R2X2,
+                RoomShapeEnum.R2X1,
+                RoomShapeEnum.R1X2,
+            };
 
             PseudoRoom starterRoom = new Room_R1X1(vectorStart);
             listOfPseudoRoom.Add(starterRoom);
@@ -172,36 +215,19 @@ namespace DungeonNs {
             while (queue.Count > 0 && listOfPseudoRoom.Count < dungeonValues.GetNumberOfRooms()) {
 
                 Vector2Int roomQueue = queue.Dequeue();
-                RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
 
                 PseudoRoom room;
+                
+                RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
 
-                // toDO a REVOIR et aussi prévoir à calculer dynamiquement le nombre de R2X2 et autre par rapport au niveau du donjon et au nbr de place !
-                bool randoShape_R2X2 = Random.Range(0, 4) == 1 && current_R2X2 < DungeonConsts.max_R2X2;
-                bool randoShape_R1X2 = Random.Range(0, 4) == 1 && current_R1X2 < DungeonConsts.max_R1X2;
-                bool randoShape_R2X1 = Random.Range(0, 4) == 1 && current_R2X1 < DungeonConsts.max_R2X1;
-
-                List<RoomShapeEnum> specialShape = new List<RoomShapeEnum>();
-
-                if (randoShape_R2X2) {
-                    specialShape.Add(RoomShapeEnum.R2X2);
+                if (IsRatioSpecialShape(listOfPseudoRoom)) {
+                    ShuffleShapes(roomShapes, random);
+                    newRoomShape = roomShapes[currentShapeIndex];
+                    currentShapeIndex = (currentShapeIndex + 1) % roomShapes.Count;
                 }
-                if (randoShape_R1X2) {
-                    specialShape.Add(RoomShapeEnum.R1X2);
-                }
-                if (randoShape_R2X1) {
-                    specialShape.Add(RoomShapeEnum.R2X1);
-                }
-
-                if (specialShape.Count > 0) {
-                    newRoomShape = specialShape[Random.Range(0, specialShape.Count)];
-                }
-
-                Type classType = Type.GetType("Room_" + newRoomShape.ToString());
-
-
 
                 // use reflexion to create instance dynamically
+                Type classType = Type.GetType("Room_" + newRoomShape.ToString());
                 if (classType != null && typeof(PseudoRoom).IsAssignableFrom(classType)) {
                     room = (PseudoRoom)Activator.CreateInstance(classType);
                 } else {
@@ -228,17 +254,14 @@ namespace DungeonNs {
                                 SetFloorPlan(room, listOfEmptySpaces[i]);
                             }
                         }
-
                         break;
                     }
                     default: {
-
                         if (listOfEmptySpaces.Count > 0) {
                             int randomNeightbor = Random.Range(0, listOfEmptySpaces.Count);
                             queue.Enqueue(listOfEmptySpaces[randomNeightbor]);
                             room.SetPosition(listOfEmptySpaces[randomNeightbor]);
                             listOfPseudoRoom.Add(room);
-
                             SetFloorPlan(room, listOfEmptySpaces[randomNeightbor]);
                             /*bool isPlaced = false;
                             for (int i = 0; i < listOfEmptySpaces.Count; i++) {
@@ -257,10 +280,8 @@ namespace DungeonNs {
                                 }
                             }*/
                         }
-
                         break;
                     }
-
                 }
                 /*if (createdCount == 0) {
                     endRooms.Add(vector);
