@@ -3,14 +3,13 @@ using UnityEngine;
 
 public class Room_R1X1 : PseudoRoom {
 
-    public Room_R1X1(Vector2Int pos) : base() {
-        position = pos;
-        roomShape = RoomShapeEnum.R1X1;
-        roomType = RoomTypeEnum.STANDARD;
-    }
     public Room_R1X1() : base() {
         roomShape = RoomShapeEnum.R1X1;
-        roomType = RoomTypeEnum.STANDARD;
+    }
+
+    public Room_R1X1(Vector2Int pos) : base(pos) {
+        position = pos;
+        roomShape = RoomShapeEnum.R1X1;
     }
 
     public override Vector2Int[] GetDirections(Vector2Int vector) {

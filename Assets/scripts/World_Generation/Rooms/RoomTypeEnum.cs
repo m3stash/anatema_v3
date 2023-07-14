@@ -4,5 +4,6 @@
         STANDARD,
         BOSS,
         ITEMS,
+        SECRET
     }
 }

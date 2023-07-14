@@ -15,7 +15,6 @@ public class GameManager : MonoBehaviour {
     private bool firstRoomInit = false;
     private static string seed;
     private static Config config;
-
     public static GameManager instance;
 
     public static string GetSeed { get { return seed; } }

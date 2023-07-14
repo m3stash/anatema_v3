@@ -6,6 +6,8 @@ using DungeonNs;
 namespace RoomNs {
     public abstract class PseudoRoom {
 
+        private Vector2Int roomSize = new Vector2Int(61, 31);
+        private Vector2Int worldPosition;
         protected Vector2Int position;
         protected RoomShapeEnum roomShape;
         protected RoomTypeEnum roomType;
@@ -13,6 +15,10 @@ namespace RoomNs {
         private List<PseudoDoor> doors = new List<PseudoDoor>();
 
         public PseudoRoom() {}
+
+        public PseudoRoom(Vector2Int pos) {
+            SetWorldPosition(pos);
+        }
 
         /*
          * Get index position of shape
@@ -68,6 +74,10 @@ namespace RoomNs {
             return DirectionalEnum.DEFAULT;
         }
 
+        private void SetWorldPosition(Vector2Int pos) {
+            worldPosition = new Vector2Int(pos.x * roomSize.x, pos.y * roomSize.y);
+        }
+
         private Vector3 CalculDoorPosition(DirectionalEnum direction) {
             switch (direction) {
                 case DirectionalEnum.T:
@@ -97,6 +107,7 @@ namespace RoomNs {
         }
 
         public void SetPosition(Vector2Int pos) {
+            SetWorldPosition(pos);
             position = pos;
         }
 
@@ -111,5 +122,10 @@ namespace RoomNs {
         public List<PseudoDoor> GetDoors() {
             return doors;
         }
+
+        public Vector2Int GetWorldPosition() {
+            return worldPosition;
+        }
+
     }
 }

@@ -5,7 +5,6 @@ public class Room_R2X2 : PseudoRoom {
 
     public Room_R2X2() : base() {
         roomShape = RoomShapeEnum.R2X2;
-        roomType = RoomTypeEnum.STANDARD;
     }
 
     public override Vector2Int[] GetDirections(Vector2Int vector) {

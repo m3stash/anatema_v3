@@ -8,6 +8,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1850838220808411557, guid: 38142f793e076f441bdf7c4bed20ae00,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1850838221190362001, guid: 38142f793e076f441bdf7c4bed20ae00,
         type: 3}
       propertyPath: m_RootOrder
@@ -66,7 +71,12 @@ PrefabInstance:
     - target: {fileID: 1850838221190362002, guid: 38142f793e076f441bdf7c4bed20ae00,
         type: 3}
       propertyPath: m_Name
-      value: Room_1x1
+      value: cave_default_starter_r1x1_ulxjm12
+      objectReference: {fileID: 0}
+    - target: {fileID: 5251798407641327537, guid: 38142f793e076f441bdf7c4bed20ae00,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

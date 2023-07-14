@@ -52,6 +52,7 @@ namespace RoomNs {
                 RoomTypeEnum typeEnum;
                 string nameWithoutPath = prefab.Replace(path, "");
                 string[] prefabValues = nameWithoutPath.Split('_');
+
                 if (prefabValues.Length > 0) {
                     string strBiome = prefabValues[0].ToUpper();
                     string strDiff = prefabValues[1].ToUpper();
