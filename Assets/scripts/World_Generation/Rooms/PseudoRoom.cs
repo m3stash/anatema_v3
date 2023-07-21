@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using DoorNs;
 using DungeonNs;
+
 namespace RoomNs {
     public abstract class PseudoRoom {
 
@@ -57,6 +58,40 @@ namespace RoomNs {
                 roomList.Remove(room);
             }
         }
+
+        /*public void SeachNeighborsAndCreateDoor(List<PseudoRoom> pseudoRooms) {
+            List<Vector2Int> neighbors = new List<Vector2Int>();
+            Vector2Int[] cellsToVerify = GetNeighborsCells(position);
+
+            neighbors.AddRange(
+                cellsToVerify.Select(cell => pseudoRooms.Find(p => p.GetPosition() == cell).GetPosition())
+            );
+            Vector2Int[] sections = GetCellToVerify(position);
+            
+            foreach (Vector2Int section in sections) {
+                // top
+                if (neighbors.Any(n => n == new Vector2Int(section.x, section.y + 1))) {
+                    Vector2Int doorPosition;
+                    PseudoDoor newDoor = new PseudoDoor(position, DirectionalEnum.T);
+                    newDoor.SetDoorNeighbor(new Vector3(neighborSection.x, neighborSection.y, 0));
+                    doors.Add(newDoor);
+                }
+                // bottom 
+                if (neighbors.Any(n => n == new Vector2Int(section.x, section.y - 1))) {
+
+                }
+                // left 
+                if (neighbors.Any(n => n == new Vector2Int(section.x - 1, section.y))) {
+
+                }
+                // right 
+                if (neighbors.Any(n => n == new Vector2Int(section.x + 1, section.y))) {
+
+                }
+
+            }
+        }*/
+
 
         private DirectionalEnum SearchNeighborAndGetDoorDirection(Vector2Int sectionPos, Vector2Int neightborSectionPos) {
             if (new Vector2Int(sectionPos.x, sectionPos.y + 1) == neightborSectionPos) {

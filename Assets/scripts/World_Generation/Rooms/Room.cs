@@ -9,12 +9,12 @@ using DoorNs;
 namespace RoomNs {
 
     public class Room : MonoBehaviour {
-        [SerializeField] public GameObject cam;
-        [SerializeField] public GameObject tilemapEnnemiesGo;
-        [SerializeField] public GameObject tilemapGo;
-        [SerializeField] public GameObject tilemapLimitsGo;
+        [SerializeField] private GameObject cam;
+        [SerializeField] private GameObject tilemapEnnemiesGo;
+        [SerializeField] private GameObject tilemapGo;
+        [SerializeField] private GameObject tilemapLimitsGo;
+        [SerializeField] private GameObject Door;
         [SerializeField] public GameObject DoorsContainer;
-        [SerializeField] public GameObject Door;
 
         public delegate void OnPlayerEnterRoom(Room room);
         public static event OnPlayerEnterRoom OnPlayerEnter;
@@ -22,7 +22,6 @@ namespace RoomNs {
         public bool isRootRoom;
         public Vector2Int rootPos;
         private RoomShapeEnum roomShape;
-        [SerializeField] private int id;
         private List<Door> doors;
         private Tilemap tilemap;
         private Tilemap tilemapEnnemies;
@@ -37,14 +36,9 @@ namespace RoomNs {
             return roomShape;
         }
 
-        public int GetId() {
-            return id;
-        }
-
-        public void Setup(Vector2Int rootPos, RoomShapeEnum roomShape/*, int id*/) {
+        public void Setup(Vector2Int rootPos, RoomShapeEnum roomShape) {
             this.rootPos = rootPos;
             this.roomShape = roomShape;
-            // this.id = id;
         }
 
         private void Start() {
