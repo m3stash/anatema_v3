@@ -118,7 +118,7 @@ namespace DungeonNs {
         }
 
         private void CreateDoorsGo(PseudoRoom pRoom, Room room) {
-            pRoom.SeachNeighborsAndCreateDoor(listOfPseudoRoom);
+            pRoom.SeachNeighborsAndCreateDoor(floorplan, floorplanBound);
             if (pRoom.GetDoors().Count > 0) {
                 foreach (PseudoDoor door in pRoom.GetDoors()) {
                     GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.prefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
@@ -144,7 +144,7 @@ namespace DungeonNs {
         }
 
         private void SetFloorPlan(PseudoRoom room, Vector2Int vector) {
-            foreach (var cell in room.GetCellToVerify(vector)) {
+            foreach (var cell in room.GetOccupedCells(vector)) {
                 floorplan[cell.x, cell.y] = 1;
             }
         }
@@ -218,9 +218,9 @@ namespace DungeonNs {
             return randomElement;
         }
 
-        private List<Vector2Int> GetEmptySpaces(PseudoRoom room, Vector2Int roomQueue) {
-            return room.GetDirections(roomQueue)
-                .Where(direction => CanAddShape(direction, room))
+        private List<Vector2Int> GetEmptySpaces(PseudoRoom room, Vector2Int position) {
+            return room.GetDirections(position)
+                .Where(Vector2Int => CanAddShape(Vector2Int, room))
                 .ToList();
         }
 
@@ -252,20 +252,20 @@ namespace DungeonNs {
                 return 99;
             }
             foreach (var checkNewPlace in shapesToCheck) {
-                if (!CheckIsOutOfBound(checkNewPlace, floorplanBound)) {
+                if (!CheckIsOutOfBound(checkNewPlace)) {
                     count += floorplan[checkNewPlace.x, checkNewPlace.y];
                 }
             }
             return count;
         }
 
-        private bool CheckIsOutOfBound(Vector2Int vector, int bound) {
-            return vector.x < 0 || vector.x > bound || vector.y > bound || vector.y < 0;
+        public bool CheckIsOutOfBound(Vector2Int vector) {
+            return vector.x < 0 || vector.x > floorplanBound || vector.y > floorplanBound || vector.y < 0;
         }
 
         private bool CheckIsEmptySpace(Vector2Int vector, PseudoRoom room) {
-            Vector2Int[] cells = room.GetCellToVerify(vector);
-            int usedCells = cells.Sum(cell => CheckIsOutOfBound(cell, floorplanBound) ? 1 : floorplan[cell.x, cell.y]);
+            Vector2Int[] cells = room.GetOccupedCells(vector);
+            int usedCells = cells.Sum(cell => CheckIsOutOfBound(cell) ? 1 : floorplan[cell.x, cell.y]);
             return usedCells == 0;
         }
 

@@ -22,7 +22,7 @@ public class Room_R1X1 : PseudoRoom {
         return dir;
     }
 
-    public override Vector2Int[] GetCellToVerify(Vector2Int vector) {
+    public override Vector2Int[] GetOccupedCells(Vector2Int vector) {
         Vector2Int[] cells = {
             new Vector2Int(vector.x, vector.y)
         };
