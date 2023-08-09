@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using DoorNs;
 using DungeonNs;
+using System;
 
 namespace RoomNs {
     public abstract class PseudoRoom {
@@ -29,7 +30,7 @@ namespace RoomNs {
         /*
          * Get occuped Cell's for shape
          */
-        public abstract Vector2Int[] GetOccupedCells(Vector2Int vector);
+        public abstract Vector2Int[] GetOccupiedCells(Vector2Int vector);
 
         /*
          * Get GetNeighbors of cell
@@ -38,90 +39,66 @@ namespace RoomNs {
 
         public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
 
-        /*public void SeachNeighborsAndCreateDoor(List<PseudoRoom> pseudoRooms) {
-            List<PseudoRoom> roomList = new List<PseudoRoom>(pseudoRooms);
-            Vector2Int[] currentSectionsRoom = WorldUtils.GetSectionPerRoom(GetShape(), GetPosition());
-            foreach (PseudoRoom room in roomList.ToList()) {
-                if (room != this) {
-                    Vector2Int[] neighborSectionsRoom = WorldUtils.GetSectionPerRoom(room.GetShape(), room.GetPosition());
-                    foreach (var currentSections in currentSectionsRoom) {
-                        foreach (var neighborSection in neighborSectionsRoom) {
-                            DirectionalEnum doorDirection = SearchNeighborAndGetDoorDirection(currentSections, neighborSection);
-                            if (doorDirection != DirectionalEnum.DEFAULT) {
-                                PseudoDoor newDoor = new PseudoDoor(CalculDoorPosition(doorDirection), doorDirection);
-                                newDoor.SetDoorNeighbor(new Vector3(neighborSection.x, neighborSection.y, 0));
-                                doors.Add(newDoor);
-                            }
-                        }
-                    }
-                }
-                roomList.Remove(room);
-            }
-        }*/
-
-        // to do enlever la duplication !!
-        public bool CheckIsOutOfBound(Vector2Int vector, int floorplanBound) {
-            return vector.x < 0 || vector.x > floorplanBound || vector.y > floorplanBound || vector.y < 0;
-        }
-
         public void SeachNeighborsAndCreateDoor(int[,] floorPlan, int bound) {
-            List<Vector2Int> filteredNeighbors = new List<Vector2Int>();
-            Vector2Int[] sections = GetOccupedCells(position);
-            filteredNeighbors.AddRange(
-                GetNeighborsCells(position)
-                    .Where(neighborPosition => !CheckIsOutOfBound(neighborPosition, bound) && floorPlan[neighborPosition.x, neighborPosition.y] == 1)
-            );
+            Vector2Int[] sections = GetOccupiedCells(position);
+            List<Vector2Int> filteredNeighbors = GetNeighborsCells(position)
+                .Where(neighborPosition => !Utilities.CheckIsOutOfBound(neighborPosition, bound) && floorPlan[neighborPosition.x, neighborPosition.y] == 1)
+                .ToList();
 
             foreach (Vector2Int section in sections) {
-                // top
-                if (filteredNeighbors.Contains(new Vector2Int(section.x, section.y + 1))) {
-                    PseudoDoor newDoor = new PseudoDoor(CalculDoorPosition(DirectionalEnum.T), DirectionalEnum.T);
-                    newDoor.SetDoorNeighbor(new Vector3(section.x, section.y + 1, 0));
-                    doors.Add(newDoor);
+                foreach (DirectionalEnum direction in Enum.GetValues(typeof(DirectionalEnum))) {
+                    Vector2Int offset = GetOffsetForDirection(direction);
+
+                    if (filteredNeighbors.Contains(section + offset)) {
+                        CreateDoor(section, direction, offset);
+                    }
                 }
-                /*// bottom
-                if (filteredNeighbors.Contains(new Vector2Int(section.x, section.y - 1))) {
-                    PseudoDoor newDoor = new PseudoDoor(CalculDoorPosition(DirectionalEnum.B), DirectionalEnum.B);
-                    newDoor.SetDoorNeighbor(new Vector3(0, - 1, 0));
-                    doors.Add(newDoor);
-                }*/
             }
         }
 
-        private DirectionalEnum SearchNeighborAndGetDoorDirection(Vector2Int sectionPos, Vector2Int neightborSectionPos) {
-            if (new Vector2Int(sectionPos.x, sectionPos.y + 1) == neightborSectionPos) {
-                return DirectionalEnum.T;
+        private void CreateDoor(Vector2Int section, DirectionalEnum direction, Vector2Int offset) {
+            PseudoDoor newDoor = new PseudoDoor(CalculateDoorPosition(section - position, direction), direction);
+            // TODO à retirer ????
+            newDoor.SetDoorNeighbor(new Vector3(section.x + offset.x, section.y + offset.y, 0));
+            doors.Add(newDoor);
+        }
+
+        private Vector2Int GetOffsetForDirection(DirectionalEnum direction) {
+            switch (direction) {
+                case DirectionalEnum.T:
+                return Vector2Int.up;
+                case DirectionalEnum.B:
+                return Vector2Int.down;
+                case DirectionalEnum.L:
+                return Vector2Int.left;
+                case DirectionalEnum.R:
+                return Vector2Int.right;
+                default:
+                return Vector2Int.zero;
             }
-            if (new Vector2Int(sectionPos.x + 1, sectionPos.y) == neightborSectionPos) {
-                return DirectionalEnum.R;
+        }
+
+        private Vector3 CalculateDoorPosition(Vector2Int position, DirectionalEnum direction) {
+            float middleH = (DungeonConsts.roomSize.x / 2) * (position.x + 1);
+            float middleV = (DungeonConsts.roomSize.y / 2) * (position.y + 1);
+
+            switch (direction) {
+                case DirectionalEnum.T:
+                return new Vector3(middleH, DungeonConsts.roomSize.y * (position.y + 1) - 0.5f, 0);
+                case DirectionalEnum.R:
+                return new Vector3(DungeonConsts.roomSize.x * (position.x + 1) - .5f, middleV, 0);
+                case DirectionalEnum.B:
+                return new Vector3(middleH, 0.5f, 0);
+                case DirectionalEnum.L:
+                return new Vector3(0.5f, middleV, 0);
+                default:
+                Debug.LogError("ERROR CalculDoorPosition");
+                return Vector3Int.zero;
             }
-            if (new Vector2Int(sectionPos.x - 1, sectionPos.y) == neightborSectionPos) {
-                return DirectionalEnum.L;
-            }
-            if (new Vector2Int(sectionPos.x, sectionPos.y - 1) == neightborSectionPos) {
-                return DirectionalEnum.B;
-            }
-            return DirectionalEnum.DEFAULT;
         }
 
         private void SetWorldPosition(Vector2Int pos) {
             worldPosition = new Vector2Int(pos.x * roomSize.x, pos.y * roomSize.y);
-        }
-
-        private Vector3 CalculDoorPosition(DirectionalEnum direction) {
-            switch (direction) {
-                case DirectionalEnum.T:
-                return new Vector3((float)(DungeonConsts.roomSize.x / 2) + .5f, DungeonConsts.roomSize.y - .5f, 0);
-                case DirectionalEnum.R:
-                return new Vector3((float)DungeonConsts.roomSize.x - .5f, (float)DungeonConsts.roomSize.y / 2, 0);
-                case DirectionalEnum.B:
-                return new Vector3((float)DungeonConsts.roomSize.x / 2, .5f, 0);
-                case DirectionalEnum.L:
-                return new Vector3(.5f, (float)DungeonConsts.roomSize.y / 2, 0);
-                default:
-                Debug.LogError("ERROR CalculateDoorPosition");
-                return Vector3Int.zero;
-            }
         }
 
         public void SetIsEndRoom(bool value) {
