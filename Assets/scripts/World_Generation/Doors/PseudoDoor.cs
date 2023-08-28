@@ -7,23 +7,21 @@ namespace DoorNs {
         private DirectionalEnum direction;
         private Vector3 localPosition;
         private Vector3 doorNeighbor;
+        private BiomeEnum biome;
 
-        public PseudoDoor(Vector3 localPosition, DirectionalEnum direction) {
+        public PseudoDoor(Vector3 localPosition, DirectionalEnum direction, BiomeEnum biome) {
             this.localPosition = localPosition;
             this.direction = direction;
+            this.biome = biome;
         }
 
-        public Vector3 GetLocalPosition() {
-            return localPosition;
+        public Vector3 LocalPosition => localPosition;
+
+        public Vector3 DoorNeighbor {
+            get { return doorNeighbor; }
+            set { doorNeighbor = value; }
         }
 
-        public void SetDoorNeighbor(Vector3 doorNeighbor) {
-            this.doorNeighbor = doorNeighbor;
-        }
-
-        public Vector3 SetDoorNeighbor() {
-            return doorNeighbor;
-        }
         public DirectionalEnum GetDirection() {
             return direction;
         }

@@ -5,7 +5,6 @@ using DoorNs;
 using System;
 using Random = UnityEngine.Random;
 using System.Linq;
-using System.IO;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -70,9 +69,7 @@ namespace DungeonNs {
         }
 
         private void SetSpecialRooms() {
-            /*foreach (Vector2Int room in endRooms) {
-                Debug.Log("ICI" + room);
-            }*/
+            foreach (int cell in floorplan) { }
         }
 
         private GameObject LoadRoomPrefab(DifficultyEnum diff, RoomShapeEnum shape, RoomTypeEnum type) {
@@ -118,13 +115,13 @@ namespace DungeonNs {
         }
 
         private void CreateDoorsGo(PseudoRoom pRoom, Room room) {
-            pRoom.SeachNeighborsAndCreateDoor(floorplan, floorplanBound);
+            pRoom.SeachNeighborsAndCreatePseudoDoor(floorplan, floorplanBound, biome);
             if (pRoom.GetDoors().Count > 0) {
                 foreach (PseudoDoor door in pRoom.GetDoors()) {
                     GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.prefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
                     doorGo.GetComponent<Door>().SetDirection(door.GetDirection());
                     doorGo.transform.SetParent(room.DoorsContainer.transform);
-                    doorGo.transform.localPosition = door.GetLocalPosition();
+                    doorGo.transform.localPosition = door.LocalPosition;
                 }
             }
         }
@@ -143,9 +140,9 @@ namespace DungeonNs {
             listOfPseudoRoom = new List<PseudoRoom>();
         }
 
-        private void SetFloorPlan(PseudoRoom room, Vector2Int vector) {
+        private void SetFloorPlan(PseudoRoom room, Vector2Int vector, int index) {
             foreach (var cell in room.GetOccupiedCells(vector)) {
-                floorplan[cell.x, cell.y] = 1;
+                floorplan[cell.x, cell.y] = index;
             }
         }
 
@@ -153,7 +150,7 @@ namespace DungeonNs {
             if (!CheckIsEmptySpace(vector, room)) {
                 return false;
             }
-            if (NeighbourCount(vector, room) > 1) {
+            if (NeighborCount(vector, room) > 1) {
                 return false;
             }
             return true;
@@ -182,7 +179,7 @@ namespace DungeonNs {
             PseudoRoom starterRoom = new Room_R1X1(vectorStart);
             starterRoom.SetRoomType(RoomTypeEnum.STARTER);
             listOfPseudoRoom.Add(starterRoom);
-            SetFloorPlan(starterRoom, vectorStart);
+            SetFloorPlan(starterRoom, vectorStart, 1);
             Queue<Vector2Int> queue = new Queue<Vector2Int>();
             queue.Enqueue(vectorStart);
 
@@ -193,14 +190,16 @@ namespace DungeonNs {
 
                 if (listOfEmptySpaces.Count > 0) {
                     int randomNeighbor = Random.Range(0, listOfEmptySpaces.Count);
-                    queue.Enqueue(listOfEmptySpaces[randomNeighbor]);
-                    pRoom.SetPosition(listOfEmptySpaces[randomNeighbor]);
+                    Vector2Int randomCell = listOfEmptySpaces[randomNeighbor];
+                    queue.Enqueue(randomCell);
+                    pRoom.SetPosition(randomCell);
                     pRoom.SetRoomType(RoomTypeEnum.STANDARD);
                     listOfPseudoRoom.Add(pRoom);
-                    SetFloorPlan(pRoom, listOfEmptySpaces[randomNeighbor]);
+                    SetFloorPlan(pRoom, randomCell, listOfPseudoRoom.Count + 1);
                 }
 
             }
+            Debug.Log("ICICIC");
         }
 
         private List<RoomShapeEnum> GetListOfSpecialShapes() {
@@ -244,16 +243,17 @@ namespace DungeonNs {
             }
         }
 
-        private int NeighbourCount(Vector2Int vector, PseudoRoom room) {
+        private int NeighborCount(Vector2Int vector, PseudoRoom room) {
             int count = 0;
             Vector2Int[] shapesToCheck = room.GetNeighborsCells(vector);
 
             if (shapesToCheck.Length == 0) {
-                return 99;
+                return -1;
             }
             foreach (var checkNewPlace in shapesToCheck) {
                 if (!Utilities.CheckIsOutOfBound(checkNewPlace, floorplanBound)) {
-                    count += floorplan[checkNewPlace.x, checkNewPlace.y];
+                    int neighbour = floorplan[checkNewPlace.x, checkNewPlace.y] > 0 ? 1 : 0;
+                    count += neighbour;
                 }
             }
             return count;

@@ -39,42 +39,22 @@ namespace RoomNs {
 
         public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
 
-        public void SeachNeighborsAndCreateDoor(int[,] floorPlan, int bound) {
+        public void SeachNeighborsAndCreatePseudoDoor(int[,] floorplan, int bound, BiomeEnum biome) {
             Vector2Int[] sections = GetOccupiedCells(position);
             List<Vector2Int> filteredNeighbors = GetNeighborsCells(position)
-                .Where(neighborPosition => !Utilities.CheckIsOutOfBound(neighborPosition, bound) && floorPlan[neighborPosition.x, neighborPosition.y] == 1)
+                .Where(neighborPosition => !Utilities.CheckIsOutOfBound(neighborPosition, bound) && floorplan[neighborPosition.x, neighborPosition.y] > 0)
                 .ToList();
 
             foreach (Vector2Int section in sections) {
                 foreach (DirectionalEnum direction in Enum.GetValues(typeof(DirectionalEnum))) {
-                    Vector2Int offset = GetOffsetForDirection(direction);
+                    Vector2Int offset = Utilities.GetOffsetForDirection(direction);
 
                     if (filteredNeighbors.Contains(section + offset)) {
-                        CreateDoor(section, direction, offset);
+                        PseudoDoor newDoor = new PseudoDoor(CalculateDoorPosition(section - position, direction), direction, biome);
+                        newDoor.DoorNeighbor = new Vector3(section.x + offset.x, section.y + offset.y, 0);
+                        doors.Add(newDoor);
                     }
                 }
-            }
-        }
-
-        private void CreateDoor(Vector2Int section, DirectionalEnum direction, Vector2Int offset) {
-            PseudoDoor newDoor = new PseudoDoor(CalculateDoorPosition(section - position, direction), direction);
-            // TODO à retirer ????
-            newDoor.SetDoorNeighbor(new Vector3(section.x + offset.x, section.y + offset.y, 0));
-            doors.Add(newDoor);
-        }
-
-        private Vector2Int GetOffsetForDirection(DirectionalEnum direction) {
-            switch (direction) {
-                case DirectionalEnum.T:
-                return Vector2Int.up;
-                case DirectionalEnum.B:
-                return Vector2Int.down;
-                case DirectionalEnum.L:
-                return Vector2Int.left;
-                case DirectionalEnum.R:
-                return Vector2Int.right;
-                default:
-                return Vector2Int.zero;
             }
         }
 
