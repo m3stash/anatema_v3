@@ -5,6 +5,7 @@ using DoorNs;
 using System;
 using Random = UnityEngine.Random;
 using System.Linq;
+using static UnityEngine.Rendering.DebugUI.Table;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -15,6 +16,7 @@ namespace DungeonNs {
 
         // InitValues
         private int[,] floorplan;
+        HashSet<(int, int)> occupiedCells = new HashSet<(int, int)>();
         private int floorplanBound;
         private int totalLoop = 0;
         private Vector2Int vectorStart;
@@ -69,7 +71,60 @@ namespace DungeonNs {
         }
 
         private void SetSpecialRooms() {
-            foreach (int cell in floorplan) { }
+            HashSet<(int, int)> emptyCellsWithMoreThan2Neighbors = new HashSet<(int, int)>();
+            HashSet<(int, int)> emptyCellsWithMoreThan3Neighbors = new HashSet<(int, int)>();
+
+            foreach ((int row, int col) in occupiedCells) {
+                int rows = floorplan.GetLength(0);
+                int cols = floorplan.GetLength(1);
+
+                int[][] directions = new int[][] {
+                    new int[] { -1, 0 }, // Up
+                    new int[] { 1, 0 },  // Down
+                    new int[] { 0, -1 }, // Left
+                    new int[] { 0, 1 }   // Right
+                };
+                foreach (var direction in directions) {
+                    int newRow = row + direction[0];
+                    int newCol = col + direction[1];
+
+                    if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && floorplan[newRow, newCol] == 0) {
+                        int occupiedNeighbors = CountOccupiedNeighbors(floorplan, newRow, newCol);
+                        if (occupiedNeighbors == 2) {
+                            emptyCellsWithMoreThan2Neighbors.Add((newRow, newCol));
+                        }
+                        if (occupiedNeighbors >= 3) {
+                            emptyCellsWithMoreThan3Neighbors.Add((newRow, newCol));
+                        }
+                    }
+                }
+            }
+
+            Debug.Log("Empty cells with more than 2 occupied neighbors: " + emptyCellsWithMoreThan2Neighbors.Count);
+            Debug.Log("Empty cells with more than 3occupied neighbors: " + emptyCellsWithMoreThan3Neighbors.Count);
+        }
+
+        private int CountOccupiedNeighbors(int[,] grid, int row, int col) {
+
+            int count = 0;
+
+            int[][] directions = new int[][] {
+                new int[] { -1, 0 }, // Up
+                new int[] { 1, 0 },  // Down
+                new int[] { 0, -1 }, // Left
+                new int[] { 0, 1 }   // Right
+            };
+
+            foreach (var direction in directions) {
+                int newRow = row + direction[0];
+                int newCol = col + direction[1];
+
+                if (Utilities.CheckIsOnOfBound(newRow, newCol, floorplanBound) && grid[newRow, newCol] > 0) {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         private GameObject LoadRoomPrefab(DifficultyEnum diff, RoomShapeEnum shape, RoomTypeEnum type) {
@@ -143,6 +198,7 @@ namespace DungeonNs {
         private void SetFloorPlan(PseudoRoom room, Vector2Int vector, int index) {
             foreach (var cell in room.GetOccupiedCells(vector)) {
                 floorplan[cell.x, cell.y] = index;
+                occupiedCells.Add((cell.x, cell.y));
             }
         }
 
@@ -199,7 +255,6 @@ namespace DungeonNs {
                 }
 
             }
-            Debug.Log("ICICIC");
         }
 
         private List<RoomShapeEnum> GetListOfSpecialShapes() {

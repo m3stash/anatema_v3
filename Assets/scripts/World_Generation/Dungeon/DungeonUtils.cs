@@ -1,9 +1,14 @@
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 namespace DungeonNs {
     public static class Utilities {
         public static bool CheckIsOutOfBound(Vector2Int vector, int floorplanBound) {
             return vector.x < 0 || vector.x > floorplanBound || vector.y > floorplanBound || vector.y < 0;
+        }
+
+        public static bool CheckIsOnOfBound(int x, int y, int bound) {
+            return x > 0 && x < bound && y > 0 && y < bound;
         }
 
         public static Vector2Int GetOffsetForDirection(DirectionalEnum direction) {
