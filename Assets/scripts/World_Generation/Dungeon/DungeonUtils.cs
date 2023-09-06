@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.Rendering.DebugUI.Table;
 
@@ -8,7 +9,7 @@ namespace DungeonNs {
         }
 
         public static bool CheckIsOnOfBound(int x, int y, int bound) {
-            return x > 0 && x < bound && y > 0 && y < bound;
+            return x >= 0 && x <= bound && y >= 0 && y <= bound;
         }
 
         public static Vector2Int GetOffsetForDirection(DirectionalEnum direction) {
@@ -25,8 +26,6 @@ namespace DungeonNs {
                 return Vector2Int.zero;
             }
         }
-
     }
-
 
 }

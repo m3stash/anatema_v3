@@ -6,16 +6,15 @@ using System;
 using Random = UnityEngine.Random;
 using System.Linq;
 using static UnityEngine.Rendering.DebugUI.Table;
-using System.Collections;
-using UnityEngine.InputSystem.XR;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 namespace DungeonNs {
 
-    public class Generator : MonoBehaviour {
+    public class Generators : MonoBehaviour {
 
+        private const int FloorPlanSize = 12;
         // InitValues
         private int[,] floorplan;
         HashSet<(int, int)> occupiedCells = new HashSet<(int, int)>();
@@ -45,7 +44,7 @@ namespace DungeonNs {
             biome = config.GetBiomeType();
             dungeonValues = DungeonValueGeneration.CreateRandomValues(GameManager.GetSeed, config.GetCurrentFloorNumber());
             RoomRepartition.SetRoomRepartition(config.GetDifficulty(), dungeonValues.GetNumberOfRooms(), roomRepartition);
-            floorplan = new int[12, 12];
+            floorplan = new int[FloorPlanSize, FloorPlanSize];
             int bound = floorplan.GetLength(0);
             floorplanBound = bound - 1;
             vectorStart = new Vector2Int((bound / 2) - 1, (bound / 2) - 1);
@@ -83,46 +82,53 @@ namespace DungeonNs {
             TryGenerateRooms();
         }
 
+        private List<(int, int)> GetAdjacentCells(int row, int col) {
+            int rows = floorplan.GetLength(0);
+            int cols = floorplan.GetLength(1);
+            int[][] directions = new int[][] {
+                new int[] { -1, 0 }, // Up
+                new int[] { 1, 0 },  // Down
+                new int[] { 0, -1 }, // Left
+                new int[] { 0, 1 }   // Right
+            };
+            List<(int, int)> adjacentCells = new List<(int, int)>();
+            foreach (var direction in directions) {
+                int newRow = row + direction[0];
+                int newCol = col + direction[1];
+                if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+                    adjacentCells.Add((newRow, newCol));
+                }
+            }
+            return adjacentCells;
+        }
+
         private void SetSpecialRooms() {
             HashSet<(int, int)> emptyCellsWithMoreThan2Neighbors = new HashSet<(int, int)>();
             HashSet<(int, int)> emptyCellsWithMoreThan3Neighbors = new HashSet<(int, int)>();
-
             foreach ((int row, int col) in occupiedCells) {
+                var adjacentCells = GetAdjacentCells(row, col);
 
-                int[][] directions = new int[][] {
-                    new int[] { -1, 0 }, // Up
-                    new int[] { 1, 0 },  // Down
-                    new int[] { 0, -1 }, // Left
-                    new int[] { 0, 1 }   // Right
-                };
-                foreach (var direction in directions) {
-                    int newRow = row + direction[0];
-                    int newCol = col + direction[1];
-
-                    if (Utilities.CheckIsOnOfBound(newRow, newCol, floorplanBound) && floorplan[newRow, newCol] == 0) {
-                        int occupiedNeighbors = CountOccupiedNeighbors(floorplan, newRow, newCol);
-                        if (occupiedNeighbors == 2) {
-                            emptyCellsWithMoreThan2Neighbors.Add((newRow, newCol));
-                        }
-                        if (occupiedNeighbors >= 3) {
-                            emptyCellsWithMoreThan3Neighbors.Add((newRow, newCol));
-                        }
+                foreach (var (newRow, newCol) in adjacentCells) {
+                    if (floorplan[newRow, newCol] == 0) {
+                        ClassifySpecialCells(floorplan, newRow, newCol, emptyCellsWithMoreThan2Neighbors, emptyCellsWithMoreThan3Neighbors);
                     }
                 }
             }
 
-            foreach ((int x, int y) in emptyCellsWithMoreThan3Neighbors) {
-                Debug.Log($"X: {x}, Y: {y}");
-                PseudoRoom pseudoRoom = new Room_R1X1(new Vector2Int(x, y));
-                pseudoRoom.SetRoomType(RoomTypeEnum.SECRET);
-                listOfPseudoRoom.Add(pseudoRoom);
-                floorplan[x, y] = 1;
-                occupiedCells.Add((x, y));
-            }
-            
-
-            Debug.Log("Empty cells with more than 3occupied neighbors: " + emptyCellsWithMoreThan3Neighbors.Count);
+            Debug.Log($"Empty cells with more than 2 occupied neighbors: {emptyCellsWithMoreThan2Neighbors.Count}");
+            Debug.Log($"Empty cells with more than 3 occupied neighbors: {emptyCellsWithMoreThan3Neighbors.Count}");
         }
+
+        private void ClassifySpecialCells(int[,] floorplan, int row, int col, HashSet<(int, int)> emptyCellsWithMoreThan2Neighbors, HashSet<(int, int)> emptyCellsWithMoreThan3Neighbors) {
+            int occupiedNeighbors = CountOccupiedNeighbors(floorplan, row, col);
+            if (occupiedNeighbors == 2) {
+                emptyCellsWithMoreThan2Neighbors.Add((row, col));
+            }
+            if (occupiedNeighbors >= 3) {
+                emptyCellsWithMoreThan3Neighbors.Add((row, col));
+            }
+        }
+
 
         private int CountOccupiedNeighbors(int[,] grid, int row, int col) {
 
@@ -175,11 +181,11 @@ namespace DungeonNs {
                     }
 
                     RoomShapeEnum shape = pRoom.GetShape();
-                    Debug.Log("pRoom.GetRoomTypeEnum " + pRoom.GetRoomTypeEnum);
                     DifficultyEnum difficulty = pRoom.GetRoomTypeEnum == RoomTypeEnum.STANDARD ? diff : DifficultyEnum.DEFAULT;
                     GameObject roomGo = LoadRoomPrefab(difficulty, shape, pRoom.GetRoomTypeEnum);
                     Vector2Int worldPos = pRoom.GetWorldPosition();
                     Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation).GetComponent<Room>();
+                    room.transform.parent = floorGO.transform;
                     // Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation, floorGO.transform).GetComponent<Room>(); // TODO : try to find why prefab is hidden...
                     room.transform.parent = floorGO.transform;
                     room.Setup(worldPos, shape);
@@ -187,21 +193,9 @@ namespace DungeonNs {
                     CreateDoorsGo(pRoom, room);
                 }
             }
-
-            foreach (PseudoRoom pseudoRoom in listOfPseudoRoom) {
-
-                    RoomShapeEnum shape = pseudoRoom.GetShape();
-                    Debug.Log("pRoom.GetRoomTypeEnum " + pseudoRoom.GetRoomTypeEnum);
-                    GameObject roomGo = LoadRoomPrefab(DifficultyEnum.DEFAULT, shape, pseudoRoom.GetRoomTypeEnum);
-                    Vector2Int worldPos = pseudoRoom.GetWorldPosition();
-                    Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation).GetComponent<Room>();
-                    // Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation, floorGO.transform).GetComponent<Room>(); // TODO : try to find why prefab is hidden...
-                    room.transform.parent = floorGO.transform;
-                    room.Setup(worldPos, shape);
-
-                    CreateDoorsGo(pseudoRoom, room);
-            }
         }
+
+
 
         private void CreateDoorsGo(PseudoRoom pRoom, Room room) {
             pRoom.SeachNeighborsAndCreatePseudoDoor(floorplan, floorplanBound, biome);
