@@ -8,6 +8,7 @@ using System.Linq;
 using static UnityEngine.Rendering.DebugUI.Table;
 using System.Collections;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.Rendering.Universal;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -36,7 +37,7 @@ namespace DungeonNs {
             // CreatePool();
             GenerateAndPlaceRooms();
             SetSpecialRooms();
-            CreateRoomGO();
+            CreateRoomsGO();
         }
 
         private void InitValues() {
@@ -161,6 +162,11 @@ namespace DungeonNs {
             }
         }
 
+        private void CreateRoomsGO() {
+            CreateRoomGO();
+            CreateSecretRoomGo();
+        }
+
         private void CreateRoomGO() {
             foreach (KeyValuePair<DifficultyEnum, float> values in roomRepartition) {
 
@@ -168,45 +174,40 @@ namespace DungeonNs {
                 // for each difficulties
                 for (var i = 0; i < values.Value; i++) {
 
-                    PseudoRoom pRoom = GetNextPseudoRoom();
-                    if (pRoom == null) {
+                    PseudoRoom pseudoRoom = GetNextPseudoRoom();
+                    if (pseudoRoom == null) {
                         Debug.LogError("CreateRooms : No more pseudo rooms available");
                         return;
                     }
 
-                    RoomShapeEnum shape = pRoom.GetShape();
-                    Debug.Log("pRoom.GetRoomTypeEnum " + pRoom.GetRoomTypeEnum);
-                    DifficultyEnum difficulty = pRoom.GetRoomTypeEnum == RoomTypeEnum.STANDARD ? diff : DifficultyEnum.DEFAULT;
-                    GameObject roomGo = LoadRoomPrefab(difficulty, shape, pRoom.GetRoomTypeEnum);
-                    Vector2Int worldPos = pRoom.GetWorldPosition();
-                    Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation).GetComponent<Room>();
-                    // Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation, floorGO.transform).GetComponent<Room>(); // TODO : try to find why prefab is hidden...
-                    room.transform.parent = floorGO.transform;
-                    room.Setup(worldPos, shape);
-
-                    CreateDoorsGo(pRoom, room);
+                    DifficultyEnum difficulty = pseudoRoom.GetRoomTypeEnum == RoomTypeEnum.STANDARD ? diff : DifficultyEnum.DEFAULT;
+                    InstanciateGoRoomAndDoors(pseudoRoom, difficulty);
                 }
             }
+            
+        }
 
+        private void CreateSecretRoomGo() {
             foreach (PseudoRoom pseudoRoom in listOfPseudoRoom) {
-
-                    RoomShapeEnum shape = pseudoRoom.GetShape();
-                    Debug.Log("pRoom.GetRoomTypeEnum " + pseudoRoom.GetRoomTypeEnum);
-                    GameObject roomGo = LoadRoomPrefab(DifficultyEnum.DEFAULT, shape, pseudoRoom.GetRoomTypeEnum);
-                    Vector2Int worldPos = pseudoRoom.GetWorldPosition();
-                    Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation).GetComponent<Room>();
-                    // Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation, floorGO.transform).GetComponent<Room>(); // TODO : try to find why prefab is hidden...
-                    room.transform.parent = floorGO.transform;
-                    room.Setup(worldPos, shape);
-
-                    CreateDoorsGo(pseudoRoom, room);
+                InstanciateGoRoomAndDoors(pseudoRoom, DifficultyEnum.DEFAULT);
             }
         }
 
-        private void CreateDoorsGo(PseudoRoom pRoom, Room room) {
-            pRoom.SeachNeighborsAndCreatePseudoDoor(floorplan, floorplanBound, biome);
-            if (pRoom.GetDoors().Count > 0) {
-                foreach (PseudoDoor door in pRoom.GetDoors()) {
+
+        private void InstanciateGoRoomAndDoors(PseudoRoom pseudoRoom, DifficultyEnum difficulty) {
+            RoomShapeEnum shape = pseudoRoom.GetShape();
+            GameObject roomGo = LoadRoomPrefab(difficulty, shape, pseudoRoom.GetRoomTypeEnum);
+            Vector2Int worldPos = pseudoRoom.GetWorldPosition();
+            Room room = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation, floorGO.transform).GetComponent<Room>();
+            room.Setup(worldPos, shape);
+
+            CreateDoorsGo(pseudoRoom, room);
+        }
+
+        private void CreateDoorsGo(PseudoRoom pseudoRoom, Room room) {
+            pseudoRoom.SeachNeighborsAndCreatePseudoDoor(floorplan, floorplanBound, biome);
+            if (pseudoRoom.GetDoors().Count > 0) {
+                foreach (PseudoDoor door in pseudoRoom.GetDoors()) {
                     GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.prefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
                     doorGo.GetComponent<Door>().SetDirection(door.GetDirection());
                     doorGo.transform.SetParent(room.DoorsContainer.transform);
