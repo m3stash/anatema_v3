@@ -36,7 +36,7 @@ namespace DungeonNs {
             InitValues();
             // CreatePool();
             GenerateAndPlaceRooms();
-            SetSpecialRooms();
+            ManageSpecialRooms();
             CreateRoomsGO();
         }
 
@@ -65,6 +65,16 @@ namespace DungeonNs {
             }
         }
 
+        private void TryGenerateRooms1000Times() {
+            int count = 0;
+            for(var i = 0; i < 1000; i++) {
+                count++;
+                TryGenerateRooms();
+            }
+            Debug.Log("Try Succesfull for " + count + " times");
+            
+        }
+
         private bool IsRoomGenerationUnsuccessful() {
             return listOfPseudoRoom.Count < dungeonValues.GetNumberOfRooms();
         }
@@ -82,25 +92,26 @@ namespace DungeonNs {
             InitGenerateValues();
             CreatePseudoRoomListAndSetFloorPlan();
             TryGenerateRooms();
+            // TryGenerateRooms1000Times();
         }
 
-        private void SetSpecialRooms() {
+        private void ManageSpecialRooms() {
+            var (listOf2Neighbors, listOf3Neighbors) = CountNeighborsAndCreateHashset();
+            AddPseudoRoomInListAndFloorplan(listOf2Neighbors, listOf3Neighbors);
+        }
+
+        private (HashSet<(int, int)>, HashSet<(int, int)>) CountNeighborsAndCreateHashset() {
             HashSet<(int, int)> emptyCellsWithMoreThan2Neighbors = new HashSet<(int, int)>();
             HashSet<(int, int)> emptyCellsWithMoreThan3Neighbors = new HashSet<(int, int)>();
+            var directions = Utilities.GetDirection();
 
             foreach ((int row, int col) in occupiedCells) {
 
-                int[][] directions = new int[][] {
-                    new int[] { -1, 0 }, // Up
-                    new int[] { 1, 0 },  // Down
-                    new int[] { 0, -1 }, // Left
-                    new int[] { 0, 1 }   // Right
-                };
                 foreach (var direction in directions) {
                     int newRow = row + direction[0];
                     int newCol = col + direction[1];
 
-                    if (Utilities.CheckIsOnOfBound(newRow, newCol, floorplanBound) && floorplan[newRow, newCol] == 0) {
+                    if (Utilities.CheckIsInBounds(newRow, newCol, floorplanBound) && floorplan[newRow, newCol] == 0) {
                         int occupiedNeighbors = CountOccupiedNeighbors(floorplan, newRow, newCol);
                         if (occupiedNeighbors == 2) {
                             emptyCellsWithMoreThan2Neighbors.Add((newRow, newCol));
@@ -112,35 +123,29 @@ namespace DungeonNs {
                 }
             }
 
-            foreach ((int x, int y) in emptyCellsWithMoreThan3Neighbors) {
-                Debug.Log($"X: {x}, Y: {y}");
+            return (emptyCellsWithMoreThan2Neighbors, emptyCellsWithMoreThan3Neighbors);
+        }
+
+        private void AddPseudoRoomInListAndFloorplan(HashSet<(int, int)> listOf2Neighbors, HashSet<(int, int)> listOf3Neighbors) {
+            // todo -> ajouter la gestion de si listOf3Neighbors == 0 alors le faire sur 2 ! et revoir le code du coup..
+            foreach ((int x, int y) in listOf3Neighbors) {
                 PseudoRoom pseudoRoom = new Room_R1X1(new Vector2Int(x, y));
                 pseudoRoom.SetRoomType(RoomTypeEnum.SECRET);
                 listOfPseudoRoom.Add(pseudoRoom);
                 floorplan[x, y] = 1;
                 occupiedCells.Add((x, y));
             }
-            
-
-            Debug.Log("Empty cells with more than 3occupied neighbors: " + emptyCellsWithMoreThan3Neighbors.Count);
         }
 
         private int CountOccupiedNeighbors(int[,] grid, int row, int col) {
 
             int count = 0;
 
-            int[][] directions = new int[][] {
-                new int[] { -1, 0 }, // Up
-                new int[] { 1, 0 },  // Down
-                new int[] { 0, -1 }, // Left
-                new int[] { 0, 1 }   // Right
-            };
-
-            foreach (var direction in directions) {
+            foreach (var direction in Utilities.GetDirection()) {
                 int newRow = row + direction[0];
                 int newCol = col + direction[1];
 
-                if (Utilities.CheckIsOnOfBound(newRow, newCol, floorplanBound) && grid[newRow, newCol] > 0) {
+                if (Utilities.CheckIsInBounds(newRow, newCol, floorplanBound) && grid[newRow, newCol] > 0) {
                     count++;
                 }
             }
