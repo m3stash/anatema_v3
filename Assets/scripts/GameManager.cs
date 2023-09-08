@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour {
 
     private Generator generator;
     // private Vector2Int playerSpawnPoint;
-    private static Room currentRoom;
+    private static RoomGO roomGO;
     private bool firstRoomInit = false;
     private static string seed;
     private static Config config;
@@ -25,8 +25,8 @@ public class GameManager : MonoBehaviour {
     }
 
     private void OnEnable() {
-        Door.OnChangeRoom += ChangeRoom;
-        Room.OnPlayerEnter += PlayerEnterRoom;
+        DoorGO.OnChangeRoom += ChangeRoom;
+        RoomGO.OnPlayerEnter += PlayerEnterRoom;
     }
 
     private string SeedGenerator(int length) {
@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour {
         return seed;
     }
 
-    public void PlayerEnterRoom(Room room) {
+    public void PlayerEnterRoom(RoomGO roomGO) {
         if (!firstRoomInit) {
             firstRoomInit = true;
             // currentDungeon.InitBackgroundContainer();
@@ -50,8 +50,8 @@ public class GameManager : MonoBehaviour {
         return player;
     }
 
-    public static Room GetCurrentRoom() {
-        return currentRoom;
+    public static RoomGO GetCurrentRoom() {
+        return roomGO;
     }
 
     public static GameObject GetFloorContainer() {
@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour {
         return config;
     }
 
-    private void ChangeRoom(Door door) {
+    private void ChangeRoom(DoorGO doorGO) {
         /*switch(door.GetDirection()){
             case DirectionalEnum.L:
                 player.transform.position = new Vector3(door.GetLocalPosition().x - 10, door.GetLocalPosition().y, player.transform.position.z);
@@ -86,26 +86,26 @@ public class GameManager : MonoBehaviour {
             break;
         }*/
         print(GetPlayer());
-        switch (door.GetDirection()) {
+        switch (doorGO.GetDirection()) {
             case DirectionalEnum.L:
-            player.transform.position = new Vector3(door.GetLocalPosition().x - 10, door.GetLocalPosition().y, player.transform.position.z);
+            player.transform.position = new Vector3(doorGO.GetLocalPosition().x - 10, doorGO.GetLocalPosition().y, player.transform.position.z);
             break;
             case DirectionalEnum.R:
-            player.transform.position = new Vector3(door.GetLocalPosition().x + 10, door.GetLocalPosition().y, player.transform.position.z);
+            player.transform.position = new Vector3(doorGO.GetLocalPosition().x + 10, doorGO.GetLocalPosition().y, player.transform.position.z);
             break;
             case DirectionalEnum.T:
-            player.transform.position = new Vector3(door.GetLocalPosition().x + 10, door.GetLocalPosition().y, player.transform.position.z);
+            player.transform.position = new Vector3(doorGO.GetLocalPosition().x + 10, doorGO.GetLocalPosition().y, player.transform.position.z);
             break;
             case DirectionalEnum.B:
-            player.transform.position = new Vector3(door.GetLocalPosition().x - 10, door.GetLocalPosition().y, player.transform.position.z);
+            player.transform.position = new Vector3(doorGO.GetLocalPosition().x - 10, doorGO.GetLocalPosition().y, player.transform.position.z);
             break;
         }
-        Debug.Log("PLAYER AS CHANGE ROOM "+door.GetLocalPosition());
+        Debug.Log("PLAYER AS CHANGE ROOM "+ doorGO.GetLocalPosition());
     }
 
     private void OnDisable() {
-        Door.OnChangeRoom -= ChangeRoom;
-        Room.OnPlayerEnter -= PlayerEnterRoom;
+        DoorGO.OnChangeRoom -= ChangeRoom;
+        RoomGO.OnPlayerEnter -= PlayerEnterRoom;
     }
 
 }

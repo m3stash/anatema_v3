@@ -1,93 +1,95 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using System.IO;
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace RoomNs {
-
-    [System.Serializable]
+    [Serializable]
     [ExecuteInEditMode]
     public class RoomsJsonConfig {
-
         private static readonly RoomsJsonConfig instance = new RoomsJsonConfig();
-        private static Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>> biomeDico;
+        private static RoomConfigDictionary biomeDico;
 
-        public Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>> GetBiomeDico() {
-            return biomeDico;
-        }
+        public static RoomsJsonConfig Instance => instance;
 
-        public static RoomsJsonConfig Instance {
-            get {
-                return instance;
+        public RoomConfigDictionary BiomeConfiguration => biomeDico;
+
+        private static RoomConfigDictionary CreateEmptyDico() {
+            var config = new RoomConfigDictionary();
+
+            foreach (BiomeEnum biome in Enum.GetValues(typeof(BiomeEnum))) {
+                config[biome] = new Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>();
+
+                foreach (DifficultyEnum difficulty in Enum.GetValues(typeof(DifficultyEnum))) {
+                    config[biome][difficulty] = new Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>();
+
+                    foreach (RoomTypeEnum type in Enum.GetValues(typeof(RoomTypeEnum))) {
+                        config[biome][difficulty][type] = new Dictionary<RoomShapeEnum, List<string>>();
+
+                        foreach (RoomShapeEnum shape in Enum.GetValues(typeof(RoomShapeEnum))) {
+                            config[biome][difficulty][type][shape] = new List<string>();
+                        }
+                    }
+                }
             }
+
+            return config;
         }
 
-        private static void CreateDico() {
-            biomeDico = new Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>>();
-            Enum.GetValues(typeof(BiomeEnum)).Cast<BiomeEnum>().ToList().ForEach(delegate (BiomeEnum biome) {
-                biomeDico[biome] = new Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>();
-                Enum.GetValues(typeof(DifficultyEnum)).Cast<DifficultyEnum>().ToList().ForEach(delegate (DifficultyEnum difficulty) {
-                    biomeDico[biome][difficulty] = new Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>();
-                    Enum.GetValues(typeof(RoomTypeEnum)).Cast<RoomTypeEnum>().ToList().ForEach(delegate (RoomTypeEnum type) {
-                        biomeDico[biome][difficulty][type] = new Dictionary<RoomShapeEnum, List<string>>();
-                        Enum.GetValues(typeof(RoomShapeEnum)).Cast<RoomShapeEnum>().ToList().ForEach(delegate (RoomShapeEnum shape) {
-                            biomeDico[biome][difficulty][type][shape] = new List<string>();
-                        });
-                    });
-                });
-            });
-        }
-
-        private static void PopulateDico() {
-            string path = Application.dataPath + GlobalConfig.resourcesPath + GlobalConfig.prefabRoomsVariantsPath;
+        private static void PopulateDico(RoomConfigDictionary config) {
+            // string path = Path.Combine(Application.dataPath, GlobalConfig.Instance.ResourcesPath, GlobalConfig.Instance.PrefabRoomsVariantsPath);
+            string path = Application.dataPath + GlobalConfig.Instance.ResourcesPath + GlobalConfig.Instance.PrefabRoomsVariantsPath;
             string[] prefabs = Directory.GetFiles(path);
-            foreach (var prefab in prefabs) {
-                if (prefab.Contains(".meta"))
-                    continue;
+
+            foreach (string prefab in prefabs) {
+                if (Path.GetExtension(prefab) == ".meta") continue;
+
                 BiomeEnum biomeEnum;
                 DifficultyEnum diffEnum;
                 RoomShapeEnum shapeEnum;
                 RoomTypeEnum typeEnum;
-                string nameWithoutPath = prefab.Replace(path, "");
+
+                string nameWithoutPath = Path.GetFileNameWithoutExtension(prefab);
                 string[] prefabValues = nameWithoutPath.Split('_');
 
-                if (prefabValues.Length > 0) {
-                    string strBiome = prefabValues[0].ToUpper();
-                    string strDiff = prefabValues[1].ToUpper();
-                    string strType = prefabValues[2].ToUpper();
-                    string strShape = prefabValues[3].ToUpper();
-                    // string name = prefabValues[4];
-                    string name = nameWithoutPath.Replace(".prefab", "");
-                    if (Enum.TryParse(strBiome, out biomeEnum) && Enum.TryParse(strDiff, out diffEnum) && Enum.TryParse(strType, out typeEnum) && Enum.TryParse(strShape, out shapeEnum)) {
-                        biomeDico[biomeEnum][diffEnum][typeEnum][shapeEnum].Add(name);
-                    }
+                if (prefabValues.Length >= 4 &&
+                    Enum.TryParse(prefabValues[0], true, out biomeEnum) &&
+                    Enum.TryParse(prefabValues[1], true, out diffEnum) &&
+                    Enum.TryParse(prefabValues[2], true, out typeEnum) &&
+                    Enum.TryParse(prefabValues[3], true, out shapeEnum)) {
+
+                    config[biomeEnum][diffEnum][typeEnum][shapeEnum].Add(nameWithoutPath);
                 } else {
-                    Debug.Log("PopulateDico: Error No Prefabs Available");
+                    Debug.Log($"PopulateDico: Error with prefab {prefab}");
                 }
             }
         }
 
-        private static void SaveJson() {
-            var toJson = JsonConvert.SerializeObject(biomeDico);
-            File.WriteAllText(Application.dataPath + GlobalConfig.resourcesPath + GlobalConfig.prefabsRoomConfigJsonFile + ".json", toJson);
+        private static void SaveJson(RoomConfigDictionary config) {
+            string jsonPath = Application.dataPath + GlobalConfig.Instance.ResourcesPath + $"{GlobalConfig.Instance.PrefabsRoomConfigJsonFile}.json";
+            // string jsonPath = Path.Combine(Application.dataPath, GlobalConfig.Instance.ResourcesPath, $"{GlobalConfig.Instance.PrefabsRoomConfigJsonFile}.json");
+            var toJson = JsonConvert.SerializeObject(config);
+            File.WriteAllText(jsonPath, toJson);
         }
 
-        public static Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>> GetRoomDictionary() {
-            string jsonFile = File.ReadAllText(Application.dataPath + GlobalConfig.resourcesPath + GlobalConfig.prefabsRoomConfigJsonFile + ".json");
-            if (jsonFile != null) {
-                return JsonConvert.DeserializeObject<Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>>>(jsonFile);
+        public static RoomConfigDictionary LoadRoomDictionary() {
+            string jsonPath = Application.dataPath + GlobalConfig.Instance.ResourcesPath + $"{GlobalConfig.Instance.PrefabsRoomConfigJsonFile}.json";
+            if (File.Exists(jsonPath)) {
+                string jsonFile = File.ReadAllText(jsonPath);
+                return JsonConvert.DeserializeObject<RoomConfigDictionary>(jsonFile);
             }
-            Debug.LogError("File not found at Resources/myData");
+
+            Debug.LogError("File not found at " + jsonPath);
             return null;
         }
 
         public static void CreateJson() {
-            CreateDico();
-            PopulateDico();
-            SaveJson();
+            var config = CreateEmptyDico();
+            PopulateDico(config);
+            SaveJson(config);
         }
-
     }
+
+    public class RoomConfigDictionary : Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>> { }
 }

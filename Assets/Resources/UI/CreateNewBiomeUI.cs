@@ -27,7 +27,7 @@ public class CreateNewBiomeUI : MonoBehaviour {
     private void OnNameChange(string value) {
         try {
             string folderName = char.ToUpper(value[0]) + value[1..];
-            string newDirectory = GlobalConfig.directoryResourceFolder + GlobalConfig.prefabRoomsPath + " / " + folderName;
+            string newDirectory = GlobalConfig.Instance.DirectoryResourceFolder + GlobalConfig.Instance.PrefabRoomsPath + " / " + folderName;
             if (!Directory.Exists(newDirectory)) {
                 CreateDirectories(newDirectory);
             }

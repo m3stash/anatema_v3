@@ -1,7 +1,7 @@
 using RoomNs;
 using UnityEngine;
 
-public class Room_R2X2 : PseudoRoom {
+public class Room_R2X2 : Room {
 
     public override Vector2Int GetSizeOfRoom() {
         return new Vector2Int(2, 2);

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Room_R1X2 : PseudoRoom {
+public class Room_R1X2 : Room {
 
     public override Vector2Int GetSizeOfRoom() {
         return new Vector2Int(1, 2);
