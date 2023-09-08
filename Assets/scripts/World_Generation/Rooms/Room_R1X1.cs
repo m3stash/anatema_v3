@@ -3,6 +3,10 @@ using UnityEngine;
 
 public class Room_R1X1 : PseudoRoom {
 
+    public override Vector2Int GetSizeOfRoom() {
+        return new Vector2Int(1, 1);
+    }
+
     public Room_R1X1() : base() {
         roomShape = RoomShapeEnum.R1X1;
     }

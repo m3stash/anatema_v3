@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 namespace DungeonNs {
     public static class Utilities {

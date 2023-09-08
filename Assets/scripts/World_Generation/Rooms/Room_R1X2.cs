@@ -5,6 +5,10 @@ using UnityEngine;
 
 public class Room_R1X2 : PseudoRoom {
 
+    public override Vector2Int GetSizeOfRoom() {
+        return new Vector2Int(1, 2);
+    }
+
     public Room_R1X2() {
         roomShape = RoomShapeEnum.R1X2;
     }
