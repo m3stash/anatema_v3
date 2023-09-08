@@ -25,7 +25,7 @@ namespace DungeonNs {
         private Dictionary<DifficultyEnum, float> roomRepartition = new Dictionary<DifficultyEnum, float>();
         private BiomeEnum biome;
         private DungeonValues dungeonValues;
-        private System.Random random;
+        private System.Random randomFromSeedHash;
         private GameObject floorGO;
 
         public void StartGeneration() {
@@ -48,9 +48,11 @@ namespace DungeonNs {
             vectorStart = new Vector2Int((bound / 2) - 1, (bound / 2) - 1);
             totalLoop = 0;
 
-            string seed = GameManager.GetSeed;
-            int seedHash = seed.GetHashCode();
-            random = new System.Random(seedHash);
+            // string seed = GameManager.GetSeed;
+            string seed = "DDT4GAJ9";
+            Debug.Log("SEED "+ seed);
+            int seedHash = DungeonValueGeneration.GetSeedHash(seed);
+            randomFromSeedHash = new System.Random(seedHash);
         }
 
         private void TryGenerateRooms() {
@@ -155,7 +157,7 @@ namespace DungeonNs {
                 if (rooms.Count == 0) {
                     throw new ArgumentNullException("CreateRooms : no room available for this configuration : " + biome + "/" + diff + "/" + type + "/" + shape);
                 }
-                int rnd = Random.Range(0, rooms.Count - 1); // toDo Gérer ça avec la SEED !!!
+                int rnd = randomFromSeedHash.Next(0, rooms.Count); // Using System.Random with Seed
                 return Resources.Load<GameObject>(GlobalConfig.Instance.PrefabRoomsVariantsPath + rooms[rnd]);
             } catch (ArgumentNullException ex) {
                 Debug.LogError("Error loading room prefab: " + ex.Message);
@@ -276,11 +278,11 @@ namespace DungeonNs {
 
             while (queue.Count > 0 && listOfRoom.Count < dungeonValues.GetNumberOfRooms()) {
                 Vector2Int roomQueue = DequeueRandomElement(queue);
-                Room room = GenerateRoom(roomShapes, random, ref currentShapeIndex);
+                Room room = GenerateRoom(roomShapes, ref currentShapeIndex);
                 List<Vector2Int> listOfEmptySpaces = GetEmptySpaces(room, roomQueue);
 
                 if (listOfEmptySpaces.Count > 0) {
-                    int randomNeighbor = Random.Range(0, listOfEmptySpaces.Count);
+                    int randomNeighbor = randomFromSeedHash.Next(listOfEmptySpaces.Count);
                     Vector2Int randomCell = listOfEmptySpaces[randomNeighbor];
                     queue.Enqueue(randomCell);
                     room.SetPosition(randomCell);
@@ -300,7 +302,7 @@ namespace DungeonNs {
         }
 
         private Vector2Int DequeueRandomElement(Queue<Vector2Int> queue) {
-            int randomIndex = UnityEngine.Random.Range(0, queue.Count);
+            int randomIndex = randomFromSeedHash.Next(queue.Count);
             Vector2Int[] array = queue.ToArray();
             Vector2Int randomElement = array[randomIndex];
             queue = new Queue<Vector2Int>(array.Where(element => element != randomElement));
@@ -313,11 +315,11 @@ namespace DungeonNs {
                 .ToList();
         }
 
-        private Room GenerateRoom(List<RoomShapeEnum> roomShapes, System.Random random, ref int currentShapeIndex) {
+        private Room GenerateRoom(List<RoomShapeEnum> roomShapes, ref int currentShapeIndex) {
             try {
                 RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
                 if (CheckProportionalShapeDistribution(listOfRoom)) {
-                    ShuffleShapes(roomShapes, random);
+                    ShuffleShapes(roomShapes, randomFromSeedHash);
                     newRoomShape = roomShapes[currentShapeIndex];
                     currentShapeIndex = (currentShapeIndex + 1) % roomShapes.Count;
                 }

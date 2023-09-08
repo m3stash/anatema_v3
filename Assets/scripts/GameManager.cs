@@ -2,7 +2,7 @@
 using DungeonNs;
 using RoomNs;
 using DoorNs;
-using UnityEditor.PackageManager;
+using System.Text;
 
 public class GameManager : MonoBehaviour {
 
@@ -31,12 +31,14 @@ public class GameManager : MonoBehaviour {
 
     private string SeedGenerator(int length) {
         const string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        string seed = "";
+        StringBuilder seed = new StringBuilder(length);
+
         for (int i = 0; i < length; i++) {
             int randomIndex = UnityEngine.Random.Range(0, characters.Length);
-            seed += characters[randomIndex];
+            seed.Append(characters[randomIndex]);
         }
-        return seed;
+
+        return seed.ToString();
     }
 
     public void PlayerEnterRoom(RoomGO roomGO) {

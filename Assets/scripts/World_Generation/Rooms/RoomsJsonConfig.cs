@@ -38,7 +38,6 @@ namespace RoomNs {
         }
 
         private static void PopulateDico(RoomConfigDictionary config) {
-            // string path = Path.Combine(Application.dataPath, GlobalConfig.Instance.ResourcesPath, GlobalConfig.Instance.PrefabRoomsVariantsPath);
             string path = Application.dataPath + GlobalConfig.Instance.ResourcesPath + GlobalConfig.Instance.PrefabRoomsVariantsPath;
             string[] prefabs = Directory.GetFiles(path);
 
@@ -68,7 +67,6 @@ namespace RoomNs {
 
         private static void SaveJson(RoomConfigDictionary config) {
             string jsonPath = Application.dataPath + GlobalConfig.Instance.ResourcesPath + $"{GlobalConfig.Instance.PrefabsRoomConfigJsonFile}.json";
-            // string jsonPath = Path.Combine(Application.dataPath, GlobalConfig.Instance.ResourcesPath, $"{GlobalConfig.Instance.PrefabsRoomConfigJsonFile}.json");
             var toJson = JsonConvert.SerializeObject(config);
             File.WriteAllText(jsonPath, toJson);
         }

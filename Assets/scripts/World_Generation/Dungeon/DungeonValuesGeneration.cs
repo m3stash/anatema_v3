@@ -1,4 +1,6 @@
 using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace DungeonNs {
 
@@ -12,18 +14,11 @@ namespace DungeonNs {
         }
 
         private static int GenerateNumberRoomPerFloor(string seed, int currentFloor) {
-            int nbOfRooms = 0;
             int roomRnd = GetNumberBySeedIndex(0, seed);
-            // toDO à revoir pas assez précis..
-            if (roomRnd > 9) {
-                int getTens = roomRnd > 9 ? (roomRnd / 10) % 10 : roomRnd;
-                nbOfRooms = getTens > currentFloor + 1 ? currentFloor + 1 : getTens;
-            } else {
-                nbOfRooms = roomRnd > currentFloor + 1 ? currentFloor + 1 : roomRnd;
-            }
-            //numberRoomForFloor = CalculNumberOfRoomPerfFloor(currentFloor);
+            int decidingFactor = roomRnd > 9 ? roomRnd / 10 : roomRnd;
+            int nbOfRooms = Math.Min(decidingFactor, currentFloor + 1);
             int totalRoom = 5 + nbOfRooms + currentFloor;
-            // return totalRoom > 20 ? 20 : totalRoom;
+            // return Math.Min(totalRoom, 20);
             return 20;
         }
 
@@ -33,15 +28,27 @@ namespace DungeonNs {
 
         private static int GetNumberBySeedIndex(int index, string seed) {
             int number = index;
-            if(number > seed.Length) {
-                // Debug.LogError("GetNumberBySeedIndex index: "+ index + "is > than " + seed.Length);
+
+            if (number >= seed.Length) {
                 number = number % seed.Length;
             }
+
             if (char.IsLetter(seed[number])) {
                 return seed[number] - 'A' + 1;
+            } else if (char.IsDigit(seed[number])) {
+                return seed[number] - '0';
             }
-            return Convert.ToInt32(seed[number]);
+
+            return -1;
         }
 
+        public static int GetSeedHash(string seed) {
+            using (SHA256 sha256Hash = SHA256.Create()) {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(seed));
+                // Takes the first 4 bytes and converts them to int (this is a simplification)
+                int hashValue = BitConverter.ToInt32(bytes, 0);
+                return hashValue;
+            }
+        }
     }
 }
