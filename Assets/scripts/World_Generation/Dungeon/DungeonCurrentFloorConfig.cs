@@ -2,14 +2,14 @@
 using System.Diagnostics;
 
 namespace DungeonNs {
-    public class Config {
+    public class CurrentFloorConfig {
 
         private BiomeEnum biomeType;
         private DifficultyEnum difficulty;
         private RoomSizeEnum roomSize;
         private int currentFloor;
 
-        public Config(BiomeEnum biomeType, DifficultyEnum difficulty, RoomSizeEnum roomSize, int currentFloor) {
+        public CurrentFloorConfig(BiomeEnum biomeType, DifficultyEnum difficulty, RoomSizeEnum roomSize, int currentFloor) {
             this.biomeType = biomeType;
             this.difficulty = difficulty;
             this.roomSize = roomSize;

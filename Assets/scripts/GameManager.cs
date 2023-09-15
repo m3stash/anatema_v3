@@ -2,43 +2,28 @@
 using DungeonNs;
 using RoomNs;
 using DoorNs;
-using System.Text;
 
 public class GameManager : MonoBehaviour {
 
     [SerializeField] static private GameObject player;
     [SerializeField] private GameObject floorContainer;
+    [SerializeField] private Generator generator;
 
-    private Generator generator;
     // private Vector2Int playerSpawnPoint;
     private static RoomGO roomGO;
     private bool firstRoomInit = false;
     private static string seed;
-    private static Config config;
+    private static CurrentFloorConfig floorConfig;
     public static GameManager instance;
-
-    public static string GetSeed { get { return seed; } }
 
     private void Awake() {
         instance = this;
-        seed = SeedGenerator(8);
+
     }
 
     private void OnEnable() {
         DoorGO.OnChangeRoom += ChangeRoom;
         RoomGO.OnPlayerEnter += PlayerEnterRoom;
-    }
-
-    private string SeedGenerator(int length) {
-        const string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        StringBuilder seed = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = UnityEngine.Random.Range(0, characters.Length);
-            seed.Append(characters[randomIndex]);
-        }
-
-        return seed.ToString();
     }
 
     public void PlayerEnterRoom(RoomGO roomGO) {
@@ -56,20 +41,11 @@ public class GameManager : MonoBehaviour {
         return roomGO;
     }
 
-    public static GameObject GetFloorContainer() {
-        return instance.floorContainer;
-    }
-
     private void Start() {
-        generator = GetComponent<Generator>();
-        config = new Config(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L, 1);
-        generator.GenerateDungeon();
+        floorConfig = new CurrentFloorConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L, 1);
+        generator.GenerateDungeon(floorConfig, floorContainer);
         /*currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
         player = GameObject.FindGameObjectWithTag("Player");*/
-    }
-
-    public static Config GetCurrentDungeonConfig() {
-        return config;
     }
 
     private void ChangeRoom(DoorGO doorGO) {

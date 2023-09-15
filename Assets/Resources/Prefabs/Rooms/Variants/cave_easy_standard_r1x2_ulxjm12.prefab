@@ -66,7 +66,7 @@ PrefabInstance:
     - target: {fileID: 3798234815493909930, guid: adf394edb300f79499a90d7ed4f27451,
         type: 3}
       propertyPath: m_Name
-      value: Room_1x2
+      value: cave_easy_standard_r1x2_ulxjm12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

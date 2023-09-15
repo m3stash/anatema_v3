@@ -7,11 +7,13 @@ using System.Diagnostics;
 namespace DungeonNs {
     public class RoomManager {
         private IDungeonInitializer dungeonInitializer;
+        private IRoomFactory roomFactory;
         private List<Room> listOfRoom;
 
-        public RoomManager(IDungeonInitializer initializer) {
+        public RoomManager(IDungeonInitializer initializer, IRoomFactory factory) {
             listOfRoom = new List<Room>();
             dungeonInitializer = initializer;
+            roomFactory = factory;
         }
 
         public Room GenerateRoom(List<RoomShapeEnum> roomShapes, ref int currentShapeIndex) {
@@ -22,15 +24,9 @@ namespace DungeonNs {
                     newRoomShape = roomShapes[currentShapeIndex];
                     currentShapeIndex = (currentShapeIndex + 1) % roomShapes.Count;
                 }
-                Type classType = Type.GetType("Room_" + newRoomShape.ToString());
-                if (classType != null && typeof(Room).IsAssignableFrom(classType)) {
-                    return (Room)Activator.CreateInstance(classType);
-                } else {
-                    throw new TypeLoadException("TryToGenerateAllRoomsFloor: Shape does not exist");
-                }
+                return roomFactory.CreateRoom(newRoomShape);
             } catch (TypeLoadException ex) {
                 Debug.Print("Error generating Room: " + ex.Message);
-                // Debug.Log("Error generating Room: " + ex.Message);
                 return null;
             }
         }

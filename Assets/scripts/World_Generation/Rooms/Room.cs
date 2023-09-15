@@ -8,7 +8,8 @@ using System;
 namespace RoomNs {
     public abstract class Room {
 
-        private Vector2Int roomSize = new Vector2Int(61, 31);
+        private readonly Vector2Int roomSize = new Vector2Int(61, 31);
+
         private Vector2Int worldPosition;
         protected Vector2Int position;
         protected RoomShapeEnum roomShape;
@@ -44,16 +45,16 @@ namespace RoomNs {
 
         public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
 
-        public void SearchNeighborsAndCreateDoor(int[,] floorplan, int bound, BiomeEnum biome) {
+        public void SearchNeighborsAndCreateDoor(int[,] floorplan, int bound, BiomeEnum biome, IDungeonUtils dungeonUtils) {
             Vector2Int[] sections = GetOccupiedCells(position);
             List<Vector2Int> filteredNeighbors = GetNeighborsCells(position)
-                .Where(neighborPosition => !Utilities.CheckIsOutOfBound(neighborPosition, bound) && floorplan[neighborPosition.x, neighborPosition.y] > 0)
+                .Where(neighborPosition => !dungeonUtils.CheckIsOutOfBound(neighborPosition, bound) && floorplan[neighborPosition.x, neighborPosition.y] > 0)
                 .ToList();
 
             foreach (Vector2Int section in sections) {
                 foreach (DirectionalEnum direction in Enum.GetValues(typeof(DirectionalEnum))) {
                     // get neightbor cell by direction for each section
-                    Vector2Int offset = Utilities.GetOffsetForDirection(direction);
+                    Vector2Int offset = GetOffsetForDirection(direction);
 
                     if (filteredNeighbors.Contains(section + offset)) {
                         Door newDoor = new Door(CalculateDoorPosition(direction, section, position), direction, biome) {
@@ -65,20 +66,35 @@ namespace RoomNs {
             }
         }
 
+        private Vector2Int GetOffsetForDirection(DirectionalEnum direction) {
+            switch (direction) {
+                case DirectionalEnum.T:
+                    return Vector2Int.up;
+                case DirectionalEnum.B:
+                    return Vector2Int.down;
+                case DirectionalEnum.L:
+                    return Vector2Int.left;
+                case DirectionalEnum.R:
+                    return Vector2Int.right;
+                default:
+                    return Vector2Int.zero;
+            }
+        }
+
         private Vector3 CalculateDoorPosition(DirectionalEnum direction, Vector2Int section, Vector2Int roomPosition) {
             int sectionPositionX = section.x - roomPosition.x;
             int sectionPositionY = section.y - roomPosition.y;
-            int sectionSizeX = sectionPositionX * DungeonConsts.roomSize.x;
-            int sectionSizeY = sectionPositionY * DungeonConsts.roomSize.y;
+            int sectionSizeX = sectionPositionX * roomSize.x;
+            int sectionSizeY = sectionPositionY * roomSize.y;
             
-            float middleH = (DungeonConsts.roomSize.x / 2) + (sectionSizeX);
-            float middleV = (DungeonConsts.roomSize.y / 2) + (sectionSizeY);
+            float middleH = (roomSize.x / 2) + (sectionSizeX);
+            float middleV = (roomSize.y / 2) + (sectionSizeY);
 
             switch (direction) {
                 case DirectionalEnum.T:
-                return new Vector3(middleH , DungeonConsts.roomSize.y + sectionSizeY - 0.5f, 0);
+                return new Vector3(middleH , roomSize.y + sectionSizeY - 0.5f, 0);
                 case DirectionalEnum.R:
-                return new Vector3(DungeonConsts.roomSize.x + sectionSizeX - .5f, middleV, 0);
+                return new Vector3(roomSize.x + sectionSizeX - .5f, middleV, 0);
                 case DirectionalEnum.B:
                 return new Vector3(middleH, 0.5f + sectionSizeY, 0);
                 case DirectionalEnum.L:
