@@ -35,7 +35,6 @@ namespace DungeonNs {
             this.currentFloorConfig = currentFloorConfig;
             this.floorContainer = floorContainer;
             string seed = dungeonSeedGenerator.GetNewSeed(seedLengh);
-            seed = "TOTOTOTO";
             dungeonInitializer.InitValues(currentFloorConfig, seed, dungeonSeedGenerator);
             roomManager = new RoomManager(dungeonInitializer, roomFactory);
             GenerateAndPlaceRooms();
