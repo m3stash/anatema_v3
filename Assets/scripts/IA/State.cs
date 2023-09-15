@@ -19,7 +19,7 @@ public abstract class State : MonoBehaviour {
         moveSpeed = config.MoveSpeed();
     }
 
-    private void FlipPosition() {
+    /*private void FlipPosition() {
         if (localState.moveDirection != DirectionalEnum.L && transform.position.x > localState.moveTo.x) {
             localState.moveDirection = DirectionalEnum.L;
             spriteRenderer.flipX = false;
@@ -28,7 +28,7 @@ public abstract class State : MonoBehaviour {
             localState.moveDirection = DirectionalEnum.R;
             spriteRenderer.flipX = true;
         }
-    }
+    }*/
 
     private void ManageSee() {
         if (!localState.canSee)

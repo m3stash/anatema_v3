@@ -1,0 +1,40 @@
+{
+    "name": "DevMenu",
+    "maps": [
+        {
+            "name": "Menu",
+            "id": "a218a084-4f0f-459b-9df2-d9757442a86e",
+            "actions": [
+                {
+                    "name": "GenerateNewBiomeFolders",
+                    "type": "Button",
+                    "id": "bf4c5671-ef46-4042-9d86-89167b1a643e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "83789446-d53c-4aad-b69d-089c001df4df",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "GenerateNewBiomeFolders",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "New control scheme",
+            "bindingGroup": "New control scheme",
+            "devices": []
+        }
+    ]
+}

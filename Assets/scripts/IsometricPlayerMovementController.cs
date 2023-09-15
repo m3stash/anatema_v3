@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 public class IsometricPlayerMovementController : MonoBehaviour {
 
-    public float movementSpeed = 10f;
+    private float movementSpeed = 10f;
     IsometricCharacterRenderer isoRenderer;
     private Vector2 moveDirection;
     private float currentSpeed;
