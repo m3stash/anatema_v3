@@ -18,6 +18,7 @@ namespace DungeonNs {
         private IDungeonUtils dungeonUtils;
         private GameObject floorContainer;
         private CurrentFloorConfig currentFloorConfig;
+        private BiomeManager biomeManager;
         private RoomManager roomManager;
         private int[,] floorplan;
         private HashSet<(int, int)> occupiedCells = new HashSet<(int, int)>();
@@ -31,7 +32,8 @@ namespace DungeonNs {
             roomFactory = new RoomFactory();
         }
 
-        public void GenerateDungeon(CurrentFloorConfig currentFloorConfig, GameObject floorContainer) {
+        public void GenerateDungeon(CurrentFloorConfig currentFloorConfig, GameObject floorContainer, BiomeManager biomeManager) {
+            this.biomeManager = biomeManager;
             this.currentFloorConfig = currentFloorConfig;
             this.floorContainer = floorContainer;
             string seed = dungeonSeedGenerator.GetNewSeed(seedLengh);
@@ -216,8 +218,11 @@ namespace DungeonNs {
             if (doorList.Count > 0) {
                 foreach (Door door in doorList) {
                     try {
+                        // toDO gérer un POOOOOOOL !
                         GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.Instance.PrefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
-                        doorGo.GetComponent<DoorGO>().SetDirection(door.GetDirection());
+                        DoorGO doorInstance = doorGo.GetComponent<DoorGO>();
+                        doorInstance.SetDirection(door.GetDirection());
+                        doorInstance.SetBiome(biomeManager.GetBiomeConfiguration(currentFloorConfig.GetBiomeType()));
                         doorGo.transform.SetParent(roomGO.DoorsContainer.transform);
                         doorGo.transform.localPosition = door.LocalPosition;
                     } catch (Exception ex) {

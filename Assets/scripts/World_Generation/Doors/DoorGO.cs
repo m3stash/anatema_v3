@@ -10,6 +10,15 @@ namespace DoorNs {
         [SerializeField] private DirectionalEnum direction;
         [SerializeField] private Vector3Int localPosition;
         [SerializeField] private Sprite sprite;
+        private SpriteRenderer spriteRenderer;
+
+        private void Awake() {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+
+        public void SetBiome(Biome biome) {
+            spriteRenderer.sprite = biome.GetDoorSpriteForDirection(direction);
+        }
 
         // [SerializeField] private DoorEnum doorType;
 
