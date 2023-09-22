@@ -5,6 +5,7 @@ using DoorNs;
 using System.Linq;
 using Debug = UnityEngine.Debug;
 using System;
+using UnityEditor.EditorTools;
 #if UNITY_EDITOR
 #endif
 
@@ -12,33 +13,33 @@ namespace DungeonNs {
 
     public class Generator : MonoBehaviour {
 
-        private IDungeonSeedGenerator dungeonSeedGenerator;
-        private IDungeonInitializer dungeonInitializer;
-        private IRoomFactory roomFactory;
+        private IDungeonFloorValues dungeonFloorValues;
         private IDungeonUtils dungeonUtils;
+        private IDungeonFloorConfig floorConfig;
+        private IRoomManager roomManager;
+        private IDoorManager doorManager;
+        private IBiomeManager biomeManager;
         private GameObject floorContainer;
-        private CurrentFloorConfig currentFloorConfig;
-        private BiomeManager biomeManager;
-        private RoomManager roomManager;
         private int[,] floorplan;
         private HashSet<(int, int)> occupiedCells = new HashSet<(int, int)>();
         private int totalLoop = 0;
-        private readonly int seedLengh = 8;
 
-        private void Awake() {
-            dungeonSeedGenerator = DungeonSeedGenerator.GetInstance();
-            dungeonInitializer = DungeonInitializer.GetInstance();
-            dungeonUtils = DungeonUtils.GetInstance();
-            roomFactory = new RoomFactory();
-        }
-
-        public void GenerateDungeon(CurrentFloorConfig currentFloorConfig, GameObject floorContainer, BiomeManager biomeManager) {
+        public void GenerateDungeon(
+            IDungeonFloorConfig floorConfig,
+            GameObject floorContainer,
+            IBiomeManager biomeManager,
+            IDungeonFloorValues dungeonFloorValues,
+            IDungeonUtils dungeonUtils,
+            IRoomManager roomManager,
+            IDoorManager doorManager
+        ) {
             this.biomeManager = biomeManager;
-            this.currentFloorConfig = currentFloorConfig;
+            this.floorConfig = floorConfig;
             this.floorContainer = floorContainer;
-            string seed = dungeonSeedGenerator.GetNewSeed(seedLengh);
-            dungeonInitializer.InitValues(currentFloorConfig, seed, dungeonSeedGenerator);
-            roomManager = new RoomManager(dungeonInitializer, roomFactory);
+            this.dungeonFloorValues = dungeonFloorValues;
+            this.dungeonUtils = dungeonUtils; // TODO utiliser le dungeon manager pour faire proxy avec le dungeonUtils !!!
+            this.roomManager = roomManager;
+            this.doorManager = doorManager;
             GenerateAndPlaceRooms();
             ManageSpecialRooms();
             CreateRoomsGO();
@@ -54,16 +55,16 @@ namespace DungeonNs {
 
         private void TryGenerateRooms1000Times() {
             int count = 0;
-            for(var i = 0; i < 1000; i++) {
+            for (var i = 0; i < 1000; i++) {
                 count++;
                 TryGenerateRooms();
             }
             Debug.Log("Try Succesfull for " + count + " times");
-            
+
         }
 
         private bool IsRoomGenerationUnsuccessful() {
-            return roomManager.GetListOfRoom().Count < dungeonInitializer.GetNumberOfRooms();
+            return roomManager.GetListOfRoom().Count < dungeonFloorValues.GetNumberOfRooms();
         }
 
         private void AttemptReGeneration() {
@@ -82,11 +83,6 @@ namespace DungeonNs {
             // TryGenerateRooms1000Times();
         }
 
-        private void ManageSpecialRooms() {
-            var (listOf1Neighbors, listOf2Neighbors, listOf3Neighbors) = CountNeighborsAndCreateHashset();
-            AddRoomInListAndFloorplan(listOf1Neighbors, listOf2Neighbors, listOf3Neighbors);
-        }
-
         private (HashSet<(int, int)>, HashSet<(int, int)>, HashSet<(int, int)>) CountNeighborsAndCreateHashset() {
             HashSet<(int, int)> emptyCellsWithOneNeighbor = new HashSet<(int, int)>();
             HashSet<(int, int)> emptyCellsWithTwoNeighbors = new HashSet<(int, int)>();
@@ -99,7 +95,7 @@ namespace DungeonNs {
                     int newRow = row + direction[0];
                     int newCol = col + direction[1];
 
-                    if (dungeonUtils.CheckIsInBounds(newRow, newCol, dungeonInitializer.GetFloorPlanBound()) && floorplan[newRow, newCol] == 0) {
+                    if (dungeonUtils.CheckIsInBounds(newRow, newCol, dungeonFloorValues.GetFloorPlanBound()) && floorplan[newRow, newCol] == 0) {
                         int occupiedNeighbors = CountOccupiedNeighbors(floorplan, newRow, newCol);
                         if (occupiedNeighbors == 1) {
                             emptyCellsWithOneNeighbor.Add((newRow, newCol));
@@ -117,7 +113,8 @@ namespace DungeonNs {
             return (emptyCellsWithOneNeighbor, emptyCellsWithTwoNeighbors, emptyCellsWithMoreThan3Neighbors);
         }
 
-        private void AddRoomInListAndFloorplan(HashSet<(int, int)> oneNeighbors, HashSet<(int, int)> listOf2Neighbors, HashSet<(int, int)> listOf3Neighbors) {
+        private void ManageSpecialRooms() {
+            var (oneNeighbors, listOf2Neighbors, listOf3Neighbors) = CountNeighborsAndCreateHashset();
             AddSpecialRoom(oneNeighbors, RoomTypeEnum.BOSS);
             HashSet<(int, int)> listOfNeighbors = listOf3Neighbors.Count == 0 ? listOf2Neighbors : listOf3Neighbors;
             AddSpecialRoom(listOfNeighbors, RoomTypeEnum.SECRET);
@@ -126,7 +123,7 @@ namespace DungeonNs {
         private (int, int)? GetMaxDistanceRoomFromStarter(HashSet<(int, int)> listOfNeighbors) {
             double maxDistanceSquared = 0;
             (int, int)? farthestPosition = null;
-            Vector2Int starter = dungeonInitializer.GetVectorStart();
+            Vector2Int starter = dungeonFloorValues.GetVectorStart();
 
             foreach ((int x, int y) in listOfNeighbors) {
                 double distanceSquared = (starter.x - x) * (starter.x - x) + (starter.y - y) * (starter.y - y);
@@ -144,16 +141,13 @@ namespace DungeonNs {
         }
 
         private void AddSpecialRoom(HashSet<(int, int)> listOfNeighbors, RoomTypeEnum type) {
-            /*int randomRoom = dungeonInitializer.GetNextRandomValue(listOfNeighbors.Count);
-            (int x, int y) selectedRoom = listOfNeighbors.ElementAt(randomRoom);*/
             if (GetMaxDistanceRoomFromStarter(listOfNeighbors) is (int x, int y)) {
-                Room room = new Room_R1X1(new Vector2Int(x, y));
-                room.SetRoomType(type);
+                Room room = roomManager.InstantiateRoomImplWithProperties(RoomShapeEnum.R1X1, new Vector2Int(x, y), type);
                 roomManager.AddRoom(room);
                 floorplan[x, y] = 1;
                 occupiedCells.Add((x, y));
             } else {
-                Debug.Log("ERROR AddSpecialRoom: GetMaxDistanceRoomFromStarter");
+                Debug.Log("ERROR AddSpecialRoom");
             }
         }
 
@@ -164,7 +158,7 @@ namespace DungeonNs {
                 int newRow = row + direction[0];
                 int newCol = col + direction[1];
 
-                if (dungeonUtils.CheckIsInBounds(newRow, newCol, dungeonInitializer.GetFloorPlanBound()) && grid[newRow, newCol] > 0) {
+                if (dungeonUtils.CheckIsInBounds(newRow, newCol, dungeonFloorValues.GetFloorPlanBound()) && grid[newRow, newCol] > 0) {
                     count++;
                 }
             }
@@ -177,10 +171,8 @@ namespace DungeonNs {
         }
 
         private void CreateRoomGO() {
-            foreach (KeyValuePair<DifficultyEnum, float> values in dungeonInitializer.GetRoomRepartition()) {
-
+            foreach (KeyValuePair<DifficultyEnum, float> values in dungeonFloorValues.GetRoomRepartition()) {
                 DifficultyEnum diff = values.Key;
-                // for each difficulties
                 for (var i = 0; i < values.Value; i++) {
 
                     Room Room = roomManager.GetNextRoom();
@@ -190,41 +182,37 @@ namespace DungeonNs {
                     }
 
                     DifficultyEnum difficulty = Room.GetRoomTypeEnum == RoomTypeEnum.STANDARD ? diff : DifficultyEnum.DEFAULT;
-                    InstanciateGoRoomAndDoors(Room, difficulty);
+                    GameObject roomGO = InstanciateRoomGo(Room, difficulty);
+                    CreateDoorsGo(Room, roomGO);
                 }
             }
-            
+
         }
 
         private void CreateSecretRoomGo() {
             foreach (Room Room in roomManager.GetListOfRoom()) {
-                InstanciateGoRoomAndDoors(Room, DifficultyEnum.DEFAULT);
+                GameObject roomGO = InstanciateRoomGo(Room, DifficultyEnum.DEFAULT);
+                CreateDoorsGo(Room, roomGO);
             }
         }
 
-        private void InstanciateGoRoomAndDoors(Room Room, DifficultyEnum difficulty) {
+        private GameObject InstanciateRoomGo(Room Room, DifficultyEnum difficulty) {
             RoomShapeEnum shape = Room.GetShape();
-            GameObject roomGo = roomFactory.CreateRoomGO(difficulty, shape, Room.GetRoomTypeEnum, dungeonInitializer, currentFloorConfig.GetBiomeType());
+            GameObject roomPrefab = roomManager.InstantiateRoomPrefab(difficulty, shape, Room.GetRoomTypeEnum, dungeonFloorValues, floorConfig.GetBiomeType());
             Vector2Int worldPos = Room.GetWorldPosition();
-            RoomGO roomGO = Instantiate(roomGo, new Vector3(worldPos.x, worldPos.y, 0), transform.rotation, floorContainer.transform).GetComponent<RoomGO>();
-            roomGO.Setup(worldPos, shape);
-
-            CreateDoorsGo(Room, roomGO);
+            return roomManager.InstantiateRoomGO(roomPrefab, new Vector3(worldPos.x, worldPos.y, 0), transform, floorContainer);
         }
 
-        private void CreateDoorsGo(Room Room, RoomGO roomGO) {
-            Room.SearchNeighborsAndCreateDoor(floorplan, dungeonInitializer.GetFloorPlanBound(), currentFloorConfig.GetBiomeType(), dungeonUtils);
+        private void CreateDoorsGo(Room Room, GameObject roomGo) {
+            Room.SearchNeighborsAndCreateDoor(floorplan, dungeonFloorValues.GetFloorPlanBound(), floorConfig.GetBiomeType(), dungeonUtils);
             List<Door> doorList = Room.GetDoors();
             if (doorList.Count > 0) {
                 foreach (Door door in doorList) {
                     try {
                         // toDO gérer un POOOOOOOL !
-                        GameObject doorGo = Instantiate(Resources.Load<GameObject>(GlobalConfig.Instance.PrefabDoorsPath + "Door"), Vector3.zero, transform.rotation);
-                        DoorGO doorInstance = doorGo.GetComponent<DoorGO>();
-                        doorInstance.SetDirection(door.GetDirection());
-                        doorInstance.SetBiome(biomeManager.GetBiomeConfiguration(currentFloorConfig.GetBiomeType()));
-                        doorGo.transform.SetParent(roomGO.DoorsContainer.transform);
-                        doorGo.transform.localPosition = door.LocalPosition;
+                        GameObject doorPrefab = doorManager.InstantiateRoomPrefab(GlobalConfig.Instance.PrefabDoorsPath + "Door");
+                        GameObject doorGo = doorManager.InstantiateDoorGO(doorPrefab, Vector3.zero, transform, roomGo.transform);
+                        doorManager.SetProperties(doorGo, door, biomeManager.GetBiomeConfiguration(floorConfig.GetBiomeType()));
                     } catch (Exception ex) {
                         Debug.LogError($"Error creating door game object: {ex.Message}");
                     }
@@ -253,7 +241,7 @@ namespace DungeonNs {
             List<RoomShapeEnum> roomShapes = GetListOfSpecialShapes();
             int currentShapeIndex = 0;
 
-            Vector2Int vectorStart = dungeonInitializer.GetVectorStart();
+            Vector2Int vectorStart = dungeonFloorValues.GetVectorStart();
             InitializeStarterRoom(vectorStart);
 
             Queue<Vector2Int> roomPositions = new Queue<Vector2Int>();
@@ -278,7 +266,7 @@ namespace DungeonNs {
                 return false;
             }
 
-            int randomNeighbor = dungeonInitializer.GetNextRandomValue(listOfEmptySpaces.Count);
+            int randomNeighbor = dungeonFloorValues.GetNextRandomValue(listOfEmptySpaces.Count);
             newRoomPosition = listOfEmptySpaces[randomNeighbor];
             room.SetPosition(newRoomPosition);
             room.SetRoomType(RoomTypeEnum.STANDARD);
@@ -291,7 +279,7 @@ namespace DungeonNs {
         }
 
         private bool ShouldContinueCreatingRooms(Queue<Vector2Int> roomPositions) {
-            return roomPositions.Count > 0 && roomManager.GetListOfRoom().Count < dungeonInitializer.GetNumberOfRooms();
+            return roomPositions.Count > 0 && roomManager.GetListOfRoom().Count < dungeonFloorValues.GetNumberOfRooms();
         }
 
         private void InitializeStarterRoom(Vector2Int vectorStart) {
@@ -309,7 +297,7 @@ namespace DungeonNs {
         }
 
         private Vector2Int DequeueRandomElement(Queue<Vector2Int> queue) {
-            int randomIndex = dungeonInitializer.GetNextRandomValue(queue.Count);
+            int randomIndex = dungeonFloorValues.GetNextRandomValue(queue.Count);
             Vector2Int[] array = queue.ToArray();
             Vector2Int randomElement = array[randomIndex];
             queue = new Queue<Vector2Int>(array.Where(element => element != randomElement));
@@ -330,7 +318,7 @@ namespace DungeonNs {
                 return -1;
             }
             foreach (var checkNewPlace in shapesToCheck) {
-                if (!dungeonUtils.CheckIsOutOfBound(checkNewPlace, dungeonInitializer.GetFloorPlanBound())) {
+                if (!dungeonUtils.CheckIsOutOfBound(checkNewPlace, dungeonFloorValues.GetFloorPlanBound())) {
                     int neighbour = floorplan[checkNewPlace.x, checkNewPlace.y] > 0 ? 1 : 0;
                     count += neighbour;
                 }
@@ -340,7 +328,7 @@ namespace DungeonNs {
 
         private bool CheckIsEmptySpace(Vector2Int vector, Room room) {
             Vector2Int[] cells = room.GetOccupiedCells(vector);
-            int usedCells = cells.Sum(cell => dungeonUtils.CheckIsOutOfBound(cell, dungeonInitializer.GetFloorPlanBound()) ? 1 : floorplan[cell.x, cell.y]);
+            int usedCells = cells.Sum(cell => dungeonUtils.CheckIsOutOfBound(cell, dungeonFloorValues.GetFloorPlanBound()) ? 1 : floorplan[cell.x, cell.y]);
             return usedCells == 0;
         }
 

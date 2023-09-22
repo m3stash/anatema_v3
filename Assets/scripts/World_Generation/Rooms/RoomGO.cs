@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Cinemachine;
@@ -36,17 +34,11 @@ namespace RoomNs {
             return roomShape;
         }
 
-        public void Setup(Vector2Int rootPos, RoomShapeEnum roomShape) {
-            this.rootPos = rootPos;
-            this.roomShape = roomShape;
-        }
-
         private void Start() {
             tilemapEnnemies = tilemapEnnemiesGo.GetComponent<Tilemap>();
             tilemap = tilemapGo.GetComponent<Tilemap>();
             tilemapLimits = tilemapLimitsGo.GetComponent<Tilemap>();
             doorsGO = new List<DoorGO>();
-            // ManageDoor();
         }
 
         public Tilemap GetTilemap() {

@@ -3,8 +3,8 @@ using DungeonNs;
 using RoomNs;
 using UnityEngine;
 
-public interface IDungeonInitializer {
-    void InitValues(CurrentFloorConfig floorConfig, string seed, IDungeonSeedGenerator dungeonSeedGenerator);
+public interface IDungeonFloorValues {
+    void InitValues(IDungeonFloorConfig floorConfig, string seed, IDungeonSeedGenerator dungeonSeedGenerator);
     int[,] GetFloorPlan();
     int GetFloorPlanBound();
     int GetNumberOfRooms();

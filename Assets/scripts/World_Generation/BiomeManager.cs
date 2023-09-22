@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class BiomeManager : MonoBehaviour {
+public class BiomeManager : MonoBehaviour, IBiomeManager {
 
     [System.Serializable]
     public class BiomeEntry {
@@ -24,5 +24,3 @@ public class BiomeManager : MonoBehaviour {
     }
 
 }
-
-

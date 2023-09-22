@@ -19,17 +19,13 @@ namespace RoomNs {
             var config = new RoomConfigDictionary();
 
             foreach (BiomeEnum biome in Enum.GetValues(typeof(BiomeEnum))) {
-                config[biome] = new Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>();
+                config[biome] = new Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>();
 
-                foreach (DifficultyEnum difficulty in Enum.GetValues(typeof(DifficultyEnum))) {
-                    config[biome][difficulty] = new Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>();
+                foreach (RoomTypeEnum type in Enum.GetValues(typeof(RoomTypeEnum))) {
+                    config[biome][type] = new Dictionary<RoomShapeEnum, List<string>>();
 
-                    foreach (RoomTypeEnum type in Enum.GetValues(typeof(RoomTypeEnum))) {
-                        config[biome][difficulty][type] = new Dictionary<RoomShapeEnum, List<string>>();
-
-                        foreach (RoomShapeEnum shape in Enum.GetValues(typeof(RoomShapeEnum))) {
-                            config[biome][difficulty][type][shape] = new List<string>();
-                        }
+                    foreach (RoomShapeEnum shape in Enum.GetValues(typeof(RoomShapeEnum))) {
+                        config[biome][type][shape] = new List<string>();
                     }
                 }
             }
@@ -45,7 +41,6 @@ namespace RoomNs {
                 if (Path.GetExtension(prefab) == ".meta") continue;
 
                 BiomeEnum biomeEnum;
-                DifficultyEnum diffEnum;
                 RoomShapeEnum shapeEnum;
                 RoomTypeEnum typeEnum;
 
@@ -54,11 +49,10 @@ namespace RoomNs {
 
                 if (prefabValues.Length >= 4 &&
                     Enum.TryParse(prefabValues[0], true, out biomeEnum) &&
-                    Enum.TryParse(prefabValues[1], true, out diffEnum) &&
-                    Enum.TryParse(prefabValues[2], true, out typeEnum) &&
-                    Enum.TryParse(prefabValues[3], true, out shapeEnum)) {
+                    Enum.TryParse(prefabValues[1], true, out typeEnum) &&
+                    Enum.TryParse(prefabValues[2], true, out shapeEnum)) {
 
-                    config[biomeEnum][diffEnum][typeEnum][shapeEnum].Add(nameWithoutPath);
+                    config[biomeEnum][typeEnum][shapeEnum].Add(nameWithoutPath);
                 } else {
                     Debug.Log($"PopulateDico: Error with prefab {prefab}");
                 }
@@ -89,5 +83,5 @@ namespace RoomNs {
         }
     }
 
-    public class RoomConfigDictionary : Dictionary<BiomeEnum, Dictionary<DifficultyEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>>> { }
+    public class RoomConfigDictionary : Dictionary<BiomeEnum, Dictionary<RoomTypeEnum, Dictionary<RoomShapeEnum, List<string>>>> { }
 }
