@@ -15,18 +15,13 @@ namespace DungeonNs {
             return instance;
         }
 
-        private int[,] floorplan;
-        private int floorplanBound;
         private Vector2Int vectorStart;
         private RoomConfigDictionary roomDico = RoomsJsonConfig.LoadRoomDictionary();
         private Dictionary<DifficultyEnum, float> roomRepartition = new Dictionary<DifficultyEnum, float>();
         private System.Random randomFromSeedHash;
         private int numberRoomForStage;
 
-        public void InitValues(IDungeonFloorConfig floorConfig, string seed, IDungeonSeedGenerator dungeonSeedGenerator) {
-            floorplan = new int[12, 12];
-            int bound = floorplan.GetLength(0);
-            floorplanBound = bound - 1;
+        public void InitValues(IDungeonFloorConfig floorConfig, string seed, IDungeonSeedGenerator dungeonSeedGenerator, int bound) {
             vectorStart = new Vector2Int((bound / 2) - 1, (bound / 2) - 1);
             numberRoomForStage = dungeonSeedGenerator.GenerateNumberRoomPerFloor(seed, floorConfig.GetCurrentFloorNumber());
             roomRepartition = SetRoomRepartition(floorConfig.GetDifficulty(), numberRoomForStage, roomRepartition);
@@ -73,15 +68,6 @@ namespace DungeonNs {
             Debug.Log("EASY ROOM - " + roomRepartition[DifficultyEnum.Easy]);
             Debug.Log("NORML ROOM - " + roomRepartition[DifficultyEnum.Normal]);
             Debug.Log("HARD ROOM - " + roomRepartition[DifficultyEnum.Hard]);*/
-        }
-
-
-        public int[,] GetFloorPlan() {
-            return floorplan;
-        }
-
-        public int GetFloorPlanBound() {
-            return floorplanBound;
         }
 
         public Vector2Int GetVectorStart() {

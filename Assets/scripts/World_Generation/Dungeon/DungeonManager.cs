@@ -14,24 +14,25 @@ public class DungeonManager : MonoBehaviour {
     private IDungeonUtils dungeonUtils;
     private IDoorManager doorManager;
     private IBiomeManager biomeManager;
+    private IFloorPlanManager floorPlanManager;
     private readonly int seedLengh = 8;
     private string seed;
-    private bool isSingletonInstantiate = false;
 
     private void Awake(){
         biomeManager = biomeManagerReference;
         if (VerifySerialisableFieldInitialised()) {
-            isSingletonInstantiate = true;
             InstantiateSingletons();
             CreateSeed();
         }
     }
 
     private void InstantiateSingletons() {
+        //toDo garder les singletons ???
         dungeonFloorValues = DungeonFloorValues.GetInstance();
         dungeonSeedGenerator = DungeonSeedGenerator.GetInstance();
         dungeonUtils = DungeonUtils.GetInstance();
-        roomManager = new RoomManager(dungeonFloorValues, RoomFactory.GetInstance());
+        floorPlanManager = new FloorPlanManager();
+        roomManager = new RoomManager(dungeonFloorValues, RoomFactory.GetInstance(), floorPlanManager, dungeonUtils);
         doorManager = new DoorManager(DoorFactory.GetInstance());
     }
 
@@ -58,10 +59,8 @@ public class DungeonManager : MonoBehaviour {
     }
 
     public void Setup(IDungeonFloorConfig floorConfig) {
-        if (isSingletonInstantiate) {
-            dungeonFloorValues.InitValues(floorConfig, seed, dungeonSeedGenerator);
-            generator.GenerateDungeon(floorConfig, floorContainerGO, biomeManager, dungeonFloorValues, dungeonUtils, roomManager, doorManager);
-        }
+        dungeonFloorValues.InitValues(floorConfig, seed, dungeonSeedGenerator, floorPlanManager.GetFloorPlanBound());
+        generator.GenerateDungeon(floorConfig, floorContainerGO, biomeManager, dungeonFloorValues, dungeonUtils, roomManager, doorManager, floorPlanManager);
     }
 
     public string GetSeed() {
