@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
@@ -9,8 +8,8 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
     protected T prefab;
 
     private void Awake() {
-        this.availableObjects = new List<T>();
-        this.usedObjects = new List<T>();
+        availableObjects = new List<T>();
+        usedObjects = new List<T>();
     }
 
     public void Setup(T prefab, int size) {

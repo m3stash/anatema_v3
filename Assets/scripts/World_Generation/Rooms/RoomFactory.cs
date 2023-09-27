@@ -3,8 +3,16 @@ using System.Collections.Generic;
 using RoomNs;
 using UnityEngine;
 
-public class RoomFactory : IRoomFactory {
-    public Room CreateRoom(RoomShapeEnum shape) {
+public class RoomFactory: IRoomFactory {
+
+    private static RoomFactory instance;
+
+    public static IRoomFactory GetInstance() {
+        instance ??= new RoomFactory();
+        return instance;
+    }
+
+    public Room InstantiateRoomImpl(RoomShapeEnum shape) {
         Type classType = Type.GetType("Room_" + shape.ToString());
         if (classType != null && typeof(Room).IsAssignableFrom(classType)) {
             return (Room)Activator.CreateInstance(classType);
@@ -13,16 +21,25 @@ public class RoomFactory : IRoomFactory {
         }
     }
 
-    public GameObject CreateRoomGO(DifficultyEnum diff, RoomShapeEnum shape, RoomTypeEnum type, IDungeonInitializer dungeonInitializer, BiomeEnum biome) {
+    public GameObject InstantiateRoomPrefab(DifficultyEnum diff, RoomShapeEnum shape, RoomTypeEnum type, IDungeonFloorValues dungeonFloorValues, BiomeEnum biome) {
         try {
-            List<string> rooms = dungeonInitializer.GetRoomConfigDictionary()[biome][diff][type][shape];
+            List<string> rooms = dungeonFloorValues.GetRoomConfigDictionary()[biome][type][shape];
             if (rooms.Count == 0) {
                 throw new ArgumentNullException("CreateRooms : no room available for this configuration : " + biome + "/" + diff + "/" + type + "/" + shape);
             }
-            int rnd = dungeonInitializer.GetNextRandomValue(rooms.Count);
+            int rnd = dungeonFloorValues.GetNextRandomValue(rooms.Count);
             return Resources.Load<GameObject>(GlobalConfig.Instance.PrefabRoomsVariantsPath + rooms[rnd]);
         } catch (ArgumentNullException ex) {
             Debug.LogError("Error loading room prefab: " + ex.Message);
+            return null;
+        }
+    }
+
+    public GameObject InstantiateRoomGO(GameObject roomPrefab, Vector3 vector3, Transform transform, GameObject floorContainer) {
+        try {
+            return UnityEngine.Object.Instantiate(roomPrefab, vector3, transform.rotation, floorContainer.transform);
+        } catch (ArgumentNullException ex) {
+            Debug.LogError("Error instantiating room game object: " + ex.Message);
             return null;
         }
     }

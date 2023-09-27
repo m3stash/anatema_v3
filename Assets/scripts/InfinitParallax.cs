@@ -30,7 +30,7 @@ public class InfinitParallax : MonoBehaviour {
         boundY = render.bounds.size.y;
         halfBoundX = boundX / 2;
         halfBoundY = boundY / 2;
-        player = GameManager.GetPlayer();
+        // player = GameManager.GetPlayer();
         transform.position = player.transform.position;
         middle.transform.position = new Vector3(player.transform.position.x, player.transform.position.y, middle.transform.position.z);
         left.transform.position = new Vector3(middle.transform.position.x - boundX, middle.transform.position.y, middle.transform.position.z);

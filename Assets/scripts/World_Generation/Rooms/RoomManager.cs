@@ -2,39 +2,138 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
+using UnityEngine;
 
 namespace DungeonNs {
-    public class RoomManager {
-        private IDungeonInitializer dungeonInitializer;
+    public class RoomManager : IRoomManager {
+        private IDungeonFloorValues dungeonFloorValues;
         private IRoomFactory roomFactory;
         private List<Room> listOfRoom;
+        private const float ratio = 0.25f;
+        private IFloorPlanManager floorPlanManager;
+        private IDungeonUtils dungeonUtils;
 
-        public RoomManager(IDungeonInitializer initializer, IRoomFactory factory) {
+        public RoomManager(IDungeonFloorValues dungeonFloorValues, IRoomFactory factory, IFloorPlanManager floorPlanManager, IDungeonUtils dungeonUtils) {
             listOfRoom = new List<Room>();
-            dungeonInitializer = initializer;
+            this.dungeonFloorValues = dungeonFloorValues;
             roomFactory = factory;
+            this.floorPlanManager = floorPlanManager;
+            this.dungeonUtils = dungeonUtils;
         }
 
-        public Room GenerateRoom(List<RoomShapeEnum> roomShapes, ref int currentShapeIndex) {
-            try {
-                RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
-                if (CheckProportionalShapeDistribution(listOfRoom)) {
-                    ShuffleShapes(roomShapes, dungeonInitializer.GetRandomFromSeedHash());
-                    newRoomShape = roomShapes[currentShapeIndex];
-                    currentShapeIndex = (currentShapeIndex + 1) % roomShapes.Count;
+        public void InitializeAndPlaceRooms() {
+            List<RoomShapeEnum> roomShapes = GetListOfSpecialShapes();
+            int currentShapeIndex = 0;
+
+            Vector2Int vectorStart = dungeonFloorValues.GetVectorStart();
+            InitializeStarterRoom(vectorStart);
+
+            Queue<Vector2Int> roomPositions = new Queue<Vector2Int>();
+            roomPositions.Enqueue(vectorStart);
+
+            while (ShouldContinueCreatingRooms(roomPositions)) {
+                Vector2Int currentRoomPosition = DequeueRandomRoomPosition(roomPositions);
+                Room room = GenerateRoom(roomShapes, ref currentShapeIndex);
+
+                if (TryPlaceRoom(room, currentRoomPosition, out Vector2Int newRoomPosition)) {
+                    roomPositions.Enqueue(newRoomPosition);
+                    AddRoom(room);
+                    SetFloorPlanByRoom(room, newRoomPosition, GetListOfRoom().Count + 1);
                 }
-                return roomFactory.CreateRoom(newRoomShape);
-            } catch (TypeLoadException ex) {
-                Debug.Print("Error generating Room: " + ex.Message);
-                return null;
             }
+        }
+
+        private Vector2Int DequeueRandomRoomPosition(Queue<Vector2Int> queue) {
+            int randomIndex = dungeonFloorValues.GetNextRandomValue(queue.Count);
+            Vector2Int[] array = queue.ToArray();
+            Vector2Int randomElement = array[randomIndex];
+            queue = new Queue<Vector2Int>(array.Where(element => element != randomElement));
+            return randomElement;
+        }
+
+        private void SetFloorPlanByRoom(Room room, Vector2Int vector, int index) {
+            foreach (var cell in room.GetOccupiedCells(vector)) {
+                floorPlanManager.SetFloorPlanValue(cell.x, cell.y, index);
+            }
+        }
+
+        private List<Vector2Int> GetEmptySpaces(Room room, Vector2Int position) {
+            return room.GetDirections(position)
+                .Where(Vector2Int => CanAddShape(Vector2Int, room))
+                .ToList();
+        }
+
+        private int NeighborCount(Vector2Int vector, Room room) {
+            int count = 0;
+            Vector2Int[] shapesToCheck = room.GetNeighborsCells(vector);
+
+            if (shapesToCheck.Length == 0) {
+                return -1;
+            }
+            foreach (var checkNewPlace in shapesToCheck) {
+                if (!dungeonUtils.CheckIsOutOfBound(checkNewPlace, floorPlanManager.GetFloorPlanBound())) {
+                    int neighbour = floorPlanManager.GetFloorPlanValue(checkNewPlace.x, checkNewPlace.y) > 0 ? 1 : 0;
+                    count += neighbour;
+                }
+            }
+            return count;
+        }
+
+        private bool CanAddShape(Vector2Int vector, Room room) {
+            if (!CheckIsEmptySpace(vector, room)) {
+                return false;
+            }
+            if (NeighborCount(vector, room) > 1) {
+                return false;
+            }
+            return true;
+        }
+
+        private bool CheckIsEmptySpace(Vector2Int vector, Room room) {
+            Vector2Int[] cells = room.GetOccupiedCells(vector);
+            int usedCells = cells.Sum(cell => dungeonUtils.CheckIsOutOfBound(cell, floorPlanManager.GetFloorPlanBound()) ? 1 : floorPlanManager.GetFloorPlanValue(cell.x, cell.y));
+            return usedCells == 0;
+        }
+
+        private bool TryPlaceRoom(Room room, Vector2Int roomPosition, out Vector2Int newRoomPosition) {
+            List<Vector2Int> listOfEmptySpaces = GetEmptySpaces(room, roomPosition);
+
+            if (listOfEmptySpaces.Count == 0) {
+                newRoomPosition = default;
+                return false;
+            }
+
+            int randomNeighbor = dungeonFloorValues.GetNextRandomValue(listOfEmptySpaces.Count);
+            newRoomPosition = listOfEmptySpaces[randomNeighbor];
+            room.SetPosition(newRoomPosition);
+            room.SetRoomType(RoomTypeEnum.STANDARD);
+            return true;
+        }
+
+        private bool ShouldContinueCreatingRooms(Queue<Vector2Int> roomPositions) {
+            return roomPositions.Count > 0 && GetListOfRoom().Count < dungeonFloorValues.GetNumberOfRooms();
+        }
+
+        private void InitializeStarterRoom(Vector2Int vectorStart) {
+            Room starterRoom = new Room_R1X1(vectorStart);
+            starterRoom.SetRoomType(RoomTypeEnum.STARTER);
+            AddRoom(starterRoom);
+            //TODO debug ici pkoi appeler une boucle ???
+            SetFloorPlanByRoom(starterRoom, vectorStart, 1);
+        }
+
+        //  todo : La méthode GetListOfSpecialShapes pourrait être appelée une seule fois lors de l'initialisation du RoomManager et stocker le résultat dans une variable d'instance. Ceci réduirait les appels redondants à Enum.GetValues et les autres opérations.
+        private List<RoomShapeEnum> GetListOfSpecialShapes() {
+            return Enum.GetValues(typeof(RoomShapeEnum))
+               .Cast<RoomShapeEnum>()
+               .Where(shape => shape != RoomShapeEnum.R1X1)
+               .ToList();
         }
 
         private bool CheckProportionalShapeDistribution(List<Room> rooms) {
             int specials = rooms.Count(r => r.GetShape() != RoomShapeEnum.R1X1);
             double currentRatio = (double)specials / rooms.Count;
-            return currentRatio <= 0.25;
+            return currentRatio <= ratio;
         }
 
         // use Knuth Algorithm to random shuffle to ensure that room shapes are evenly distributed throughout the level.
@@ -45,6 +144,37 @@ namespace DungeonNs {
                 int k = random.Next(n + 1);
                 (list[n], list[k]) = (list[k], list[n]); // tuples desconstruction
             }
+        }
+
+        // Todo error : Principe de responsabilité unique (Single Responsibility Principle)
+        public Room GenerateRoom(List<RoomShapeEnum> roomShapes, ref int currentShapeIndex) {
+            try {
+                RoomShapeEnum newRoomShape = RoomShapeEnum.R1X1;
+                if (CheckProportionalShapeDistribution(listOfRoom)) {
+                    ShuffleShapes(roomShapes, dungeonFloorValues.GetRandomFromSeedHash());
+                    newRoomShape = roomShapes[currentShapeIndex];
+                    currentShapeIndex = (currentShapeIndex + 1) % roomShapes.Count;
+                }
+                return roomFactory.InstantiateRoomImpl(newRoomShape);
+            } catch (TypeLoadException ex) {
+                Debug.Log("Error generating Room: " + ex.Message);
+                return null;
+            }
+        }
+
+        public Room InstantiateRoomImplWithProperties(RoomShapeEnum shape, Vector2Int vector, RoomTypeEnum type) {
+            Room room = roomFactory.InstantiateRoomImpl(shape);
+            room.SetPosition(vector);
+            room.SetRoomType(type);
+            return room;
+        }
+
+        public GameObject InstantiateRoomPrefab(DifficultyEnum diff, RoomShapeEnum shape, RoomTypeEnum type, IDungeonFloorValues dungeonFloorValues, BiomeEnum biome) {
+            return roomFactory.InstantiateRoomPrefab(diff, shape, type, dungeonFloorValues, biome);
+        }
+
+        public GameObject InstantiateRoomGO(GameObject roomPrefab, Vector3 vector3, Transform transform, GameObject floorContainer) {
+            return roomFactory.InstantiateRoomGO(roomPrefab, vector3, transform, floorContainer);
         }
 
         public List<Room> GetListOfRoom() {
