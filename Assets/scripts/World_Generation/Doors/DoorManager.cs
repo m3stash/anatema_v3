@@ -1,28 +1,30 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System;
 using DoorNs;
-using RoomNs;
 
-public class DoorManager : IDoorManager {
+public class DoorManager : MonoBehaviour {
+    private DoorPool pool;
+    PoolConfig config;
 
-    private IDoorFactory doorFactory;
-
-    public DoorManager(IDoorFactory doorFactory) {
-        this.doorFactory = doorFactory;
+    public void Setup() {
+        pool = GetComponent<DoorPool>();
+        config = pool.GetConfig();
+        if (pool != null) {
+            try {
+                pool.Setup(config.GetPrefab(), config.GetPoolSize());
+            } catch (Exception ex) {
+                Debug.LogError("Error initializing pool: " + ex.Message);
+            }
+        } else {
+            Debug.LogError("Component DoorPool not serialise");
+        }
     }
 
-    public GameObject InstantiateRoomPrefab(string path) {
-        return doorFactory.InstantiateDoorPrefab(path);
-    }
-
-    public GameObject InstantiateDoorGO(GameObject roomPrefab, Vector3 vector3, Transform transform, Transform parentTransform) {
-        return doorFactory.InstantiateDoorGO(roomPrefab, vector3, transform, parentTransform);
-    }
-
-    public void SetProperties(GameObject doorGameobject, Door door, Biome biome) {
-        DoorGO doorInstance = doorGameobject.GetComponent<DoorGO>();
-        doorInstance.SetDirection(door.GetDirection());
-        doorInstance.SetSpriteRender(biome);
-        doorInstance.transform.localPosition = door.LocalPosition;
-
+    public void CreateDoor(Transform parent, Door door) {
+        GameObject doorGO = pool.GetOne().gameObject;
+        doorGO.transform.SetParent(parent);
+        doorGO.GetComponent<DoorGO>().Setup(door.LocalPosition, door.GetDirection(), null);
+        doorGO.SetActive(true);
     }
 }
+

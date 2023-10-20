@@ -16,7 +16,6 @@ public class InputManager : MonoBehaviour {
         gameplay.Enable();
     }
 
-
     void Start() {
         gameplay.Player.Enable();
     }

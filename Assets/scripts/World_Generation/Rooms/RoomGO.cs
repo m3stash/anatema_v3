@@ -20,15 +20,10 @@ namespace RoomNs {
         public bool isRootRoom;
         public Vector2Int rootPos;
         private RoomShapeEnum roomShape;
-        private List<DoorGO> doorsGO;
         private Tilemap tilemap;
         private Tilemap tilemapEnnemies;
         private Tilemap tilemapLimits;
         private CinemachineTransposer camTransposer;
-
-        public List<DoorGO> GetDoorsForRoom() {
-            return doorsGO;
-        }
 
         public RoomShapeEnum GetShape() {
             return roomShape;
@@ -38,7 +33,6 @@ namespace RoomNs {
             tilemapEnnemies = tilemapEnnemiesGo.GetComponent<Tilemap>();
             tilemap = tilemapGo.GetComponent<Tilemap>();
             tilemapLimits = tilemapLimitsGo.GetComponent<Tilemap>();
-            doorsGO = new List<DoorGO>();
         }
 
         public Tilemap GetTilemap() {

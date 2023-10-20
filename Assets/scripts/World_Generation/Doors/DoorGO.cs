@@ -5,16 +5,12 @@ namespace DoorNs {
 
         public delegate void OnDoorEnter(DoorGO doorGO);
         public static event OnDoorEnter OnChangeRoom;
-        private DoorType doorType;
         private DirectionalEnum direction;
         private SpriteRenderer spriteRenderer;
+        // private PoolConfig config;
 
         private void Awake() {
             spriteRenderer = GetComponent<SpriteRenderer>();
-        }
-
-        public void SetSpriteRender(Biome biome) {
-            spriteRenderer.sprite = biome.GetDoorSpriteForDirection(direction);
         }
 
         private void OnTriggerEnter2D(Collider2D collision) {
@@ -23,20 +19,14 @@ namespace DoorNs {
             }
         }
 
-        public DoorType GetDoorType() {
-            return doorType;
-        }
-
-        public void SetDoorType(DoorType doorType) {
-            this.doorType = doorType;
-        }
-
-        public void SetDirection(DirectionalEnum direction) {
-            this.direction = direction;
-        }
-
         public DirectionalEnum GetDirection() {
             return direction;
+        }
+
+        public void Setup(Vector3 localPosition, DirectionalEnum direction, Sprite sprite) {
+            this.direction = direction;
+            // spriteRenderer.sprite = sprite;
+            transform.localPosition = localPosition;
         }
 
     }

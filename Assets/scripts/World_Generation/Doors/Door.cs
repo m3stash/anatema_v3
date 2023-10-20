@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace DoorNs { 
+namespace DoorNs {
     public class Door {
 
         private DirectionalEnum direction;
@@ -24,7 +24,7 @@ namespace DoorNs {
 
         public DirectionalEnum GetDirection() {
             return direction;
-        }
+        }        
 
     }
 }
