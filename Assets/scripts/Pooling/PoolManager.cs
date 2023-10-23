@@ -2,18 +2,12 @@
 
 public class PoolManager : MonoBehaviour {
     [SerializeField] GameObject doorPool;
-    private DoorManager doorManager;
 
-    public void Setup() {
+    public DoorPool GetDoorPool() {
         if(doorPool != null) {
-            doorManager = doorPool.GetComponent<DoorManager>();
-            doorManager.Setup();
-        } else {
-            Debug.LogError("PoolManager mising doorPool serialize");
+            return doorPool.GetComponent<DoorPool>();
         }
-    }
-
-    public DoorManager GetDoorManager() {
-        return doorManager;
+        Debug.LogError("Error : No SerializeField associate to doorPool");
+        return null;
     }
 }

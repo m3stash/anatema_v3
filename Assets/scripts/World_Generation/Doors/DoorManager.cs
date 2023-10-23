@@ -2,13 +2,12 @@
 using System;
 using DoorNs;
 
-public class DoorManager : MonoBehaviour {
+public class DoorManager {
     private DoorPool pool;
-    PoolConfig config;
 
-    public void Setup() {
-        pool = GetComponent<DoorPool>();
-        config = pool.GetConfig();
+    public void Setup(DoorPool doorPool) {
+        pool = doorPool;
+        PoolConfig config = doorPool.GetConfig();
         if (pool != null) {
             try {
                 pool.Setup(config.GetPrefab(), config.GetPoolSize());

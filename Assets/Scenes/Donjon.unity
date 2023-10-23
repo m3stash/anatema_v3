@@ -607,7 +607,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1445210200}
-  - component: {fileID: 1445210201}
   - component: {fileID: 1445210202}
   m_Layer: 0
   m_Name: DoorPool
@@ -631,18 +630,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1327145135}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1445210201
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1445210199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd30d90938fed4bfb80aa44baa49e5f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1445210202
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -704,7 +691,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   generator: {fileID: 321899008}
   floorContainerGO: {fileID: 330357668}
-  poolManager: {fileID: 1327145136}
+  poolManagerGO: {fileID: 1327145134}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

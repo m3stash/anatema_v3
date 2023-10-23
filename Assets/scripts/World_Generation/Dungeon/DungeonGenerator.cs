@@ -16,10 +16,8 @@ namespace DungeonNs {
         private IDungeonUtils dungeonUtils;
         private IDungeonFloorConfig floorConfig;
         private IRoomManager roomManager;
-        // private IDoorManager doorManager;
         private GameObject floorContainer;
         private IFloorPlanManager floorPlanManager;
-        private PoolManager poolManager;
         private DoorManager doorManager;
         private int totalLoop = 0;
 
@@ -30,7 +28,7 @@ namespace DungeonNs {
             IDungeonUtils dungeonUtils,
             IRoomManager roomManager,
             IFloorPlanManager floorPlanManager,
-            PoolManager poolManager
+            DoorManager doorManager
         ) {
             this.floorConfig = floorConfig;
             this.floorContainer = floorContainer;
@@ -38,9 +36,8 @@ namespace DungeonNs {
             this.dungeonUtils = dungeonUtils; // TODO utiliser le dungeon manager pour faire proxy avec le dungeonUtils !!!
             this.roomManager = roomManager;
             this.floorPlanManager = floorPlanManager;
-            this.poolManager = poolManager;
+            this.doorManager = doorManager;
 
-            doorManager = poolManager.GetDoorManager();
             GenerateAndPlaceRooms();
             SpecialRoomManager specialRoomManager = new SpecialRoomManager(dungeonFloorValues, roomManager, dungeonUtils, floorPlanManager);
             specialRoomManager.PlaceSpecialRooms();
