@@ -18,7 +18,7 @@ namespace DungeonNs {
         private IRoomManager roomManager;
         private GameObject floorContainer;
         private IFloorPlanManager floorPlanManager;
-        private DoorManager doorManager;
+        private IDoorManager doorManager;
         private int totalLoop = 0;
 
         public void GenerateDungeon(
@@ -28,7 +28,7 @@ namespace DungeonNs {
             IDungeonUtils dungeonUtils,
             IRoomManager roomManager,
             IFloorPlanManager floorPlanManager,
-            DoorManager doorManager
+            IDoorManager doorManager
         ) {
             this.floorConfig = floorConfig;
             this.floorContainer = floorContainer;

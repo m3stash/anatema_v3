@@ -13,7 +13,7 @@ public class DungeonManager : MonoBehaviour {
     private IDungeonFloorValues dungeonFloorValues;
     private IRoomManager roomManager;
     private IDungeonUtils dungeonUtils;
-    private DoorManager doorManager;
+    private IDoorManager doorManager;
     private IFloorPlanManager floorPlanManager;
     private PoolManager poolManager;
     private readonly int seedLengh = 8;

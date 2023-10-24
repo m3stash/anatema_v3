@@ -2,7 +2,7 @@
 using System;
 using DoorNs;
 
-public class DoorManager {
+public class DoorManager : IDoorManager {
     private DoorPool pool;
 
     public void Setup(DoorPool doorPool) {
