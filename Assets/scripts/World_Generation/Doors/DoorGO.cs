@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using RoomNs;
+using UnityEngine;
 
 namespace DoorNs {
     public class DoorGO : MonoBehaviour {
@@ -7,9 +8,13 @@ namespace DoorNs {
         public static event OnDoorEnter OnChangeRoom;
         private DirectionalEnum direction;
         private SpriteRenderer spriteRenderer;
+        [SerializeField] private SpriteConfig spriteConfig;
         // private PoolConfig config;
 
         private void Awake() {
+            if(spriteConfig == null) {
+                Debug.LogError("DoorGO: SpriteConfig are not serialisable");
+            }
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
@@ -23,9 +28,9 @@ namespace DoorNs {
             return direction;
         }
 
-        public void Setup(Vector3 localPosition, DirectionalEnum direction, Sprite sprite) {
+        public void Setup(Vector3 localPosition, DirectionalEnum direction, RoomTypeEnum roomType, BiomeEnum biome) {
             this.direction = direction;
-            // spriteRenderer.sprite = sprite;
+            //spriteRenderer.sprite = sprite;
             transform.localPosition = localPosition;
         }
 

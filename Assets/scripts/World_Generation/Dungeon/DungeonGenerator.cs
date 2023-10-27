@@ -125,12 +125,13 @@ namespace DungeonNs {
         }
 
         private void CreateDoorsGo(Room Room, GameObject roomGo) {
+            BiomeEnum biome = floorConfig.GetBiomeType();
             Room.SearchNeighborsAndCreateDoor(floorPlanManager, floorPlanManager.GetFloorPlanBound(), floorConfig.GetBiomeType(), dungeonUtils);
             List<Door> doorList = Room.GetDoors();
             if (doorList.Count > 0) {
                 foreach (Door door in doorList) {
                     try {
-                        doorManager.CreateDoor(roomGo.transform, door);
+                        doorManager.CreateDoor(roomGo.transform, door, Room.GetRoomTypeEnum, biome);
                     } catch (Exception ex) {
                         Debug.LogError($"Error creating door game object: {ex.Message}");
                     }

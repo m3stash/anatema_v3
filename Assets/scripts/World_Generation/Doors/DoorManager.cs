@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using DoorNs;
+using RoomNs;
 
 public class DoorManager : IDoorManager {
     private DoorPool pool;
@@ -19,10 +20,10 @@ public class DoorManager : IDoorManager {
         }
     }
 
-    public void CreateDoor(Transform parent, Door door) {
+    public void CreateDoor(Transform parent, Door door, RoomTypeEnum roomType, BiomeEnum biome) {
         GameObject doorGO = pool.GetOne().gameObject;
         doorGO.transform.SetParent(parent);
-        doorGO.GetComponent<DoorGO>().Setup(door.LocalPosition, door.GetDirection(), null);
+        doorGO.GetComponent<DoorGO>().Setup(door.LocalPosition, door.GetDirection(), roomType, biome);
         doorGO.SetActive(true);
     }
 }
