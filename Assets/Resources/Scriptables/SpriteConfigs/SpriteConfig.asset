@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dee34f2cfeb104d7d8ccdb24537f341c, type: 3}
+  m_Name: SpriteConfig
+  m_EditorClassIdentifier: 
+  biomeRoomTypesList:
+  - biomeName: CAVE
+    biomeRoomTypeSprites:
+    - roomType: STARTER
+      topSprite: {fileID: 4599323450485179080, guid: 29ff43e93337e6d4fb027342b5afcaf0,
+        type: 3}
+      leftSprite: {fileID: 0}
+    - roomType: STANDARD
+      topSprite: {fileID: 0}
+      leftSprite: {fileID: 0}
+    - roomType: BOSS
+      topSprite: {fileID: 4340402923186232840, guid: 29ff43e93337e6d4fb027342b5afcaf0,
+        type: 3}
+      leftSprite: {fileID: 0}
+    - roomType: ITEMS
+      topSprite: {fileID: 0}
+      leftSprite: {fileID: 0}
+    - roomType: SECRET
+      topSprite: {fileID: 4599323450485179080, guid: 29ff43e93337e6d4fb027342b5afcaf0,
+        type: 3}
+      leftSprite: {fileID: 0}
+    - roomType: SECRET2
+      topSprite: {fileID: 8148967778456589955, guid: 29ff43e93337e6d4fb027342b5afcaf0,
+        type: 3}
+      leftSprite: {fileID: 0}
+  - biomeName: CAVE2
+    biomeRoomTypeSprites:
+    - roomType: STARTER
+      topSprite: {fileID: 0}
+      leftSprite: {fileID: 0}
+    - roomType: STANDARD
+      topSprite: {fileID: 0}
+      leftSprite: {fileID: 0}
+    - roomType: BOSS
+      topSprite: {fileID: 0}
+      leftSprite: {fileID: 0}
+    - roomType: ITEMS
+      topSprite: {fileID: 0}
+      leftSprite: {fileID: 0}
+    - roomType: SECRET
+      topSprite: {fileID: 4599323450485179080, guid: 29ff43e93337e6d4fb027342b5afcaf0,
+        type: 3}
+      leftSprite: {fileID: 0}
+    - roomType: SECRET2
+      topSprite: {fileID: 8148967778456589955, guid: 29ff43e93337e6d4fb027342b5afcaf0,
+        type: 3}
+      leftSprite: {fileID: 0}
+  SecretConfig:
+    roomType: SECRET
+    topSprite: {fileID: 0}
+    leftSprite: {fileID: 0}

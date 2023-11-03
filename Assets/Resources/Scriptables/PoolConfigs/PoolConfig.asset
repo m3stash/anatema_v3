@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dee34f2cfeb104d7d8ccdb24537f341c, type: 3}
-  m_Name: SpriteConfig
+  m_Script: {fileID: 11500000, guid: 9370de55a8f8f481cb411283c035eb23, type: 3}
+  m_Name: PoolConfig
   m_EditorClassIdentifier: 
-  biomeRoomTypesList: []
+  prefab: {fileID: 3508355695154505523, guid: 017029159fa74064a8c25b945f534603, type: 3}
+  poolSize: 50
