@@ -12,6 +12,7 @@ namespace DungeonNs {
         private const float ratio = 0.25f;
         private IFloorPlanManager floorPlanManager;
         private IDungeonUtils dungeonUtils;
+        private List<RoomShapeEnum> roomShapes;
 
         public RoomManager(IDungeonFloorValues dungeonFloorValues, IRoomFactory factory, IFloorPlanManager floorPlanManager, IDungeonUtils dungeonUtils) {
             listOfRoom = new List<Room>();
@@ -19,10 +20,15 @@ namespace DungeonNs {
             roomFactory = factory;
             this.floorPlanManager = floorPlanManager;
             this.dungeonUtils = dungeonUtils;
+
+            Setup();
+        }
+
+        private void Setup() {
+            roomShapes = GetListOfSpecialShapes();
         }
 
         public void InitializeAndPlaceRooms() {
-            List<RoomShapeEnum> roomShapes = GetListOfSpecialShapes();
             int currentShapeIndex = 0;
 
             Vector2Int vectorStart = dungeonFloorValues.GetVectorStart();
@@ -122,7 +128,6 @@ namespace DungeonNs {
             SetFloorPlanByRoom(starterRoom, vectorStart, 1);
         }
 
-        //  todo : La méthode GetListOfSpecialShapes pourrait être appelée une seule fois lors de l'initialisation du RoomManager et stocker le résultat dans une variable d'instance. Ceci réduirait les appels redondants à Enum.GetValues et les autres opérations.
         private List<RoomShapeEnum> GetListOfSpecialShapes() {
             return Enum.GetValues(typeof(RoomShapeEnum))
                .Cast<RoomShapeEnum>()

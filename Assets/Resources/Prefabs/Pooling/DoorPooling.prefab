@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7445417672816584894}
   - component: {fileID: -3633085235604359642}
   m_Layer: 0
-  m_Name: DoorsPooling
+  m_Name: DoorPooling
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,4 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a251ec525519342e5a1c4af2c2cd40a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 2e3501a7da9e643a086a15f91b27ee34, type: 2}
+  config: {fileID: 11400000, guid: 3b671d3a1d0994b4f8d629b9c51e136b, type: 2}

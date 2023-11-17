@@ -13,9 +13,9 @@ namespace DoorNs {
 
         private void Awake() {
             if(spriteConfig == null) {
-                Debug.LogError("DoorGO: SpriteConfig are not serialisable");
+                Debug.LogError("DoorGO: SpriteConfig are not serialised !!!");
             }
-            spriteRenderer = GetComponent<SpriteRenderer>();
+            setSpriteRender();
         }
 
         private void OnTriggerEnter2D(Collider2D collision) {
@@ -28,9 +28,26 @@ namespace DoorNs {
             return direction;
         }
 
+        private void setSpriteRender() {
+            if (spriteRenderer == null) {
+                spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+        }
+
         public void Setup(Vector3 localPosition, DirectionalEnum direction, RoomTypeEnum roomType, BiomeEnum biome) {
+            setSpriteRender();
             this.direction = direction;
-            //spriteRenderer.sprite = sprite;
+            SpriteConfig.BiomeRoomTypeSprites spriteConf = spriteConfig.GetSpriteConfig(biome, roomType);
+            switch (direction) {
+                case DirectionalEnum.T:
+                case DirectionalEnum.B:
+                    spriteRenderer.sprite = spriteConf.topSprite;
+                    break;
+                case DirectionalEnum.L:
+                case DirectionalEnum.R:
+                    spriteRenderer.sprite = spriteConf.leftSprite;
+                    break;
+            }
             transform.localPosition = localPosition;
         }
 

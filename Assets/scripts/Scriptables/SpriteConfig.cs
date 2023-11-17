@@ -14,7 +14,7 @@ public class SpriteConfig : ScriptableObject {
     }
 
     [Serializable]
-    private class BiomeRoomTypeSprites {
+    public class BiomeRoomTypeSprites {
         public string roomType;
         public Sprite topSprite;
         public Sprite leftSprite;
@@ -24,8 +24,29 @@ public class SpriteConfig : ScriptableObject {
     private List<BiomeRoomTypes> biomeRoomTypesList;
 
     [SerializeField]
-    BiomeRoomTypeSprites SecretConfig = new BiomeRoomTypeSprites() {
+    private BiomeRoomTypeSprites secretConfig = new BiomeRoomTypeSprites() {
         roomType = RoomTypeEnum.SECRET.ToString(),
+        leftSprite = null,
+        topSprite = null
+    };
+
+    [SerializeField]
+    private BiomeRoomTypeSprites starterConfig = new BiomeRoomTypeSprites() {
+        roomType = RoomTypeEnum.STARTER.ToString(),
+        leftSprite = null,
+        topSprite = null
+    };
+
+    [SerializeField]
+    private BiomeRoomTypeSprites bossConfig = new BiomeRoomTypeSprites() {
+        roomType = RoomTypeEnum.BOSS.ToString(),
+        leftSprite = null,
+        topSprite = null
+    };
+
+    [SerializeField]
+    private BiomeRoomTypeSprites itemConfig = new BiomeRoomTypeSprites() {
+        roomType = RoomTypeEnum.ITEMS.ToString(),
         leftSprite = null,
         topSprite = null
     };
@@ -42,7 +63,7 @@ public class SpriteConfig : ScriptableObject {
     private List<RoomTypeEnum> GetExistingRoomTypes() {
         return Enum.GetValues(typeof(RoomTypeEnum))
                    .Cast<RoomTypeEnum>()
-                   .Where(roomType => roomType == RoomTypeEnum.STANDARD || roomType == RoomTypeEnum.STARTER)
+                   .Where(roomType => roomType == RoomTypeEnum.STANDARD)
                    .ToList();
     }
 
@@ -135,6 +156,24 @@ public class SpriteConfig : ScriptableObject {
                 biomeRoomTypes.biomeRoomTypeSprites.Add(roomTypeSprites);
             }
         }
+    }
+
+    public BiomeRoomTypeSprites GetSpriteConfig(BiomeEnum biome, RoomTypeEnum roomType) {
+        switch (roomType) {
+            case RoomTypeEnum.STANDARD:
+                BiomeRoomTypes room = biomeRoomTypesList.Find(roomType => roomType.biomeName == biome.ToString());
+                return room.biomeRoomTypeSprites.Find(roomTypeSprite => roomTypeSprite.roomType == roomType.ToString());
+            case RoomTypeEnum.BOSS:
+                return bossConfig;
+            case RoomTypeEnum.ITEMS:
+                return itemConfig;
+            case RoomTypeEnum.SECRET:
+                return secretConfig;
+            case RoomTypeEnum.STARTER:
+                return starterConfig;
+        }
+        Debug.LogWarning("GetSpriteConfig not exist for roomType: " + roomType + "&& BiomeEnum: " + biome);
+        return null;
     }
 
 }

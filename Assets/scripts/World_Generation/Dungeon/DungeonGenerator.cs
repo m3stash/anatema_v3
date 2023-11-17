@@ -81,15 +81,11 @@ namespace DungeonNs {
             TryGenerateRooms();
         }
 
-        // TOdo sortir tout ça pour ajouter une classe CreateGameObject tout déplacer dedans et y gérer le pooling !
         private void CreateRoomsGO() {
-            CreateRoomsGO(CreateStandardRoomsGO);
-            CreateRoomsGO(CreateSecretRoomsGO);
+            CreateStandardRoomsGO();
+            CreateSecretRoomsGO();
         }
 
-        private void CreateRoomsGO(Action action) {
-            action.Invoke();
-        }
 
         private void CreateStandardRoomsGO() {
             foreach (KeyValuePair<DifficultyEnum, float> values in dungeonFloorValues.GetRoomRepartition()) {
@@ -130,11 +126,7 @@ namespace DungeonNs {
             List<Door> doorList = Room.GetDoors();
             if (doorList.Count > 0) {
                 foreach (Door door in doorList) {
-                    try {
-                        doorManager.CreateDoor(roomGo.transform, door, Room.GetRoomTypeEnum, biome);
-                    } catch (Exception ex) {
-                        Debug.LogError($"Error creating door game object: {ex.Message}");
-                    }
+                    doorManager.CreateDoor(roomGo.transform, door, Room.GetRoomTypeEnum, biome);
                 }
             }
         }

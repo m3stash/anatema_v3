@@ -25,6 +25,14 @@ public class DoorManager : IDoorManager {
         doorGO.transform.SetParent(parent);
         doorGO.GetComponent<DoorGO>().Setup(door.LocalPosition, door.GetDirection(), roomType, biome);
         doorGO.SetActive(true);
+        /*try {
+            GameObject doorGO = pool.GetOne().gameObject;
+            doorGO.transform.SetParent(parent);
+            doorGO.GetComponent<DoorGO>().Setup(door.LocalPosition, door.GetDirection(), roomType, biome);
+            doorGO.SetActive(true);
+        } catch (Exception ex) {
+            Debug.LogError($"Error creating door game object: {ex.Message}");
+        }*/
     }
 }
 
