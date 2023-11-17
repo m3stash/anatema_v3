@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
 using DoorNs;
+using RoomNs;
+using UnityEngine;
 
 public interface IDoorManager {
-    GameObject InstantiateRoomPrefab(string path);
-    GameObject InstantiateDoorGO(GameObject roomPrefab, Vector3 vector3, Transform transform, Transform parentTransform);
-    void SetProperties(GameObject doorGO, Door door, Biome biome);
+    void Setup(DoorPool doorPool);
+    void CreateDoor(Transform parent, Door door, RoomTypeEnum roomType, BiomeEnum biome);
 }
 
