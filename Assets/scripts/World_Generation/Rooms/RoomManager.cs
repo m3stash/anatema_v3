@@ -9,6 +9,13 @@ namespace DungeonNs {
     public class RoomManager : IRoomManager {
 
         private static RoomManager instance;
+        private IDungeonFloorValues dungeonFloorValues;
+        private IRoomFactory roomFactory;
+        private List<Room> listOfRoom;
+        private const float ratio = 0.25f;
+        private IFloorPlanManager floorPlanManager;
+        private List<RoomShapeEnum> roomShapes;
+        private SpecialRoomManager specialRoomManager;
 
         public static RoomManager GetInstance(IDungeonFloorValues dungeonFloorValues, IFloorPlanManager floorPlanManager) {
             instance ??= new RoomManager(dungeonFloorValues, floorPlanManager);
@@ -22,15 +29,6 @@ namespace DungeonNs {
             this.floorPlanManager = floorPlanManager;
             Setup();
         }
-
-
-        private IDungeonFloorValues dungeonFloorValues;
-        private IRoomFactory roomFactory;
-        private List<Room> listOfRoom;
-        private const float ratio = 0.25f;
-        private IFloorPlanManager floorPlanManager;
-        private List<RoomShapeEnum> roomShapes;
-        private SpecialRoomManager specialRoomManager;
 
         private void Setup() {
             roomShapes = GetListOfSpecialShapes();

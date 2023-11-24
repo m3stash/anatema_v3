@@ -1,13 +1,6 @@
 ﻿#if UNITY_EDITOR
-
-using System;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 //public class CustomAssetModificationProcessor : UnityEditor.AssetModificationProcessor {
 //    private static AssetMoveResult OnWillMoveAsset(string sourcePath, string destinationPath) {

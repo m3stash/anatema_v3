@@ -4,7 +4,6 @@ using RoomNs;
 using DoorNs;
 using Debug = UnityEngine.Debug;
 using System;
-using NUnit.Framework;
 #if UNITY_EDITOR
 #endif
 
@@ -18,7 +17,7 @@ namespace DungeonNs {
         private GameObject floorContainer;
         private IFloorPlanManager floorPlanManager;
         private IDoorManager doorManager;
-        private IITemManager iTemManager;
+        private Item.IManager iTemManager;
         private int totalLoop;
         private List<GameObject> roomsGo;
         private int maxLoop = 100;
@@ -30,7 +29,7 @@ namespace DungeonNs {
             IRoomManager roomManager,
             IFloorPlanManager floorPlanManager,
             IDoorManager doorManager,
-            IITemManager iTemManager
+            Item.IManager iTemManager
         ) {
             this.floorConfig = floorConfig;
             this.floorContainer = floorContainer;

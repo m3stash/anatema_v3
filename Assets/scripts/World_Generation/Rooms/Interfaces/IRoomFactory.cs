@@ -1,5 +1,4 @@
-﻿using DungeonNs;
-using RoomNs;
+﻿using RoomNs;
 using UnityEngine;
 
 public interface IRoomFactory {
