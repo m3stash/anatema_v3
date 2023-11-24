@@ -19,6 +19,7 @@ namespace DungeonNs {
         private GameObject floorContainer;
         private IFloorPlanManager floorPlanManager;
         private IDoorManager doorManager;
+        private IITemManager iTemManager;
         private int totalLoop;
         private List<GameObject> roomsGo;
         private int maxLoop = 100;
@@ -30,7 +31,8 @@ namespace DungeonNs {
             IDungeonUtils dungeonUtils,
             IRoomManager roomManager,
             IFloorPlanManager floorPlanManager,
-            IDoorManager doorManager
+            IDoorManager doorManager,
+            IITemManager iTemManager
         ) {
             this.floorConfig = floorConfig;
             this.floorContainer = floorContainer;
@@ -39,6 +41,7 @@ namespace DungeonNs {
             this.roomManager = roomManager;
             this.floorPlanManager = floorPlanManager;
             this.doorManager = doorManager;
+            this.iTemManager = iTemManager;
             InitValues();
             GenerateRooms();
             CreateRoomsGO();
@@ -139,7 +142,7 @@ namespace DungeonNs {
         }
 
         private void GenerateItems() {
-
+            iTemManager.GenerateItems();
         }
         
     }

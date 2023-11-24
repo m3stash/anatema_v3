@@ -1,6 +1,5 @@
 ﻿using System;
 using DungeonNs;
-using UnityEditor.EditorTools;
 using UnityEngine;
 
 public class DungeonManager : MonoBehaviour {
@@ -15,6 +14,7 @@ public class DungeonManager : MonoBehaviour {
     private IDungeonUtils dungeonUtils;
     private IDoorManager doorManager;
     private IFloorPlanManager floorPlanManager;
+    private IITemManager iTemManager;
     private PoolManager poolManager;
     private readonly int seedLengh = 8;
     private string seed;
@@ -27,15 +27,14 @@ public class DungeonManager : MonoBehaviour {
     }
 
     private void InstantiateSingletons() {
-        //toDo garder les singletons car ils devraient être supprimer entre deux scènes non dungeon type ???
         dungeonFloorValues = DungeonFloorValues.GetInstance();
         dungeonSeedGenerator = DungeonSeedGenerator.GetInstance();
         dungeonUtils = DungeonUtils.GetInstance();
         floorPlanManager = new FloorPlanManager();
         poolManager = poolManagerGO.GetComponent<PoolManager>();
-        doorManager = new DoorManager();
-        doorManager.Setup(poolManager.GetDoorPool());
-        roomManager = new RoomManager(dungeonFloorValues, RoomFactory.GetInstance(), floorPlanManager, dungeonUtils);
+        doorManager = DoorManager.GetInstance(poolManager.GetDoorPool());
+        iTemManager = ItemManager.GetInstance();
+        roomManager = RoomManager.GetInstance(dungeonFloorValues, floorPlanManager, dungeonUtils);
     }
 
     private bool VerifySerialisableFieldInitialised() {
@@ -59,15 +58,11 @@ public class DungeonManager : MonoBehaviour {
 
     public void Setup(IDungeonFloorConfig floorConfig) {
         dungeonFloorValues.InitValues(floorConfig, seed, dungeonSeedGenerator, floorPlanManager.GetFloorPlanBound());
-        generator.GenerateDungeon(floorConfig, floorContainerGO, dungeonFloorValues, dungeonUtils, roomManager, floorPlanManager, doorManager);
+        generator.GenerateDungeon(floorConfig, floorContainerGO, dungeonFloorValues, dungeonUtils, roomManager, floorPlanManager, doorManager, iTemManager);
     }
 
     public string GetSeed() {
         return seed;
-    }
-
-    public void InitPooling() {
-
     }
 }
 

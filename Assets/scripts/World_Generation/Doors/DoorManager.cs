@@ -2,9 +2,21 @@
 using System;
 using DoorNs;
 using RoomNs;
+using DungeonNs;
 
 public class DoorManager : IDoorManager {
     private DoorPool pool;
+
+    private static DoorManager instance;
+
+    public static DoorManager GetInstance(DoorPool doorPool) {
+        instance ??= new DoorManager(doorPool);
+        return instance;
+    }
+
+    private DoorManager(DoorPool doorPool) {
+        Setup(doorPool);
+    }
 
     public void Setup(DoorPool doorPool) {
         pool = doorPool;

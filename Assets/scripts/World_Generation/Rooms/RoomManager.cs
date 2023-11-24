@@ -2,12 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.EditorTools;
 using UnityEngine;
 using static DungeonNs.SpecialRoomManager;
 
 namespace DungeonNs {
     public class RoomManager : IRoomManager {
+
+        private static RoomManager instance;
+
+        public static RoomManager GetInstance(IDungeonFloorValues dungeonFloorValues, IFloorPlanManager floorPlanManager, IDungeonUtils dungeonUtils) {
+            instance ??= new RoomManager(dungeonFloorValues, floorPlanManager, dungeonUtils);
+            return instance;
+        }
+
         private IDungeonFloorValues dungeonFloorValues;
         private IRoomFactory roomFactory;
         private List<Room> listOfRoom;
@@ -17,13 +24,12 @@ namespace DungeonNs {
         private List<RoomShapeEnum> roomShapes;
         private SpecialRoomManager specialRoomManager;
 
-        public RoomManager(IDungeonFloorValues dungeonFloorValues, IRoomFactory factory, IFloorPlanManager floorPlanManager, IDungeonUtils dungeonUtils) {
+        private RoomManager(IDungeonFloorValues dungeonFloorValues, IFloorPlanManager floorPlanManager, IDungeonUtils dungeonUtils) {
             listOfRoom = new List<Room>();
             this.dungeonFloorValues = dungeonFloorValues;
-            roomFactory = factory;
+            roomFactory = RoomFactory.GetInstance();
             this.floorPlanManager = floorPlanManager;
             this.dungeonUtils = dungeonUtils;
-
             Setup();
         }
 
