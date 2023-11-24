@@ -11,7 +11,6 @@ public class DungeonManager : MonoBehaviour {
     private IDungeonSeedGenerator dungeonSeedGenerator;
     private IDungeonFloorValues dungeonFloorValues;
     private IRoomManager roomManager;
-    private IDungeonUtils dungeonUtils;
     private IDoorManager doorManager;
     private IFloorPlanManager floorPlanManager;
     private IITemManager iTemManager;
@@ -29,12 +28,11 @@ public class DungeonManager : MonoBehaviour {
     private void InstantiateSingletons() {
         dungeonFloorValues = DungeonFloorValues.GetInstance();
         dungeonSeedGenerator = DungeonSeedGenerator.GetInstance();
-        dungeonUtils = DungeonUtils.GetInstance();
         floorPlanManager = new FloorPlanManager();
         poolManager = poolManagerGO.GetComponent<PoolManager>();
         doorManager = DoorManager.GetInstance(poolManager.GetDoorPool());
         iTemManager = ItemManager.GetInstance();
-        roomManager = RoomManager.GetInstance(dungeonFloorValues, floorPlanManager, dungeonUtils);
+        roomManager = RoomManager.GetInstance(dungeonFloorValues, floorPlanManager);
     }
 
     private bool VerifySerialisableFieldInitialised() {
@@ -58,7 +56,7 @@ public class DungeonManager : MonoBehaviour {
 
     public void Setup(IDungeonFloorConfig floorConfig) {
         dungeonFloorValues.InitValues(floorConfig, seed, dungeonSeedGenerator, floorPlanManager.GetFloorPlanBound());
-        generator.GenerateDungeon(floorConfig, floorContainerGO, dungeonFloorValues, dungeonUtils, roomManager, floorPlanManager, doorManager, iTemManager);
+        generator.GenerateDungeon(floorConfig, floorContainerGO, dungeonFloorValues, roomManager, floorPlanManager, doorManager, iTemManager);
     }
 
     public string GetSeed() {

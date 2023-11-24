@@ -45,10 +45,10 @@ namespace RoomNs {
 
         public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
 
-        public void SearchNeighborsAndCreateDoor(IFloorPlanManager floorPlanManager, int bound, BiomeEnum biome, IDungeonUtils dungeonUtils) {
+        public void SearchNeighborsAndCreateDoor(IFloorPlanManager floorPlanManager, BiomeEnum biome) {
             Vector2Int[] sections = GetOccupiedCells(position);
             List<Vector2Int> filteredNeighbors = GetNeighborsCells(position)
-                .Where(neighborPosition => !dungeonUtils.CheckIsOutOfBound(neighborPosition, bound) && floorPlanManager.GetFloorPlanValue(neighborPosition.x, neighborPosition.y) > 0)
+                .Where(neighborPosition => !floorPlanManager.CheckIsOutOfBound(neighborPosition, floorPlanManager.GetFloorPlanBound()) && floorPlanManager.GetFloorPlanValue(neighborPosition.x, neighborPosition.y) > 0)
                 .ToList();
 
             foreach (Vector2Int section in sections) {

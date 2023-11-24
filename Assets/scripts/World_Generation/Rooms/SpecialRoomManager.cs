@@ -5,7 +5,6 @@ using UnityEngine;
 namespace DungeonNs {
     public class SpecialRoomManager {
 
-        private IDungeonUtils dungeonUtils;
         private IFloorPlanManager floorPlanManager;
         private Vector2Int vectorStart;
         private List<SpecialRoom> specialRooms;
@@ -35,8 +34,7 @@ namespace DungeonNs {
             }
         }
 
-        public SpecialRoomManager(Vector2Int vectorStart, IDungeonUtils dungeonUtils, IFloorPlanManager floorPlanManager) {
-            this.dungeonUtils = dungeonUtils;
+        public SpecialRoomManager(Vector2Int vectorStart, IFloorPlanManager floorPlanManager) {
             this.floorPlanManager = floorPlanManager;
             this.vectorStart = vectorStart;
             specialRooms = new List<SpecialRoom>();
@@ -81,11 +79,11 @@ namespace DungeonNs {
         private int CountOccupiedNeighbors(int row, int col) {
             int count = 0;
 
-            foreach (var direction in dungeonUtils.GetDirection()) {
+            foreach (var direction in floorPlanManager.GetDirection()) {
                 int newRow = row + direction[0];
                 int newCol = col + direction[1];
 
-                if (dungeonUtils.CheckIsInBounds(newRow, newCol, floorPlanManager.GetFloorPlanBound()) && floorPlanManager.GetFloorPlanValue(newRow, newCol) > 0) {
+                if (floorPlanManager.CheckIsInBounds(newRow, newCol, floorPlanManager.GetFloorPlanBound()) && floorPlanManager.GetFloorPlanValue(newRow, newCol) > 0) {
                     count++;
                 }
             }
@@ -96,7 +94,7 @@ namespace DungeonNs {
             HashSet<(int, int)> emptyCellsWithOneNeighbor = new HashSet<(int, int)>();
             HashSet<(int, int)> emptyCellsWithTwoNeighbors = new HashSet<(int, int)>();
             HashSet<(int, int)> emptyCellsWithMoreThan3Neighbors = new HashSet<(int, int)>();
-            var directions = dungeonUtils.GetDirection();
+            var directions = floorPlanManager.GetDirection();
 
             foreach ((int row, int col) in floorPlanManager.GetOccupiedCells()) {
 
@@ -104,7 +102,7 @@ namespace DungeonNs {
                     int newRow = row + direction[0];
                     int newCol = col + direction[1];
 
-                    if (dungeonUtils.CheckIsInBounds(newRow, newCol, floorPlanManager.GetFloorPlanBound()) && floorPlanManager.GetFloorPlanValue(newRow, newCol) == 0) {
+                    if (floorPlanManager.CheckIsInBounds(newRow, newCol, floorPlanManager.GetFloorPlanBound()) && floorPlanManager.GetFloorPlanValue(newRow, newCol) == 0) {
                         int occupiedNeighbors = CountOccupiedNeighbors(newRow, newCol);
                         if (occupiedNeighbors == 1) {
                             emptyCellsWithOneNeighbor.Add((newRow, newCol));

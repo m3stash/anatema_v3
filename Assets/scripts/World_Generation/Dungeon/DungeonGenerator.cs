@@ -13,7 +13,6 @@ namespace DungeonNs {
     public class Generator : MonoBehaviour {
 
         private IDungeonFloorValues dungeonFloorValues;
-        private IDungeonUtils dungeonUtils;
         private IDungeonFloorConfig floorConfig;
         private IRoomManager roomManager;
         private GameObject floorContainer;
@@ -28,7 +27,6 @@ namespace DungeonNs {
             IDungeonFloorConfig floorConfig,
             GameObject floorContainer,
             IDungeonFloorValues dungeonFloorValues,
-            IDungeonUtils dungeonUtils,
             IRoomManager roomManager,
             IFloorPlanManager floorPlanManager,
             IDoorManager doorManager,
@@ -37,14 +35,18 @@ namespace DungeonNs {
             this.floorConfig = floorConfig;
             this.floorContainer = floorContainer;
             this.dungeonFloorValues = dungeonFloorValues;
-            this.dungeonUtils = dungeonUtils; // TODO utiliser le dungeon manager pour faire proxy avec le dungeonUtils !!!
             this.roomManager = roomManager;
             this.floorPlanManager = floorPlanManager;
             this.doorManager = doorManager;
             this.iTemManager = iTemManager;
+            StartGeneration();
+        }
+
+        private void StartGeneration() {
             InitValues();
             GenerateRooms();
             CreateRoomsGO();
+            GenerateItems();
         }
 
         private void InitValues() {
@@ -132,7 +134,7 @@ namespace DungeonNs {
 
         private void CreateDoorsGo(Room Room, GameObject roomGo) {
             BiomeEnum biome = floorConfig.GetBiomeType();
-            Room.SearchNeighborsAndCreateDoor(floorPlanManager, floorPlanManager.GetFloorPlanBound(), floorConfig.GetBiomeType(), dungeonUtils);
+            Room.SearchNeighborsAndCreateDoor(floorPlanManager, floorConfig.GetBiomeType());
             List<Door> doorList = Room.GetDoors();
             if (doorList.Count > 0) {
                 foreach (Door door in doorList) {
