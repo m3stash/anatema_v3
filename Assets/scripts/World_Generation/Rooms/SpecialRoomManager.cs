@@ -5,29 +5,55 @@ using UnityEngine;
 namespace DungeonNs {
     public class SpecialRoomManager {
 
-        private IDungeonFloorValues dungeonFloorValues;
-        private IRoomManager roomManager;
         private IDungeonUtils dungeonUtils;
         private IFloorPlanManager floorPlanManager;
+        private Vector2Int vectorStart;
+        private List<SpecialRoom> specialRooms;
 
-        public SpecialRoomManager(IDungeonFloorValues dungeonFloorValues, IRoomManager roomManager, IDungeonUtils dungeonUtils, IFloorPlanManager floorPlanManager) {
-            this.dungeonFloorValues = dungeonFloorValues;
-            this.roomManager = roomManager;
-            this.dungeonUtils = dungeonUtils;
-            this.floorPlanManager = floorPlanManager;
+        public class SpecialRoom {
+
+            private RoomShapeEnum shape;
+            private Vector2Int vector;
+            private RoomTypeEnum type;
+
+            public SpecialRoom(RoomShapeEnum shape, Vector2Int vector, RoomTypeEnum type) {
+                this.shape = shape;
+                this.vector = vector;
+                this.type = type;
+            }
+
+            public RoomShapeEnum GetShape() {
+                return shape;
+            }
+
+            public Vector2Int GetVector() {
+                return vector;
+            }
+
+            public RoomTypeEnum GetTypeEnum() {
+                return type;
+            }
         }
 
-        public void PlaceSpecialRooms() {
+        public SpecialRoomManager(Vector2Int vectorStart, IDungeonUtils dungeonUtils, IFloorPlanManager floorPlanManager) {
+            this.dungeonUtils = dungeonUtils;
+            this.floorPlanManager = floorPlanManager;
+            this.vectorStart = vectorStart;
+            specialRooms = new List<SpecialRoom>();
+        }
+
+        public List<SpecialRoom> CreateSpecialRooms() {
             var (oneNeighbors, listOf2Neighbors, listOf3Neighbors) = CountNeighborsAndCreateHashset();
             AddSpecialRoom(oneNeighbors, RoomTypeEnum.BOSS);
             HashSet<(int, int)> listOfNeighbors = listOf3Neighbors.Count == 0 ? listOf2Neighbors : listOf3Neighbors;
             AddSpecialRoom(listOfNeighbors, RoomTypeEnum.SECRET);
+            return specialRooms;
         }
 
         private (int, int)? GetMaxDistanceRoomFromStarter(HashSet<(int, int)> listOfNeighbors) {
             double maxDistanceSquared = 0;
             (int, int)? farthestPosition = null;
-            Vector2Int starter = dungeonFloorValues.GetVectorStart();
+            Vector2Int starter = vectorStart;
 
             foreach ((int x, int y) in listOfNeighbors) {
                 double distanceSquared = (starter.x - x) * (starter.x - x) + (starter.y - y) * (starter.y - y);
@@ -46,9 +72,7 @@ namespace DungeonNs {
 
         private void AddSpecialRoom(HashSet<(int, int)> listOfNeighbors, RoomTypeEnum type) {
             if (GetMaxDistanceRoomFromStarter(listOfNeighbors) is (int x, int y)) {
-                Room room = roomManager.InstantiateRoomImplWithProperties(RoomShapeEnum.R1X1, new Vector2Int(x, y), type);
-                roomManager.AddRoom(room);
-                floorPlanManager.SetFloorPlanValue(x, y, 1);
+                specialRooms.Add(new SpecialRoom(RoomShapeEnum.R1X1, new Vector2Int(x, y), type));
             } else {
                 Debug.LogError("ERROR AddSpecialRoom");
             }

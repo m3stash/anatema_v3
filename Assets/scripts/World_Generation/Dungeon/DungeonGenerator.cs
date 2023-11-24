@@ -19,7 +19,9 @@ namespace DungeonNs {
         private GameObject floorContainer;
         private IFloorPlanManager floorPlanManager;
         private IDoorManager doorManager;
-        private int totalLoop = 0;
+        private int totalLoop;
+        private List<GameObject> roomsGo;
+        private int maxLoop = 100;
 
         public void GenerateDungeon(
             IDungeonFloorConfig floorConfig,
@@ -37,11 +39,14 @@ namespace DungeonNs {
             this.roomManager = roomManager;
             this.floorPlanManager = floorPlanManager;
             this.doorManager = doorManager;
-
-            GenerateAndPlaceRooms();
-            SpecialRoomManager specialRoomManager = new SpecialRoomManager(dungeonFloorValues, roomManager, dungeonUtils, floorPlanManager);
-            specialRoomManager.PlaceSpecialRooms();
+            InitValues();
+            GenerateRooms();
             CreateRoomsGO();
+        }
+
+        private void InitValues() {
+            totalLoop = 0;
+            roomsGo = new List<GameObject>();
         }
 
         private void TryGenerateRooms() {
@@ -68,16 +73,16 @@ namespace DungeonNs {
 
         private void AttemptReGeneration() {
             totalLoop++;
-            if (totalLoop <= 100) {
+            if (totalLoop <= maxLoop) {
                 floorPlanManager.ResetFloorPlan();
-                GenerateAndPlaceRooms();
+                GenerateRooms();
             } else {
                 Debug.LogError("TRY GenerateRooms call == 100 tries");
             }
         }
 
-        private void GenerateAndPlaceRooms() {
-            roomManager.InitializeAndPlaceRooms();
+        private void GenerateRooms() {
+            roomManager.InitializeRooms();
             TryGenerateRooms();
         }
 
@@ -101,6 +106,7 @@ namespace DungeonNs {
                     DifficultyEnum difficulty = Room.GetRoomTypeEnum == RoomTypeEnum.STANDARD ? diff : DifficultyEnum.DEFAULT;
                     GameObject roomGO = InstanciateRoomGo(Room, difficulty);
                     CreateDoorsGo(Room, roomGO);
+                    roomsGo.Add(roomGO);
                 }
             }
 
@@ -110,6 +116,7 @@ namespace DungeonNs {
             foreach (Room Room in roomManager.GetListOfRoom()) {
                 GameObject roomGO = InstanciateRoomGo(Room, DifficultyEnum.DEFAULT);
                 CreateDoorsGo(Room, roomGO);
+                roomsGo.Add(roomGO);
             }
         }
 
@@ -129,6 +136,10 @@ namespace DungeonNs {
                     doorManager.CreateDoor(roomGo.transform, door, Room.GetRoomTypeEnum, biome);
                 }
             }
+        }
+
+        private void GenerateItems() {
+
         }
         
     }

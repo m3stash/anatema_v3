@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.EditorTools;
 using UnityEngine;
+using static DungeonNs.SpecialRoomManager;
 
 namespace DungeonNs {
     public class RoomManager : IRoomManager {
@@ -13,6 +15,7 @@ namespace DungeonNs {
         private IFloorPlanManager floorPlanManager;
         private IDungeonUtils dungeonUtils;
         private List<RoomShapeEnum> roomShapes;
+        private SpecialRoomManager specialRoomManager;
 
         public RoomManager(IDungeonFloorValues dungeonFloorValues, IRoomFactory factory, IFloorPlanManager floorPlanManager, IDungeonUtils dungeonUtils) {
             listOfRoom = new List<Room>();
@@ -26,9 +29,25 @@ namespace DungeonNs {
 
         private void Setup() {
             roomShapes = GetListOfSpecialShapes();
+            specialRoomManager = new SpecialRoomManager(dungeonFloorValues.GetVectorStart(), dungeonUtils, floorPlanManager);
         }
 
-        public void InitializeAndPlaceRooms() {
+        public void InitializeRooms() {
+            CreateStandardRooms();
+            CreateSpecialRooms();
+        }
+
+        private void CreateSpecialRooms() {
+            List<SpecialRoom> specialRooms = specialRoomManager.CreateSpecialRooms();
+            specialRooms.ForEach(specialRoom => {
+                Vector2Int vector = specialRoom.GetVector();
+                Room room = InstantiateRoomImplWithProperties(specialRoom.GetShape(), vector, specialRoom.GetTypeEnum());
+                AddRoom(room);
+                floorPlanManager.SetFloorPlanValue(vector.x, vector.y, 1);
+            });
+        }
+
+        private void CreateStandardRooms() {
             int currentShapeIndex = 0;
 
             Vector2Int vectorStart = dungeonFloorValues.GetVectorStart();
@@ -41,12 +60,24 @@ namespace DungeonNs {
                 Vector2Int currentRoomPosition = DequeueRandomRoomPosition(roomPositions);
                 Room room = GenerateRoom(roomShapes, ref currentShapeIndex);
 
-                if (TryPlaceRoom(room, currentRoomPosition, out Vector2Int newRoomPosition)) {
-                    roomPositions.Enqueue(newRoomPosition);
-                    AddRoom(room);
-                    SetFloorPlanByRoom(room, newRoomPosition, GetListOfRoom().Count + 1);
-                }
+                TryPlaceAndAddRoom(room, currentRoomPosition, roomPositions);
             }
+        }
+
+        private void TryPlaceAndAddRoom(Room room, Vector2Int currentRoomPosition, Queue<Vector2Int> roomPositions) {
+            if (TryPlaceRoom(room, currentRoomPosition, out Vector2Int newRoomPosition)) {
+                EnqueueNewRoomPosition(newRoomPosition, roomPositions);
+                AddRoomAndUpdateFloorPlan(room, newRoomPosition);
+            }
+        }
+
+        private void EnqueueNewRoomPosition(Vector2Int newRoomPosition, Queue<Vector2Int> roomPositions) {
+            roomPositions.Enqueue(newRoomPosition);
+        }
+
+        private void AddRoomAndUpdateFloorPlan(Room room, Vector2Int newRoomPosition) {
+            AddRoom(room);
+            SetFloorPlanByRoom(room, newRoomPosition, GetListOfRoom().Count + 1);
         }
 
         private Vector2Int DequeueRandomRoomPosition(Queue<Vector2Int> queue) {
