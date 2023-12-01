@@ -20,6 +20,15 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
         }
     }
 
+    public void SetupWithParent(T prefab, int size, Transform transform) {
+        this.prefab = prefab;
+
+        for (int i = 0; i < size; i++) {
+            T obj = Instantiate(prefab, transform);
+            availableObjects.Enqueue(obj);
+        }
+    }
+
     public virtual T GetOne() {
         T obj;
 
@@ -28,7 +37,6 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
         } else {
             obj = Instantiate(prefab, transform);
         }
-
         usedObjects.Add(obj);
 
         return obj;
