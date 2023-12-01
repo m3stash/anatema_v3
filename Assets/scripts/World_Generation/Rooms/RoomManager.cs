@@ -3,32 +3,54 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static DungeonNs.SpecialRoomManager;
 
 namespace DungeonNs {
     public class RoomManager : IRoomManager {
+
+        private static RoomManager instance;
         private IDungeonFloorValues dungeonFloorValues;
         private IRoomFactory roomFactory;
         private List<Room> listOfRoom;
         private const float ratio = 0.25f;
         private IFloorPlanManager floorPlanManager;
-        private IDungeonUtils dungeonUtils;
         private List<RoomShapeEnum> roomShapes;
+        private SpecialRoomManager specialRoomManager;
 
-        public RoomManager(IDungeonFloorValues dungeonFloorValues, IRoomFactory factory, IFloorPlanManager floorPlanManager, IDungeonUtils dungeonUtils) {
+        public static RoomManager GetInstance(IDungeonFloorValues dungeonFloorValues, IFloorPlanManager floorPlanManager) {
+            instance ??= new RoomManager(dungeonFloorValues, floorPlanManager);
+            return instance;
+        }
+
+        private RoomManager(IDungeonFloorValues dungeonFloorValues, IFloorPlanManager floorPlanManager) {
             listOfRoom = new List<Room>();
             this.dungeonFloorValues = dungeonFloorValues;
-            roomFactory = factory;
+            roomFactory = RoomFactory.GetInstance();
             this.floorPlanManager = floorPlanManager;
-            this.dungeonUtils = dungeonUtils;
-
             Setup();
         }
 
         private void Setup() {
             roomShapes = GetListOfSpecialShapes();
+            specialRoomManager = new SpecialRoomManager(dungeonFloorValues.GetVectorStart(), floorPlanManager);
         }
 
-        public void InitializeAndPlaceRooms() {
+        public void InitializeRooms() {
+            CreateStandardRooms();
+            CreateSpecialRooms();
+        }
+
+        private void CreateSpecialRooms() {
+            List<SpecialRoom> specialRooms = specialRoomManager.CreateSpecialRooms();
+            specialRooms.ForEach(specialRoom => {
+                Vector2Int vector = specialRoom.GetVector();
+                Room room = InstantiateRoomImplWithProperties(specialRoom.GetShape(), vector, specialRoom.GetTypeEnum());
+                AddRoom(room);
+                floorPlanManager.SetFloorPlanValue(vector.x, vector.y, 1);
+            });
+        }
+
+        private void CreateStandardRooms() {
             int currentShapeIndex = 0;
 
             Vector2Int vectorStart = dungeonFloorValues.GetVectorStart();
@@ -41,12 +63,24 @@ namespace DungeonNs {
                 Vector2Int currentRoomPosition = DequeueRandomRoomPosition(roomPositions);
                 Room room = GenerateRoom(roomShapes, ref currentShapeIndex);
 
-                if (TryPlaceRoom(room, currentRoomPosition, out Vector2Int newRoomPosition)) {
-                    roomPositions.Enqueue(newRoomPosition);
-                    AddRoom(room);
-                    SetFloorPlanByRoom(room, newRoomPosition, GetListOfRoom().Count + 1);
-                }
+                TryPlaceAndAddRoom(room, currentRoomPosition, roomPositions);
             }
+        }
+
+        private void TryPlaceAndAddRoom(Room room, Vector2Int currentRoomPosition, Queue<Vector2Int> roomPositions) {
+            if (TryPlaceRoom(room, currentRoomPosition, out Vector2Int newRoomPosition)) {
+                EnqueueNewRoomPosition(newRoomPosition, roomPositions);
+                AddRoomAndUpdateFloorPlan(room, newRoomPosition);
+            }
+        }
+
+        private void EnqueueNewRoomPosition(Vector2Int newRoomPosition, Queue<Vector2Int> roomPositions) {
+            roomPositions.Enqueue(newRoomPosition);
+        }
+
+        private void AddRoomAndUpdateFloorPlan(Room room, Vector2Int newRoomPosition) {
+            AddRoom(room);
+            SetFloorPlanByRoom(room, newRoomPosition, GetListOfRoom().Count + 1);
         }
 
         private Vector2Int DequeueRandomRoomPosition(Queue<Vector2Int> queue) {
@@ -77,7 +111,7 @@ namespace DungeonNs {
                 return -1;
             }
             foreach (var checkNewPlace in shapesToCheck) {
-                if (!dungeonUtils.CheckIsOutOfBound(checkNewPlace, floorPlanManager.GetFloorPlanBound())) {
+                if (!floorPlanManager.CheckIsOutOfBound(checkNewPlace, floorPlanManager.GetFloorPlanBound())) {
                     int neighbour = floorPlanManager.GetFloorPlanValue(checkNewPlace.x, checkNewPlace.y) > 0 ? 1 : 0;
                     count += neighbour;
                 }
@@ -97,7 +131,7 @@ namespace DungeonNs {
 
         private bool CheckIsEmptySpace(Vector2Int vector, Room room) {
             Vector2Int[] cells = room.GetOccupiedCells(vector);
-            int usedCells = cells.Sum(cell => dungeonUtils.CheckIsOutOfBound(cell, floorPlanManager.GetFloorPlanBound()) ? 1 : floorPlanManager.GetFloorPlanValue(cell.x, cell.y));
+            int usedCells = cells.Sum(cell => floorPlanManager.CheckIsOutOfBound(cell, floorPlanManager.GetFloorPlanBound()) ? 1 : floorPlanManager.GetFloorPlanValue(cell.x, cell.y));
             return usedCells == 0;
         }
 

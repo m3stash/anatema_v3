@@ -4,7 +4,6 @@ using RoomNs;
 using DoorNs;
 using Debug = UnityEngine.Debug;
 using System;
-using NUnit.Framework;
 #if UNITY_EDITOR
 #endif
 
@@ -13,35 +12,45 @@ namespace DungeonNs {
     public class Generator : MonoBehaviour {
 
         private IDungeonFloorValues dungeonFloorValues;
-        private IDungeonUtils dungeonUtils;
         private IDungeonFloorConfig floorConfig;
         private IRoomManager roomManager;
         private GameObject floorContainer;
         private IFloorPlanManager floorPlanManager;
         private IDoorManager doorManager;
-        private int totalLoop = 0;
+        private Item.IManager iTemManager;
+        private int totalLoop;
+        private List<GameObject> roomsGo;
+        private int maxLoop = 100;
 
         public void GenerateDungeon(
             IDungeonFloorConfig floorConfig,
             GameObject floorContainer,
             IDungeonFloorValues dungeonFloorValues,
-            IDungeonUtils dungeonUtils,
             IRoomManager roomManager,
             IFloorPlanManager floorPlanManager,
-            IDoorManager doorManager
+            IDoorManager doorManager,
+            Item.IManager iTemManager
         ) {
             this.floorConfig = floorConfig;
             this.floorContainer = floorContainer;
             this.dungeonFloorValues = dungeonFloorValues;
-            this.dungeonUtils = dungeonUtils; // TODO utiliser le dungeon manager pour faire proxy avec le dungeonUtils !!!
             this.roomManager = roomManager;
             this.floorPlanManager = floorPlanManager;
             this.doorManager = doorManager;
+            this.iTemManager = iTemManager;
+            StartGeneration();
+        }
 
-            GenerateAndPlaceRooms();
-            SpecialRoomManager specialRoomManager = new SpecialRoomManager(dungeonFloorValues, roomManager, dungeonUtils, floorPlanManager);
-            specialRoomManager.PlaceSpecialRooms();
+        private void StartGeneration() {
+            InitValues();
+            GenerateRooms();
             CreateRoomsGO();
+            GenerateItems();
+        }
+
+        private void InitValues() {
+            totalLoop = 0;
+            roomsGo = new List<GameObject>();
         }
 
         private void TryGenerateRooms() {
@@ -68,16 +77,16 @@ namespace DungeonNs {
 
         private void AttemptReGeneration() {
             totalLoop++;
-            if (totalLoop <= 100) {
+            if (totalLoop <= maxLoop) {
                 floorPlanManager.ResetFloorPlan();
-                GenerateAndPlaceRooms();
+                GenerateRooms();
             } else {
                 Debug.LogError("TRY GenerateRooms call == 100 tries");
             }
         }
 
-        private void GenerateAndPlaceRooms() {
-            roomManager.InitializeAndPlaceRooms();
+        private void GenerateRooms() {
+            roomManager.InitializeRooms();
             TryGenerateRooms();
         }
 
@@ -101,6 +110,7 @@ namespace DungeonNs {
                     DifficultyEnum difficulty = Room.GetRoomTypeEnum == RoomTypeEnum.STANDARD ? diff : DifficultyEnum.DEFAULT;
                     GameObject roomGO = InstanciateRoomGo(Room, difficulty);
                     CreateDoorsGo(Room, roomGO);
+                    roomsGo.Add(roomGO);
                 }
             }
 
@@ -110,6 +120,7 @@ namespace DungeonNs {
             foreach (Room Room in roomManager.GetListOfRoom()) {
                 GameObject roomGO = InstanciateRoomGo(Room, DifficultyEnum.DEFAULT);
                 CreateDoorsGo(Room, roomGO);
+                roomsGo.Add(roomGO);
             }
         }
 
@@ -122,13 +133,17 @@ namespace DungeonNs {
 
         private void CreateDoorsGo(Room Room, GameObject roomGo) {
             BiomeEnum biome = floorConfig.GetBiomeType();
-            Room.SearchNeighborsAndCreateDoor(floorPlanManager, floorPlanManager.GetFloorPlanBound(), floorConfig.GetBiomeType(), dungeonUtils);
+            Room.SearchNeighborsAndCreateDoor(floorPlanManager, floorConfig.GetBiomeType());
             List<Door> doorList = Room.GetDoors();
             if (doorList.Count > 0) {
                 foreach (Door door in doorList) {
                     doorManager.CreateDoor(roomGo.transform, door, Room.GetRoomTypeEnum, biome);
                 }
             }
+        }
+
+        private void GenerateItems() {
+            iTemManager.GenerateItems();
         }
         
     }

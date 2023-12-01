@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using DungeonNs;
 using RoomNs;
 using UnityEngine;
 
@@ -9,7 +8,7 @@ public interface IRoomManager {
     GameObject InstantiateRoomGO(GameObject roomPrefab, Vector3 vector3, Transform transform, GameObject floorContainer);
     Room InstantiateRoomImplWithProperties(RoomShapeEnum shape, Vector2Int vector, RoomTypeEnum type);
     List<Room> GetListOfRoom();
-    void InitializeAndPlaceRooms();
+    void InitializeRooms();
     void AddRoom(Room room);
     Room GetNextRoom();
  }

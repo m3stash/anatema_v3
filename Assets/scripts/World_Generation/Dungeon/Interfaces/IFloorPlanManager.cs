@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public interface IFloorPlanManager {
     void SetFloorPlanValue(int x, int y, int value);
@@ -7,5 +8,8 @@ public interface IFloorPlanManager {
     int GetFloorPlanBound();
     HashSet<(int, int)> GetOccupiedCells();
     void ResetFloorPlan();
+    bool CheckIsOutOfBound(Vector2Int vector, int floorplanBound);
+    bool CheckIsInBounds(int x, int y, int bound);
+    int[][] GetDirection();
 }
 

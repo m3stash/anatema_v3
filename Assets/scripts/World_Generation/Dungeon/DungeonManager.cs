@@ -1,6 +1,5 @@
 ﻿using System;
 using DungeonNs;
-using UnityEditor.EditorTools;
 using UnityEngine;
 
 public class DungeonManager : MonoBehaviour {
@@ -12,11 +11,11 @@ public class DungeonManager : MonoBehaviour {
     private IDungeonSeedGenerator dungeonSeedGenerator;
     private IDungeonFloorValues dungeonFloorValues;
     private IRoomManager roomManager;
-    private IDungeonUtils dungeonUtils;
     private IDoorManager doorManager;
     private IFloorPlanManager floorPlanManager;
+    private Item.IManager iTemManager;
     private PoolManager poolManager;
-    private readonly int seedLengh = 8;
+    private readonly int SEED_LENGH = 8;
     private string seed;
 
     private void Awake(){
@@ -27,15 +26,13 @@ public class DungeonManager : MonoBehaviour {
     }
 
     private void InstantiateSingletons() {
-        //toDo garder les singletons car ils devraient être supprimer entre deux scènes non dungeon type ???
-        dungeonFloorValues = DungeonFloorValues.GetInstance();
         dungeonSeedGenerator = DungeonSeedGenerator.GetInstance();
-        dungeonUtils = DungeonUtils.GetInstance();
+        dungeonFloorValues = DungeonFloorValues.GetInstance();
         floorPlanManager = new FloorPlanManager();
         poolManager = poolManagerGO.GetComponent<PoolManager>();
-        doorManager = new DoorManager();
-        doorManager.Setup(poolManager.GetDoorPool());
-        roomManager = new RoomManager(dungeonFloorValues, RoomFactory.GetInstance(), floorPlanManager, dungeonUtils);
+        doorManager = DoorManager.GetInstance(poolManager.GetDoorPool());
+        iTemManager = Item.Manager.GetInstance(dungeonFloorValues);
+        roomManager = RoomManager.GetInstance(dungeonFloorValues, floorPlanManager);
     }
 
     private bool VerifySerialisableFieldInitialised() {
@@ -47,11 +44,15 @@ public class DungeonManager : MonoBehaviour {
             throw new Exception("FloorContainerGO is not assigned in editor!");
         }
 
-        return generator != null && floorContainerGO != null;
+        if(poolManagerGO == null) {
+            throw new Exception("PoolManagerGO is not assigned in editor!");
+        }
+
+        return generator != null && floorContainerGO != null && poolManagerGO != null;
     }
 
     private void CreateSeed() {
-        seed = dungeonSeedGenerator.GetNewSeed(seedLengh);
+        seed = dungeonSeedGenerator.GetNewSeed(SEED_LENGH);
         if (string.IsNullOrEmpty(seed)) {
             throw new Exception("Error when generating a new seed !");
         }
@@ -59,15 +60,11 @@ public class DungeonManager : MonoBehaviour {
 
     public void Setup(IDungeonFloorConfig floorConfig) {
         dungeonFloorValues.InitValues(floorConfig, seed, dungeonSeedGenerator, floorPlanManager.GetFloorPlanBound());
-        generator.GenerateDungeon(floorConfig, floorContainerGO, dungeonFloorValues, dungeonUtils, roomManager, floorPlanManager, doorManager);
+        generator.GenerateDungeon(floorConfig, floorContainerGO, dungeonFloorValues, roomManager, floorPlanManager, doorManager, iTemManager);
     }
 
     public string GetSeed() {
         return seed;
-    }
-
-    public void InitPooling() {
-
     }
 }
 
