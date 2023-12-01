@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour {
     }
   
     private void Start() {
-        floorConfig = new DungeonFloorConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, RoomSizeEnum.L, 1);
+        floorConfig = new DungeonFloorConfig(BiomeEnum.CAVE, DifficultyEnum.EASY, 1);
         dungeonManager.Setup(floorConfig);
         /*currentRoom = generator.GetRoomFromVector2Int(Vector2Int.zero);
         player = GameObject.FindGameObjectWithTag("Player");*/
