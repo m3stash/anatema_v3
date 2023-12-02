@@ -1,6 +1,6 @@
 ﻿namespace RoomNs {
     public enum RoomSizeEnum {
-        WIDTH = 61,
-        HEIGHT = 31
+        WIDTH = 21,
+        HEIGHT = 15
     }
 }
