@@ -28,12 +28,14 @@ namespace RoomNs {
         public abstract Vector2Int GetSizeOfRoom();
 
         /*
-         * Get Size of Room
+         * Get Vector2Int[] List of possible location
+         * based on a 1x1 shape, we position 4 possible locations (T, L, R, B) around this shape to know if we can place the block or not
+         * (depending on its size)
          */
         public abstract Vector2Int[] GetDirections(Vector2Int vector);
 
         /*
-         * Get occuped Cell's for shape
+         * Get list of cells to be occupied for this shape 
          */
         public abstract Vector2Int[] GetOccupiedCells(Vector2Int vector);
 

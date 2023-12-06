@@ -21,7 +21,7 @@ namespace RoomUI {
         }
 
         private void Start() {
-            GenerateGrid(RoomShapeEnum.R2X2);
+            GenerateGrid(RoomShapeEnum.L);
         }
 
         public void GenerateGrid(RoomShapeEnum shape) {
@@ -33,8 +33,12 @@ namespace RoomUI {
                 case RoomShapeEnum.R2X1:
                     break;
                 case RoomShapeEnum.R2X2:
-                    RoomGrid grid = new RoomGrid_R2X2(RoomShapeEnum.R2X2, pool);
-                    grid.GenerateGrid();
+                    //RoomGrid r2x2grid = new RoomGrid_R2X2(RoomShapeEnum.R2X2, pool);
+                    //r2x2grid.GenerateGrid();
+                    break;
+                case RoomShapeEnum.L:
+                    RoomGrid lGrid = new RoomGrid_L(RoomShapeEnum.L, pool);
+                    lGrid.GenerateGrid();
                     break;
                 default:
                     Debug.LogError("GridManager: GenerateGrid, error shape not included : " + shape);
