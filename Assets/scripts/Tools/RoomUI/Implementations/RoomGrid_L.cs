@@ -27,96 +27,77 @@ public class RoomGrid_L: RoomGrid {
 
         // TOP
         if (row == 0) {
-            if ((col + middleSectionWidth) % sectionWidth == 0) {
-                cell.AddDoor();
-                return;
-            }
-            cell.AddWall();
-            return;
+            AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
         // BOTTOM
         } else if (row == rows - 1) {
-            if ((col + middleSectionWidth) % sectionWidth == 0) {
-                cell.AddDoor();
-                return;
-            }
-            cell.AddWall();
-            return;
-        // Neighboor Section
+            AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
+            // Neighboor Section
         } else if(row % sectionHeight == 0 || (row + 1) % sectionHeight == 0) {
             // Top
             if (currentSection.y + 1 < roomHeight && !FindedSection(new Vector2Int(currentSection.x, currentSection.y + 1))) {
-                if ((col + middleSectionWidth) % sectionWidth == 0) {
-                    cell.AddDoor();
-                    return;
-                }
-                cell.AddWall();
-                return;
-            // Bottom
+                AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
+                // Bottom
             } else if (currentSection.y - 1 >= 0 && !FindedSection(new Vector2Int(currentSection.x, currentSection.y - 1))) {
-                if ((col + middleSectionWidth) % sectionWidth == 0) {
-                    cell.AddDoor();
-                    return;
-                }
-                cell.AddWall();
-                return;
+                AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
             }
         }
 
         // LEFT / RIGHT
         if (col == 0) {
-            if ((row + middleSectionHeight) % sectionHeight == 0) {
-                cell.AddDoor();
-                return;
-            }
-            cell.AddWall();
-            return;
+            AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
         } else if (col == cols - 1) {
-            if ((row + middleSectionHeight) % sectionHeight == 0) {
-                cell.AddDoor();
-                return;
-            }
-            cell.AddWall();
-            return;
+            AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
         } else if (col % sectionWidth == 0 || (col + 1) % sectionWidth == 0) {
             // Right
             if (currentSection.x + 1 < roomWidth && !FindedSection(new Vector2Int(currentSection.x + 1, currentSection.y))) {
-                if ((row + middleSectionHeight) % sectionHeight == 0) {
-                    cell.AddDoor();
-                    return;
-                }
-                cell.AddWall();
-                return;
-            // Left
+                AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
+                // Left
             } else if (currentSection.x - 1 >= 0 && !FindedSection(new Vector2Int(currentSection.x - 1, currentSection.y))) {
-                if ((row + middleSectionHeight) % sectionHeight == 0) {
-                    cell.AddDoor();
-                    return;
-                }
-                cell.AddWall();
-                return;
+                AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
             }
         }
 
         // Check Diagonals
         if ((col % sectionWidth == 0 || (col + 1) % sectionWidth == 0) && (row % sectionHeight == 0 || (row + 1) % sectionHeight == 0)) {
-            if (!FindedSection(new Vector2Int(currentSection.x + 1, currentSection.y + 1))) {
-                cell.AddWall();
-                return;
+            Vector2Int TR = new Vector2Int(currentSection.x + 1, currentSection.y + 1);
+            if(TR.x < roomWidth && TR.y < roomHeight) {
+                if (!FindedSection(TR)) {
+                    cell.AddWall();
+                    return;
+                }
             }
-            if (!FindedSection(new Vector2Int(currentSection.x - 1, currentSection.y - 1))) {
-                cell.AddWall();
-                return;
+            Vector2Int BL = new Vector2Int(currentSection.x - 1, currentSection.y - 1);
+            if (BL.x >= 0 && BL.y >= 0) {
+                if (!FindedSection(BL)) {
+                    cell.AddWall();
+                    return;
+                }
             }
-            if (!FindedSection(new Vector2Int(currentSection.x + 1, currentSection.y - 1))) {
-                cell.AddWall();
-                return;
+            Vector2Int BR = new Vector2Int(currentSection.x + 1, currentSection.y - 1);
+            if (BR.x < roomWidth && BR.y >= 0) {
+                if (!FindedSection(BR)) {
+                    cell.AddWall();
+                    return;
+                }
             }
-            if (!FindedSection(new Vector2Int(currentSection.x - 1, currentSection.y + 1))) {
-                cell.AddWall();
-                return;
+            Vector2Int TL = new Vector2Int(currentSection.x - 1, currentSection.y + 1);
+            if (TL.x >= 0 && TL.y < roomHeight) {
+                if (!FindedSection(TL)) {
+                    cell.AddWall();
+                    return;
+                }
             }
         }
 
+    }
+
+    private void AddDoorOrWall(int pos, int middleSection, int sectionSize, CellGO cell) {
+        if ((pos + middleSection) % sectionSize == 0) {
+            cell.AddDoor();
+            return;
+        }
+        cell.AddWall();
+        return;
     }
 }
 
