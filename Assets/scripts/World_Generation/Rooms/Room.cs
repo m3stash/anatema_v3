@@ -37,7 +37,7 @@ namespace RoomNs {
         /*
          * Get list of cells to be occupied for this shape 
          */
-        public abstract Vector2Int[] GetOccupiedCells(Vector2Int vector);
+        public abstract Vector2Int[] GetSections(Vector2Int vector);
 
         /*
          * Get GetNeighbors of cell
@@ -47,7 +47,7 @@ namespace RoomNs {
         public RoomTypeEnum GetRoomTypeEnum { get { return roomType; } }
 
         public void SearchNeighborsAndCreateDoor(IFloorPlanManager floorPlanManager, BiomeEnum biome) {
-            Vector2Int[] sections = GetOccupiedCells(position);
+            Vector2Int[] sections = GetSections(position);
             List<Vector2Int> filteredNeighbors = GetNeighborsCells(position)
                 .Where(neighborPosition => !floorPlanManager.CheckIsOutOfBound(neighborPosition, floorPlanManager.GetFloorPlanBound()) && floorPlanManager.GetFloorPlanValue(neighborPosition.x, neighborPosition.y) > 0)
                 .ToList();

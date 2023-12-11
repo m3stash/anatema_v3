@@ -54,4 +54,8 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
 
         }
     }
+
+    public void ReleaseMany(List<T> objects) {
+        objects.ForEach(obj => ReleaseOne(obj));
+    }
 }

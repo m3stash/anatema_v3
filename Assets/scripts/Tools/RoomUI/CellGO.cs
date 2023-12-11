@@ -6,21 +6,13 @@ public class CellGO: MonoBehaviour {
     private Image image;
     private Button button;
 
-    public void SetImage(Image image) {
-        this.image = image;
-    }
-
-    public void SetButton(Button button) {
-        this.button = button;
-    }
-
     public void DesactivateCell() {
         image.enabled = false;
         button.interactable = false;
     }
 
     public void AddWall() {
-        image.color = Color.black;
+        image.color = Color.gray;
         button.interactable = false;
     }
 
@@ -30,8 +22,16 @@ public class CellGO: MonoBehaviour {
     }
 
     public void Setup() {
-        button = GetComponent<Button>();
-        image = GetComponent<Image>();
+        if(button == null || image == null) {
+            button = GetComponent<Button>();
+            image = GetComponent<Image>();
+        } else {
+            image.enabled = true;
+            button.interactable = true;
+            image.color = Color.white;
+        }
+        
     }
+
 }
 

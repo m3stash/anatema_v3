@@ -21,7 +21,7 @@ public class Room_R2X2 : Room {
         return dir;
     }
 
-    public override Vector2Int[] GetOccupiedCells(Vector2Int vector) {
+    public override Vector2Int[] GetSections(Vector2Int vector) {
         Vector2Int[] cells = {
             new Vector2Int(vector.x, vector.y),
             new Vector2Int(vector.x + 1, vector.y),

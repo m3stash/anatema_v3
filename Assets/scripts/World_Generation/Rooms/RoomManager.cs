@@ -92,7 +92,7 @@ namespace DungeonNs {
         }
 
         private void SetFloorPlanByRoom(Room room, Vector2Int vector, int index) {
-            foreach (var cell in room.GetOccupiedCells(vector)) {
+            foreach (var cell in room.GetSections(vector)) {
                 floorPlanManager.SetFloorPlanValue(cell.x, cell.y, index);
             }
         }
@@ -130,7 +130,7 @@ namespace DungeonNs {
         }
 
         private bool CheckIsEmptySpace(Vector2Int vector, Room room) {
-            Vector2Int[] cells = room.GetOccupiedCells(vector);
+            Vector2Int[] cells = room.GetSections(vector);
             int usedCells = cells.Sum(cell => floorPlanManager.CheckIsOutOfBound(cell, floorPlanManager.GetFloorPlanBound()) ? 1 : floorPlanManager.GetFloorPlanValue(cell.x, cell.y));
             return usedCells == 0;
         }

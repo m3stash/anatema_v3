@@ -96,7 +96,7 @@ namespace DungeonNs {
             HashSet<(int, int)> emptyCellsWithMoreThan3Neighbors = new HashSet<(int, int)>();
             var directions = floorPlanManager.GetDirection();
 
-            foreach ((int row, int col) in floorPlanManager.GetOccupiedCells()) {
+            foreach ((int row, int col) in floorPlanManager.GetSections()) {
 
                 foreach (var direction in directions) {
                     int newRow = row + direction[0];

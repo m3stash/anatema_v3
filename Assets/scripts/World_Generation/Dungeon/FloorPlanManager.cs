@@ -25,7 +25,7 @@ namespace DungeonNs {
             return floorplan[x, y];
         }
 
-        public HashSet<(int, int)> GetOccupiedCells() {
+        public HashSet<(int, int)> GetSections() {
             return occupiedCells;
         }
 

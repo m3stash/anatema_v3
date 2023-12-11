@@ -13,10 +13,10 @@ public class CellPool : Pool<CellGO> {
         return config;
     }
 
-    public void Setup(GameObject prefab, int poolSize, Transform transformParent) {
-        GameObject obj = Instantiate(prefab, transformParent);
+    public void Setup(GameObject prefab, int poolSize) {
+        GameObject obj = Instantiate(prefab);
         CellGO cellGO = obj.GetComponent<CellGO>();
         obj.SetActive(false);
-        base.SetupWithParent(cellGO, poolSize, transformParent);
+        base.Setup(cellGO, poolSize);
     }
 }
