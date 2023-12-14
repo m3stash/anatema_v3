@@ -4,20 +4,25 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using TMPro;
-using System.Runtime.CompilerServices;
 
 namespace RoomUI {
     public class GridManager : MonoBehaviour {
         [SerializeField] private GameObject roomCellPrefab;
         [SerializeField] private GameObject cellPool;
         [SerializeField] private TMP_Dropdown roomShapeDropdown;
+        [SerializeField] private Button gridZoomMinus;
+        [SerializeField] private Button gridZoomPlus;
         private CellPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomBySHape = new Dictionary<RoomShapeEnum, Room>();
         private RoomGrid currentGrid;
         private RectTransform rectTransform;
         private int cellSize = 28;
-        private int cellSpacing = 2;
+        private int cellSpacing = 1;
+        private int defaultWidth;
+        private int defaultHeight;
+        private float currentZoom = 1;
+        private float zoomIncrement = 0.5f;
 
         private void Awake() {
             pool = cellPool.GetComponent<CellPool>();
@@ -40,6 +45,34 @@ namespace RoomUI {
             roomShapeDropdown.onValueChanged.AddListener(delegate {
                 DropdownValueChanged(roomShapeDropdown);
             });
+            if (gridZoomMinus != null) {
+                gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
+            } else {
+                Debug.Log("[SerializeField] gridZoomMinus not set !");
+            }
+            if (gridZoomPlus != null) {
+                gridZoomPlus.onClick.AddListener(OnGridZoomPlus);
+            } else {
+                Debug.Log("[SerializeField] gridZoomPlus not set !");
+            }
+            
+        }
+
+        private void OnGridZoomMinusClick() {
+            currentZoom = currentZoom == 1 ? 1 : currentZoom - zoomIncrement;
+            Zoom(currentZoom);
+        }
+
+        private void OnGridZoomPlus() {
+            currentZoom += zoomIncrement;
+            Zoom(currentZoom);
+        }
+
+        private void Zoom(float currentZoom) {
+            float newWidth = currentZoom * defaultWidth;
+            float newHeight = currentZoom * defaultHeight;
+            gridLayout.cellSize = new Vector2(cellSize * currentZoom, cellSize * currentZoom);
+            rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
         }
 
         private void DropdownValueChanged(TMP_Dropdown change) {
@@ -90,6 +123,8 @@ namespace RoomUI {
         void ModifyGridLayoutRectTransform(int cols, int rows) {
             int width = (cellSize * cols) + (cellSpacing * (cols - 1));
             int height = (cellSize * rows) + (cellSpacing * (rows - 1));
+            defaultWidth = width;
+            defaultHeight = height;
             rectTransform.sizeDelta = new Vector2(width, height);
         }
 

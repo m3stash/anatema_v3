@@ -1,4 +1,4 @@
-using RoomNs;
+/*using RoomNs;
 using UnityEngine;
 
 public class Room_L : Room {
@@ -42,4 +42,4 @@ public class Room_L : Room {
         return new Vector2Int[] { tl, lt, lb, rb, bl, br, mtr };
     }
 
-}
+}*/

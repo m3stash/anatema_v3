@@ -5,6 +5,7 @@ public class CellGO: MonoBehaviour {
 
     private Image image;
     private Button button;
+    private Color defaultColor;
 
     public void DesactivateCell() {
         image.enabled = false;
@@ -25,10 +26,11 @@ public class CellGO: MonoBehaviour {
         if(button == null || image == null) {
             button = GetComponent<Button>();
             image = GetComponent<Image>();
+            defaultColor = image.color;
         } else {
             image.enabled = true;
             button.interactable = true;
-            image.color = Color.white;
+            image.color = defaultColor;
         }
         
     }

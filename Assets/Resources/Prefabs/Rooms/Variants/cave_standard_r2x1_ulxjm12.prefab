@@ -11,7 +11,7 @@ PrefabInstance:
     - target: {fileID: 8532187167547266032, guid: 9ebf33195d513df4ca503a78fb408cac,
         type: 3}
       propertyPath: m_Name
-      value: Room_2x1
+      value: cave_standard_r2x1_ulxjm12
       objectReference: {fileID: 0}
     - target: {fileID: 8532187167547266035, guid: 9ebf33195d513df4ca503a78fb408cac,
         type: 3}
