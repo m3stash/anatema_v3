@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 247e4ba998b8342a0823abaaeafbb1c1
+guid: e552a2db9e1454dcf8c9e5499541eee2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4488944890330720571
-    second: icon-zoom-minus_0
+      213: 5188760772946766342
+    second: icon-kube-x3_0
+  - first:
+      213: -9171378071134032033
+    second: icon-kube-x3_1
+  - first:
+      213: 1467285683068626505
+    second: icon-kube-x3_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +106,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: icon-zoom-minus_0
+      name: icon-kube-x3_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 512
-        height: 512
+        y: 180
+        width: 150
+        height: 152
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -114,8 +120,50 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b39a774289feb4e30800000000000000
-      internalID: 4488944890330720571
+      spriteID: 60a29f78e6e220840800000000000000
+      internalID: 5188760772946766342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-kube-x3_1
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 180
+        width: 152
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5faf318c38b8b080800000000000000
+      internalID: -9171378071134032033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icon-kube-x3_2
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 180
+        width: 150
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94662530e88dc5410800000000000000
+      internalID: 1467285683068626505
       vertices: []
       indices: 
       edges: []
@@ -131,7 +179,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      icon-zoom-minus_0: 4488944890330720571
+      icon-kube-x3_0: 5188760772946766342
+      icon-kube-x3_1: -9171378071134032033
+      icon-kube-x3_2: 1467285683068626505
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

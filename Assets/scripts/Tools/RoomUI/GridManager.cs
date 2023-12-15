@@ -76,6 +76,8 @@ namespace RoomUI {
         }
 
         private void DropdownValueChanged(TMP_Dropdown change) {
+            currentZoom = 1;
+            Zoom(currentZoom);
             string value = change.options[change.value].text;
             RoomShapeEnum shape = GetEnumFromDropdownValue(value);
             GenerateGrid(shape, false);
