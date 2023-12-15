@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using TMPro;
 
 namespace RoomUI {
-    public class GridManager : MonoBehaviour {
+    public class RoomGridManager : MonoBehaviour {
+        [SerializeField] private RoomStateManager roomStateManager;
         [SerializeField] private GameObject roomCellPrefab;
         [SerializeField] private GameObject cellPool;
-        [SerializeField] private TMP_Dropdown roomShapeDropdown;
         [SerializeField] private Button gridZoomMinus;
         [SerializeField] private Button gridZoomPlus;
         private CellPool pool;
@@ -23,6 +23,7 @@ namespace RoomUI {
         private int defaultHeight;
         private float currentZoom = 1;
         private float zoomIncrement = 0.5f;
+        private bool initGrid = true;
 
         private void Awake() {
             pool = cellPool.GetComponent<CellPool>();
@@ -36,15 +37,17 @@ namespace RoomUI {
                 pool.Setup(roomCellPrefab, config.GetPoolSize());
             }
             rectTransform = gridLayout.GetComponent<RectTransform>();
-            PopulateDropdown();
             CreateRoomInstance();
             CreateListeners();
         }
 
+        private void OnDestroy() {
+            roomStateManager.OnShapeChange -= DropdownValueChanged;
+        }
+
         private void CreateListeners() {
-            roomShapeDropdown.onValueChanged.AddListener(delegate {
-                DropdownValueChanged(roomShapeDropdown);
-            });
+            roomStateManager.OnShapeChange += DropdownValueChanged;
+
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
             } else {
@@ -55,7 +58,6 @@ namespace RoomUI {
             } else {
                 Debug.Log("[SerializeField] gridZoomPlus not set !");
             }
-            
         }
 
         private void OnGridZoomMinusClick() {
@@ -75,38 +77,17 @@ namespace RoomUI {
             rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
         }
 
-        private void DropdownValueChanged(TMP_Dropdown change) {
+        private void DropdownValueChanged(RoomShapeEnum shape) {
             currentZoom = 1;
             Zoom(currentZoom);
-            string value = change.options[change.value].text;
-            RoomShapeEnum shape = GetEnumFromDropdownValue(value);
-            GenerateGrid(shape, false);
+            GenerateGrid(shape);
         }
 
-        private RoomShapeEnum GetEnumFromDropdownValue(string value) {
-            RoomShapeEnum shapeEnumValue;
-            if (Enum.TryParse(value, out shapeEnumValue)) {
-                return shapeEnumValue;
-            }
-            Debug.Log("Unkown Enum GetEnumFromDropdownValue: " + value);
-            return RoomShapeEnum.R1X1;
-        }
-
-        private void PopulateDropdown() {
-            List<string> options = new List<string>(Enum.GetNames(typeof(RoomNs.RoomShapeEnum)));
-            roomShapeDropdown.ClearOptions();
-            roomShapeDropdown.AddOptions(options);
-        }
-
-        private void Start() {
-            RoomShapeEnum shape = GetEnumFromDropdownValue(roomShapeDropdown.options[0].text);
-            GenerateGrid(shape, true);
-        }
-
-        private void GenerateGrid(RoomShapeEnum shape, bool isStartCall) {
-            if (!isStartCall) {
+        private void GenerateGrid(RoomShapeEnum shape) {
+            if (!initGrid) {
                 currentGrid.ResetPool();
             }
+            initGrid = false;
             if (roomBySHape.ContainsKey(shape)) {
                 Room room = roomBySHape[shape];
                 Vector2Int[] roomSections = room.GetSections(Vector2Int.zero);
