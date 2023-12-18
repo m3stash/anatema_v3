@@ -9,7 +9,6 @@ namespace RoomUI {
         private RoomGridManager roomGridManager;
         private ItemGridManager itemGridManager;
         private RoomStateManager roomStateManager;
-        //private
 
         private void Awake() {
             InitComponents();

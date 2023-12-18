@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 035237a1303c7411d850192ec12443d3, type: 3}
+  m_Name: Blob
+  m_EditorClassIdentifier: 
+  id: 0
+  prefab: {fileID: 0}
+  displayName: Blob
+  description: A blob
+  itemType: 0
+  sprite: {fileID: 21300000, guid: 050cf1243e4d048aa8a1659b85f9fa39, type: 3}

@@ -1,35 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using RoomNs;
-using TMPro;
 using UnityEngine;
 
 public class RoomStateManager: MonoBehaviour {
-    private RoomShapeEnum shape;
-    private BiomeEnum biome;
-    private DifficultyEnum difficulty;
+    private string shape;
+    private string biome;
+    private string difficulty;
 
 
     // Events
-    public event Action<RoomShapeEnum> OnShapeChange;
-    public event Action<BiomeEnum> OnBiomeChange;
-    public event Action<DifficultyEnum> OnDifficultyChange;
+    public event Action<string> OnShapeChange;
+    public event Action<string> OnBiomeChange;
+    public event Action<string> OnDifficultyChange;
 
-    public RoomShapeEnum CurrentShape => shape;
-    public DifficultyEnum CurrentDifficulty => difficulty;
-    public BiomeEnum CurrentBiome => biome;
+    public string CurrentShape => shape;
+    public string CurrentDifficulty => difficulty;
+    public string CurrentBiome => biome;
 
-    public void OnChangeShape(RoomShapeEnum shape) {
+    public void OnChangeShape(string shape) {
         this.shape = shape;
         OnShapeChange.Invoke(shape);
     }
 
-    public void OnChangeBiome(BiomeEnum biome) {
+    public void OnChangeBiome(string biome) {
         this.biome = biome;
         OnBiomeChange?.Invoke(biome);
     }
 
-    public void OnChangeDifficulty(DifficultyEnum difficulty) {
+    public void OnChangeDifficulty(string difficulty) {
         this.difficulty = difficulty;
         OnDifficultyChange?.Invoke(difficulty);
     }

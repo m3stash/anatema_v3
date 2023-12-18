@@ -3,7 +3,6 @@ using RoomNs;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
-using TMPro;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour {
@@ -14,7 +13,7 @@ namespace RoomUI {
         [SerializeField] private Button gridZoomPlus;
         private CellPool pool;
         private GridLayoutGroup gridLayout;
-        private Dictionary<RoomShapeEnum, Room> roomBySHape = new Dictionary<RoomShapeEnum, Room>();
+        private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
         private RoomGrid currentGrid;
         private RectTransform rectTransform;
         private int cellSize = 28;
@@ -26,6 +25,7 @@ namespace RoomUI {
         private bool initGrid = true;
 
         private void Awake() {
+            VerifySerialisables();
             pool = cellPool.GetComponent<CellPool>();
             PoolConfig config = pool.GetConfig();
             gridLayout = gameObject.GetComponent<GridLayoutGroup>();
@@ -41,6 +41,21 @@ namespace RoomUI {
             CreateListeners();
         }
 
+        private void VerifySerialisables() {
+            Dictionary<string, object> serializableFields = new Dictionary<string, object> {
+                { "roomStateManager", roomStateManager },
+                { "roomCellPrefab", roomCellPrefab },
+                { "cellPool", cellPool },
+                { "gridZoomMinus", gridZoomMinus },
+                { "gridZoomPlus", gridZoomPlus }
+            };
+            foreach (var field in serializableFields) {
+                if (field.Value == null) {
+                    Debug.LogError($"ItemGridManager SerializeField {field.Key} not set !");
+                }
+            }
+        }
+
         private void OnDestroy() {
             roomStateManager.OnShapeChange -= DropdownValueChanged;
         }
@@ -50,13 +65,9 @@ namespace RoomUI {
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
-            } else {
-                Debug.Log("[SerializeField] gridZoomMinus not set !");
             }
             if (gridZoomPlus != null) {
                 gridZoomPlus.onClick.AddListener(OnGridZoomPlus);
-            } else {
-                Debug.Log("[SerializeField] gridZoomPlus not set !");
             }
         }
 
@@ -77,10 +88,15 @@ namespace RoomUI {
             rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
         }
 
-        private void DropdownValueChanged(RoomShapeEnum shape) {
+        private void DropdownValueChanged(string shape) {
             currentZoom = 1;
             Zoom(currentZoom);
-            GenerateGrid(shape);
+            RoomShapeEnum? newShape = Utilities.GetEnumValueFromDropdown<RoomShapeEnum>(shape);
+            if(newShape.HasValue) {
+                GenerateGrid(newShape.Value);
+            } else {
+                currentGrid.ResetPool();
+            }
         }
 
         private void GenerateGrid(RoomShapeEnum shape) {
@@ -88,8 +104,8 @@ namespace RoomUI {
                 currentGrid.ResetPool();
             }
             initGrid = false;
-            if (roomBySHape.ContainsKey(shape)) {
-                Room room = roomBySHape[shape];
+            if (roomByShape.ContainsKey(shape)) {
+                Room room = roomByShape[shape];
                 Vector2Int[] roomSections = room.GetSections(Vector2Int.zero);
                 Vector2Int roomSize = room.GetSizeOfRoom();
                 int cols = roomSize.x * (int)RoomSizeEnum.WIDTH;
@@ -114,7 +130,7 @@ namespace RoomUI {
         private void CreateRoomInstance() {
             foreach (RoomShapeEnum shape in Enum.GetValues(typeof(RoomShapeEnum))) {
                 Room room = RoomFactory.GetInstance().InstantiateRoomImpl(shape);
-                roomBySHape.Add(shape, room);
+                roomByShape.Add(shape, room);
             }
         }
 

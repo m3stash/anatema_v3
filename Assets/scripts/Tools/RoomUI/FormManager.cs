@@ -33,46 +33,16 @@ public class FormManager: MonoBehaviour {
     private void CreateListeners() {
         shapeDropdown.onValueChanged.AddListener(newValue => {
             string value = shapeDropdown.options[newValue].text;
-            RoomShapeEnum shape = GetRoomShapeEnumFromDropdownValue(value);
-            roomStateManager.OnChangeShape(shape);
+            roomStateManager.OnChangeShape(value);
         });
         difficultyDropdown.onValueChanged.AddListener(newValue => {
             string value = shapeDropdown.options[newValue].text;
-            DifficultyEnum difficulty = GetDifficultyEnumFromDropdownValue(value);
-            roomStateManager.OnChangeDifficulty(difficulty);
+            roomStateManager.OnChangeDifficulty(value);
         });
         biomeDropdown.onValueChanged.AddListener(newValue => {
             string value = biomeDropdown.options[newValue].text;
-            BiomeEnum biome = GetBiomeEnumFromDropdownValue(value);
-            roomStateManager.OnChangeBiome(biome);
+            roomStateManager.OnChangeBiome(value);
         });
-    }
-
-    private RoomShapeEnum GetRoomShapeEnumFromDropdownValue(string value) {
-        RoomShapeEnum shapeEnumValue;
-        if (Enum.TryParse(value, out shapeEnumValue)) {
-            return shapeEnumValue;
-        }
-        Debug.Log("Unkown Enum GetEnumFromDropdownValue: " + value);
-        return RoomShapeEnum.R1X1;
-    }
-
-    private DifficultyEnum GetDifficultyEnumFromDropdownValue(string value) {
-        DifficultyEnum difficultyEnumValue;
-        if (Enum.TryParse(value, out difficultyEnumValue)) {
-            return difficultyEnumValue;
-        }
-        Debug.Log("Unkown Enum GetEnumFromDropdownValue: " + value);
-        return DifficultyEnum.DEFAULT;
-    }
-
-    private BiomeEnum GetBiomeEnumFromDropdownValue(string value) {
-        BiomeEnum biomeEnumValue;
-        if (Enum.TryParse(value, out biomeEnumValue)) {
-            return biomeEnumValue;
-        }
-        Debug.Log("Unkown Enum GetEnumFromDropdownValue: " + value);
-        return BiomeEnum.CAVE;
     }
 
 }
