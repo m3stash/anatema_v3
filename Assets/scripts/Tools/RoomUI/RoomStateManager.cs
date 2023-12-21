@@ -6,7 +6,6 @@ public class RoomStateManager: MonoBehaviour {
     private string biome;
     private string difficulty;
 
-
     // Events
     public event Action<string> OnShapeChange;
     public event Action<string> OnBiomeChange;

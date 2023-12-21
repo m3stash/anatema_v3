@@ -1,7 +1,7 @@
 ﻿public enum ItemType {
-    IA,
-    PNJ,
-    CONSUMABLES,
-    BLOCK,
+    POTION,
+    CONTAINER,
+    RESOURCE,
+    CURRENCY,
+    USABLE
 }
-

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour {
         [SerializeField] private RoomStateManager roomStateManager;
-        [SerializeField] private GameObject roomCellPrefab;
         [SerializeField] private GameObject cellPool;
         [SerializeField] private Button gridZoomMinus;
         [SerializeField] private Button gridZoomPlus;
@@ -26,25 +25,32 @@ namespace RoomUI {
 
         private void Awake() {
             VerifySerialisables();
-            pool = cellPool.GetComponent<CellPool>();
-            PoolConfig config = pool.GetConfig();
+            CreateListeners();
+            CreatePooling();
+            InitGrid();
+            CreateRoomInstance();
+        }
+
+        private void InitGrid() {
             gridLayout = gameObject.GetComponent<GridLayoutGroup>();
             gridLayout.cellSize = new Vector2(cellSize, cellSize);
             gridLayout.spacing = new Vector2(cellSpacing, cellSpacing);
+            rectTransform = gridLayout.GetComponent<RectTransform>();
+        }
+
+        private void CreatePooling() {
+            pool = cellPool.GetComponent<CellPool>();
+            PoolConfig config = pool.GetConfig();
             if (!config) {
                 Debug.LogError("Error no config for cellPool on GridManager awake !");
             } else {
-                pool.Setup(roomCellPrefab, config.GetPoolSize());
+                pool.Setup(config.GetPrefab(), config.GetPoolSize());
             }
-            rectTransform = gridLayout.GetComponent<RectTransform>();
-            CreateRoomInstance();
-            CreateListeners();
         }
 
         private void VerifySerialisables() {
             Dictionary<string, object> serializableFields = new Dictionary<string, object> {
                 { "roomStateManager", roomStateManager },
-                { "roomCellPrefab", roomCellPrefab },
                 { "cellPool", cellPool },
                 { "gridZoomMinus", gridZoomMinus },
                 { "gridZoomPlus", gridZoomPlus }
