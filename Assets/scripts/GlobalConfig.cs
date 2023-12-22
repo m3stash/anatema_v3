@@ -7,14 +7,14 @@ public class GlobalConfig {
     private readonly string prefabRoomsPath;
     private readonly string prefabRoomsVariantsPath;
     private readonly string resourcesPath;
-    private readonly string prefabItemsPath;
+    private readonly string prefabObjectPath;
     private readonly string prefabsRoomConfigJsonFile;
     private readonly string directoryResourceFolder;
 
     private GlobalConfig() {
         prefabRoomsPath = "Prefabs/Rooms/";
         prefabRoomsVariantsPath = prefabRoomsPath + "Variants/";
-        prefabItemsPath = "Prefabs/Items/";
+        prefabObjectPath = "Prefabs/object/";
         resourcesPath = "/Resources/";
         prefabsRoomConfigJsonFile = prefabRoomsPath + "rooms_prefab_config";
         directoryResourceFolder = Application.dataPath + "/Resources/";
@@ -38,9 +38,9 @@ public class GlobalConfig {
         }
     }
 
-    public string PrefabItemsPath {
+    public string PrefabObjectPath {
         get {
-            return prefabItemsPath;
+            return prefabObjectPath;
         }
     }
 

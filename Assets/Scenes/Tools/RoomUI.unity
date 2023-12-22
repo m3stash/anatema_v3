@@ -4186,7 +4186,7 @@ GameObject:
   - component: {fileID: 770838200}
   - component: {fileID: 770838201}
   m_Layer: 5
-  m_Name: Object Hub Grid Container
+  m_Name: Objects Hub Grid Container
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4230,7 +4230,7 @@ MonoBehaviour:
   grid: {fileID: 1248016667}
   scrollView: {fileID: 60921546}
   gridTabs: {fileID: 1595801717}
-  itemCategoryConfig: {fileID: 11400000, guid: 595e1be9dfe8d460ebeaabd45d134a2f, type: 2}
+  tabsCategoryConfig: {fileID: 11400000, guid: 106ceeaec03784985b6c3e1762b45b90, type: 2}
 --- !u!1 &835077656
 GameObject:
   m_ObjectHideFlags: 0
@@ -11433,7 +11433,7 @@ PrefabInstance:
     - target: {fileID: 853953006918311526, guid: 0dfdc88576eff4296807ed43b04ec313,
         type: 3}
       propertyPath: m_Name
-      value: ObjectHubCell
+      value: ObjectCell
       objectReference: {fileID: 0}
     - target: {fileID: 1089561602092338073, guid: 0dfdc88576eff4296807ed43b04ec313,
         type: 3}
