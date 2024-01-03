@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.IO;
 
 namespace RoomUI {
     public class ObjectsManager : MonoBehaviour {
         [SerializeField] private RoomStateManager roomStateManager;
-        [SerializeField] private GameObject cellPool;
+        [SerializeField] private GameObject cellPoolGO;
+        [SerializeField] private GameObject tabCellPoolGO;
         [SerializeField] private GameObject grid;
         [SerializeField] private GameObject scrollView;
         [SerializeField] private GameObject gridTabs;
@@ -16,7 +16,9 @@ namespace RoomUI {
         private RectTransform rectTransform;
         private GridLayoutGroup gridLayout;
         private List<CellGO> usedCells = new List<CellGO>();
-        private CellPool pool;
+        private List<TabCellGO> usedTabCells = new List<TabCellGO>();
+        private CellPool cellPool;
+        private TabCellPool tabCellPool;
         private RectOffset padding;
         private int cellSize = 48;
         private int cellSpacing = 1;
@@ -31,7 +33,7 @@ namespace RoomUI {
         void Awake() {
             VerifySerialisables();
             CreateListeners();
-            CreateItemCellPooling();
+            CreatePooling();
             InitGrid();
             CreateTabs();
             InitGridTabs();
@@ -59,14 +61,29 @@ namespace RoomUI {
             gridLayout.spacing = new Vector2(cellTabSpacing, cellTabSpacing);
         }
 
+        private void CreatePooling() {
+            CreateTabCellPooling();
+            CreateObjectCellPooling();
+        }
 
-        private void CreateItemCellPooling() {
-            pool = cellPool.GetComponent<CellPool>();
-            PoolConfig config = pool.GetConfig();
+        private void CreateTabCellPooling() {
+            tabCellPool = tabCellPoolGO.GetComponent<TabCellPool>();
+            PoolConfig config = tabCellPool.GetConfig();
             if (!config) {
                 Debug.LogError("Error no config for cellPool on GridManager awake !");
             } else {
-                pool.Setup(config.GetPrefab(), config.GetPoolSize());
+                tabCellPool.Setup(config.GetPrefab(), config.GetPoolSize());
+            }
+        }
+
+
+        private void CreateObjectCellPooling() {
+            cellPool = cellPoolGO.GetComponent<CellPool>();
+            PoolConfig config = cellPool.GetConfig();
+            if (!config) {
+                Debug.LogError("Error no config for cellPool on GridManager awake !");
+            } else {
+                cellPool.Setup(config.GetPrefab(), config.GetPoolSize());
             }
         }
 
@@ -97,70 +114,40 @@ namespace RoomUI {
             }
         }
 
-        private void CreateTab(ObjectType type) {
-            /*GameObject go = Resources.Load<GameObject>(GlobalConfig.Instance.PrefabObjectPath + directory + "/");
-            string path = Application.dataPath + GlobalConfig.Instance.ResourcesPath + GlobalConfig.Instance.PrefabObjectPath + directory;
-            string[] prefabs = Directory.GetFiles(path);*/
-
+        private void CreateTab(ObjectType type, bool isFirst) {
             Sprite sprite = tabsCategoryConfig.GetItemByCategory(type);
-            CellGO cell = pool.GetOne();
-            usedCells.Add(cell);
-            cell.transform.SetParent(gridTabs.transform);
-            cell.Setup();
-            GameObject cellGo = cell.gameObject;
+            TabCellGO tab = tabCellPool.GetOne();
+            usedTabCells.Add(tab);
+            tab.transform.SetParent(gridTabs.transform);
+            tab.Setup(isFirst, sprite);
+            GameObject cellGo = tab.gameObject;
             cellGo.SetActive(true);
-
-            // TODO !!!!!!!!!!!! revoir le naming de Object (tout renomer partout) puis simplifier : on va créer 5 instances à la main d'un prefab
-            // et dans le script on mettra un champ avec un select pour choisir le type d'enum que l'on veut et qui quand on click emet au parent la tab
-            // selectionnée !
         }
 
         private void CreateTabs() {
-
+            bool isFirstElement = true;
             foreach (ObjectType type in Enum.GetValues(typeof(ObjectType))) {
-                if(type != ObjectType.DECORATION) {
-                    CreateTab(type);
+                if(type != ObjectType.EQUIPMENT) {
+                    if (isFirstElement) {
+                        CreateTab(type, true);
+                        isFirstElement = false;
+                    } else {
+                        CreateTab(type, false);
+                    }
                 }
             }
-
-
-            /*foreach (ElementType type in Enum.GetValues(typeof(ElementType))) {
-                //toDO revoir ça !!!
-                string directory = "";
-                switch (type) {
-                    case ElementType.BLOCK:
-                        directory = "Ennemies";
-                        break;
-                }
-                if(directory == "") {
-                    Debug.LogError("ItemGridManager: directory does not exist for type: " + type);
-                } else {
-                    // GameObject go = Resources.Load<GameObject>(GlobalConfig.Instance.PrefabItemsPath+ "path");
-                    string path = Application.dataPath + GlobalConfig.Instance.ResourcesPath + GlobalConfig.Instance.PrefabItemsPath + directory;
-                    string[] prefabs = Directory.GetFiles(path);
-                }
-                Sprite sprite = itemCategoryConfig.GetIconByElementType(type);
-                CellGO cell = pool.GetOne();
-                usedCells.Add(cell);
-                cell.transform.SetParent(gridTabs.transform);
-                cell.Setup();
-                GameObject cellGo = cell.gameObject;
-                cellGo.SetActive(true);
-                // ITEM GO toDO finir ça !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                //ItemCellGO item = roomUIManager.GetItemCell();
-                //item.transform.SetParent(cell.transform);
-            }*/
         }
 
         public void GenerateGrid(int nbItems) {
             for (int i = 0; i < nbItems; i++) {
-                CellGO cell = pool.GetOne();
+                CellGO cell = cellPool.GetOne();
                 usedCells.Add(cell);
                 cell.transform.SetParent(grid.transform);
                 cell.Setup();
                 GameObject cellGo = cell.gameObject;
                 cellGo.SetActive(true);
                 // ITEM GO toDO finir ça !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                // voir à ne pas intégrer une cellule dans chaque object mais plutot un gameobject vide qui contiendrait le script et la conf associé !
                 // ItemCellGO item = roomUIManager.GetItemCell();
                 // item.transform.SetParent(cell.transform);
             }
@@ -170,7 +157,7 @@ namespace RoomUI {
             /*usedCells.ForEach(cell => {
                 // cell.DesactivateCell();
             });*/
-            pool.ReleaseMany(usedCells);
+            cellPool.ReleaseMany(usedCells);
         }
     }
 }
