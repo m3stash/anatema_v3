@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class RoomStateManager: MonoBehaviour {
+public class RoomUIStateManager: MonoBehaviour {
     private string shape;
     private string biome;
     private string difficulty;

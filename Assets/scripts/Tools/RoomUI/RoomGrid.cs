@@ -35,7 +35,7 @@ namespace RoomUI {
                     CellGO cell = pool.GetOne();
                     usedCells.Add(cell);
                     cell.transform.SetParent(transform);
-                    cell.Setup();
+                    cell.Setup(null);
                     GameObject cellGo = cell.gameObject;
                     cellGo.SetActive(true);
                     ManageCells(col, row, cell);

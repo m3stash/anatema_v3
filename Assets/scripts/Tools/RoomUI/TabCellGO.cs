@@ -3,6 +3,14 @@ using UnityEngine.UI;
 
 public class TabCellGO : MonoBehaviour {
 
+    public delegate void TabClickedEvent(ObjectType type);
+    public event TabClickedEvent OnTabClicked;
+    private ObjectType tabType;
+
+    private void OnTabClick() {
+        OnTabClicked?.Invoke(tabType);
+    }
+
     private Button button;
     // private Color defaultColor;
     private Image backgroundImage;
@@ -22,13 +30,16 @@ public class TabCellGO : MonoBehaviour {
         button.interactable = false;
     }*/
 
-    public void Setup(bool isActive, Sprite sprite) {
+    public void Setup(bool isActive, Sprite sprite, ObjectType objectType) {
+
+        tabType = objectType;
 
         if (button == null) {
             backgroundImage = backgroundGO.GetComponent<Image>();
             // defaultBackgroundTransform = backgroundGO.transform;
             backgroundRectTransform = backgroundGO.GetComponent<RectTransform>();
             button = GetComponent<Button>();
+            button.onClick.AddListener(OnTabClick);
             icon = cellGO.GetComponent<Image>();
             transform.localScale = Vector3Int.one;
             transform.localPosition = Vector3.one;

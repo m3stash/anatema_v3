@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+
 namespace RoomUI {
     public static class Utilities {
         public static T? GetEnumValueFromDropdown<T>(string value) where T : struct, Enum {
@@ -11,6 +12,5 @@ namespace RoomUI {
             return null;
         }
     }
-
 }
 

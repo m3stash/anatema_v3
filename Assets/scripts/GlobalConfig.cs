@@ -10,6 +10,7 @@ public class GlobalConfig {
     private readonly string prefabObjectPath;
     private readonly string prefabsRoomConfigJsonFile;
     private readonly string directoryResourceFolder;
+    private readonly string scriptablePath;
 
     private GlobalConfig() {
         prefabRoomsPath = "Prefabs/Rooms/";
@@ -18,11 +19,18 @@ public class GlobalConfig {
         resourcesPath = "/Resources/";
         prefabsRoomConfigJsonFile = prefabRoomsPath + "rooms_prefab_config";
         directoryResourceFolder = Application.dataPath + "/Resources/";
+        scriptablePath = "Scriptables/object/";
     }
 
     public static GlobalConfig Instance {
         get {
             return instance;
+        }
+    }
+
+    public string ScriptablePath {
+        get {
+            return scriptablePath;
         }
     }
 

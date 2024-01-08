@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace RoomUI {
     public class ObjectsManager : MonoBehaviour {
-        [SerializeField] private RoomStateManager roomStateManager;
+        [SerializeField] private RoomUIStateManager roomUIStateManager;
         [SerializeField] private GameObject cellPoolGO;
         [SerializeField] private GameObject tabCellPoolGO;
         [SerializeField] private GameObject grid;
@@ -28,7 +28,9 @@ namespace RoomUI {
         private int cellTabSpacing = 1;
         private int constraintCount;
         private float gridWidth;
+        private ObjectType selectedTab;
         private RoomUIManager roomUIManager;
+        private Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>> objectConfigsDictionnary = new Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>>();
 
         void Awake() {
             VerifySerialisables();
@@ -37,6 +39,7 @@ namespace RoomUI {
             InitGrid();
             CreateTabs();
             InitGridTabs();
+            LoadObjects();
         }
 
         public void Setup(RoomUIManager roomUIManager) {
@@ -76,7 +79,6 @@ namespace RoomUI {
             }
         }
 
-
         private void CreateObjectCellPooling() {
             cellPool = cellPoolGO.GetComponent<CellPool>();
             PoolConfig config = cellPool.GetConfig();
@@ -88,17 +90,17 @@ namespace RoomUI {
         }
 
         private void VerifySerialisables() {
-            if (roomStateManager == null) {
+            if (roomUIStateManager == null) {
                 Debug.LogError("ItemGridManager SerializeField roomStateManager not set !");
             }
         }
 
         private void OnDestroy() {
-            roomStateManager.OnBiomeChange -= DropdownBiomeChanged;
+            roomUIStateManager.OnBiomeChange -= DropdownBiomeChanged;
         }
 
         private void CreateListeners() {
-            roomStateManager.OnBiomeChange += DropdownBiomeChanged;
+            roomUIStateManager.OnBiomeChange += DropdownBiomeChanged;
         }
 
         private void DropdownBiomeChanged(string biome) {
@@ -108,7 +110,7 @@ namespace RoomUI {
                 int nbrRows = (int)Math.Ceiling((decimal)nbItems / constraintCount);
                 int height = nbrRows * (cellSize + (cellSpacing * 2)) + (padding.bottom + padding.top);
                 rectTransform.sizeDelta = new Vector2(gridWidth, height);
-                GenerateGrid(nbItems);
+                // TODO changer le biome des objects configs !!!
             } else {
                 ResetPool();
             }
@@ -119,9 +121,16 @@ namespace RoomUI {
             TabCellGO tab = tabCellPool.GetOne();
             usedTabCells.Add(tab);
             tab.transform.SetParent(gridTabs.transform);
-            tab.Setup(isFirst, sprite);
+            tab.Setup(isFirst, sprite, type);
             GameObject cellGo = tab.gameObject;
+            tab.OnTabClicked += OnTabClickHandler;
             cellGo.SetActive(true);
+        }
+
+        private void OnTabClickHandler(ObjectType type) {
+            Debug.Log("SELECTED TYPE: "+ type);
+            // ToDO vider les cellules avant d'en charger des nouvelles
+            CreateDictionnary(type);
         }
 
         private void CreateTabs() {
@@ -129,6 +138,7 @@ namespace RoomUI {
             foreach (ObjectType type in Enum.GetValues(typeof(ObjectType))) {
                 if(type != ObjectType.EQUIPMENT) {
                     if (isFirstElement) {
+                        selectedTab = type;
                         CreateTab(type, true);
                         isFirstElement = false;
                     } else {
@@ -138,26 +148,56 @@ namespace RoomUI {
             }
         }
 
-        public void GenerateGrid(int nbItems) {
-            for (int i = 0; i < nbItems; i++) {
-                CellGO cell = cellPool.GetOne();
-                usedCells.Add(cell);
-                cell.transform.SetParent(grid.transform);
-                cell.Setup();
-                GameObject cellGo = cell.gameObject;
-                cellGo.SetActive(true);
-                // ITEM GO toDO finir ça !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                // voir à ne pas intégrer une cellule dans chaque object mais plutot un gameobject vide qui contiendrait le script et la conf associé !
-                // ItemCellGO item = roomUIManager.GetItemCell();
-                // item.transform.SetParent(cell.transform);
+        void LoadObjects() {
+            foreach (ObjectType type in Enum.GetValues(typeof(ObjectType))) {
+                switch (type) {
+                    case ObjectType.ITEM:
+                    case ObjectType.ENTITY:
+                    case ObjectType.BLOCK:
+                    case ObjectType.PEDESTRAL:
+                    case ObjectType.DECORATION:
+                        CreateDictionnary(type);
+                        break;
+                    case ObjectType.EQUIPMENT:
+                        break;
+                    default:
+                        Debug.LogError("LoadObjects: type not found: " + type);
+                        break;
+                }
+            };
+        }
+
+        private void CreateDictionnary(ObjectType type) {
+            string cat = type.ToString().ToLower();
+            if (objectConfigsDictionnary.ContainsKey(type)) { return; }
+            ObjectConfig[] objectConfigs = Resources.LoadAll<ObjectConfig>(GlobalConfig.Instance.ScriptablePath + cat);
+            objectConfigsDictionnary[type] = new Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>();
+            foreach (var config in objectConfigs) {
+                Type category = config.Category();
+                Enum categoryValue = config.CategoryValue<Enum>();
+                if (!objectConfigsDictionnary[type].ContainsKey(category)) {
+                    objectConfigsDictionnary[type][category] = new Dictionary<Enum, List<ObjectConfig>>();
+                }
+                if (!objectConfigsDictionnary[type][category].ContainsKey(categoryValue)) {
+                    objectConfigsDictionnary[type][category][categoryValue] = new List<ObjectConfig>();
+                }
+                objectConfigsDictionnary[type][category][categoryValue].Add(config);
+                CreateCell(config);
             }
         }
 
+        public void CreateCell(ObjectConfig config) {
+            CellGO cell = cellPool.GetOne();
+            usedCells.Add(cell);
+            cell.transform.SetParent(grid.transform);
+            cell.Setup(config);
+            GameObject cellGo = cell.gameObject;
+            cellGo.SetActive(true);
+        }
+
         public void ResetPool() {
-            /*usedCells.ForEach(cell => {
-                // cell.DesactivateCell();
-            });*/
             cellPool.ReleaseMany(usedCells);
+            tabCellPool.ReleaseMany(usedTabCells);
         }
     }
 }

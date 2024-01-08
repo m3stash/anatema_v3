@@ -11,10 +11,10 @@ public class FormManager: MonoBehaviour {
     [SerializeField] private TMP_Dropdown biomeDropdown;
     [SerializeField] private GameObject stateManager;
 
-    private RoomStateManager roomStateManager;
+    private RoomUIStateManager roomUIStateManager;
 
     private void Awake() {
-        roomStateManager = stateManager.GetComponent<RoomStateManager>();
+        roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
         CreateDropdownList();
         CreateListeners();
     }
@@ -33,15 +33,15 @@ public class FormManager: MonoBehaviour {
     private void CreateListeners() {
         shapeDropdown.onValueChanged.AddListener(newValue => {
             string value = shapeDropdown.options[newValue].text;
-            roomStateManager.OnChangeShape(value);
+            roomUIStateManager.OnChangeShape(value);
         });
         difficultyDropdown.onValueChanged.AddListener(newValue => {
             string value = shapeDropdown.options[newValue].text;
-            roomStateManager.OnChangeDifficulty(value);
+            roomUIStateManager.OnChangeDifficulty(value);
         });
         biomeDropdown.onValueChanged.AddListener(newValue => {
             string value = biomeDropdown.options[newValue].text;
-            roomStateManager.OnChangeBiome(value);
+            roomUIStateManager.OnChangeBiome(value);
         });
     }
 

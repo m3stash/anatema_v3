@@ -10,7 +10,7 @@ namespace RoomUI {
         private ObjectPool pool;
         private RoomGridManager roomGridManager;
         private ObjectsManager objectsManager;
-        private RoomStateManager roomStateManager;
+        private RoomUIStateManager roomUIStateManager;
         // private List<ItemCellGO> usedCells = new List<ItemCellGO>();
 
         public ObjectSlotGO GetObjectCell() {
@@ -62,7 +62,7 @@ namespace RoomUI {
             roomGridManager = roomGrid.GetComponent<RoomGridManager>();
             objectsManager = itemGrid.GetComponent<ObjectsManager>();
             objectsManager.Setup(this);
-            roomStateManager = stateManager.GetComponent<RoomStateManager>();
+            roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
         }
 
     }

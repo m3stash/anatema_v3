@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour {
-        [SerializeField] private RoomStateManager roomStateManager;
+        [SerializeField] private RoomUIStateManager roomUIStateManager;
         [SerializeField] private GameObject cellPool;
         [SerializeField] private Button gridZoomMinus;
         [SerializeField] private Button gridZoomPlus;
@@ -50,7 +50,7 @@ namespace RoomUI {
 
         private void VerifySerialisables() {
             Dictionary<string, object> serializableFields = new Dictionary<string, object> {
-                { "roomStateManager", roomStateManager },
+                { "roomStateManager", roomUIStateManager },
                 { "cellPool", cellPool },
                 { "gridZoomMinus", gridZoomMinus },
                 { "gridZoomPlus", gridZoomPlus }
@@ -63,11 +63,11 @@ namespace RoomUI {
         }
 
         private void OnDestroy() {
-            roomStateManager.OnShapeChange -= DropdownValueChanged;
+            roomUIStateManager.OnShapeChange -= DropdownValueChanged;
         }
 
         private void CreateListeners() {
-            roomStateManager.OnShapeChange += DropdownValueChanged;
+            roomUIStateManager.OnShapeChange += DropdownValueChanged;
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);

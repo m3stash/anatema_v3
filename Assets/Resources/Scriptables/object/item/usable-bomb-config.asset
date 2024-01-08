@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: usable-bomb-config
   m_EditorClassIdentifier: 
   displayName: Bomb
+  icon: {fileID: 21300000, guid: 98c21f12dc14944e0814655e84a908d7, type: 3}
+  description: deal 60 damage
+  id: 0
+  displayName: Bomb
   icon: {fileID: 0}
   description: deal 60 damage
   id: 0

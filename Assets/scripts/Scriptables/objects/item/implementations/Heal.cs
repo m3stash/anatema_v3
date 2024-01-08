@@ -4,7 +4,7 @@
 public class Heal : Potion {
 
     public Heal() {
-        subCategory = PotionType.HEAL;
+        potionType = PotionType.HEAL;
     }
     
     [Header("Recovered Life Config")]
