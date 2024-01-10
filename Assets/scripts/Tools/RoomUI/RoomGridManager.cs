@@ -50,7 +50,7 @@ namespace RoomUI {
 
         private void VerifySerialisables() {
             Dictionary<string, object> serializableFields = new Dictionary<string, object> {
-                { "roomStateManager", roomUIStateManager },
+                { "roomUIStateManager", roomUIStateManager },
                 { "cellPool", cellPool },
                 { "gridZoomMinus", gridZoomMinus },
                 { "gridZoomPlus", gridZoomPlus }

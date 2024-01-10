@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using NUnit.Framework.Constraints;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class CellGO: MonoBehaviour {
@@ -8,7 +11,10 @@ public class CellGO: MonoBehaviour {
     private Color defaultColor;
     private ObjectConfig config;
     [SerializeField] private GameObject cell;
+    [SerializeField] private Sprite defaultIcon;
     private Image icon;
+    private RectTransform rectTransform;
+    private RectTransform childRectTransform;
 
     public void DesactivateCell() {
         image.enabled = false;
@@ -18,17 +24,28 @@ public class CellGO: MonoBehaviour {
     public void AddWall() {
         image.color = Color.gray;
         button.interactable = false;
+        icon.sprite = null;
+        cell.SetActive(false);
     }
 
     public void AddDoor() {
         image.color = Color.yellow;
         button.interactable = false;
+        icon.sprite = null;
+        cell.SetActive(false);
+    }
+
+    private void LateUpdate() {
+        transform.localScale = Vector3Int.one;
+        rectTransform = GetComponent<RectTransform>();
+        float width = rectTransform.sizeDelta.x;
+        float height = rectTransform.sizeDelta.y;
+        childRectTransform = cell.GetComponent<RectTransform>();
+        childRectTransform.sizeDelta = new Vector2(width * 0.75f, height * 0.75f);
     }
 
     public void Setup(ObjectConfig config) {
-
-        transform.localScale = Vector3Int.one;
-
+        // todo revoir la façon de faire !!!
         if (button == null || image == null) {
             button = GetComponent<Button>();
             image = GetComponent<Image>();
@@ -40,16 +57,16 @@ public class CellGO: MonoBehaviour {
             image.color = defaultColor;
         }
 
-        this.config = config;
-
         if (config == null) {
-            Debug.LogError("CellGO config cannot be null");
+            // toDo voir quoi faire...
+            // Debug.LogError("CellGO config cannot be null");
         } else {
+            this.config = config;
             Sprite cellIcon = config.GetSprite();
             if (cellIcon) {
                 icon.sprite = cellIcon;
             } else {
-                // Debug.LogError("Icon sprite not set in config : " + config.GetName());
+                icon.sprite = defaultIcon;
             }
 
         }

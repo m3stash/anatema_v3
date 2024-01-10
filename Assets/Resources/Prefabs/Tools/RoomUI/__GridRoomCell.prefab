@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7267042901503241519}
   - component: {fileID: -6168761159776928396}
   m_Layer: 5
-  m_Name: GridRoomCell
+  m_Name: __GridRoomCell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

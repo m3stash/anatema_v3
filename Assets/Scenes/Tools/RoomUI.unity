@@ -9770,7 +9770,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1927bb20c2d134bef9aa5171068b999a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomUIStateManager: {fileID: 0}
+  roomUIStateManager: {fileID: 1045058813}
   cellPool: {fileID: 380827830}
   gridZoomMinus: {fileID: 859567418}
   gridZoomPlus: {fileID: 1744376212}
