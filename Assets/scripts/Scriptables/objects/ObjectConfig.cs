@@ -20,4 +20,7 @@ public abstract class ObjectConfig : ScriptableObject {
     public string GetName() {
         return displayName;
     }
+    public string GetDescription() {
+        return description;
+    }
 }

@@ -42,8 +42,24 @@ namespace RoomUI {
             LoadObjects();
         }
 
+        void OnDestroy() {
+            RemoveListeners();
+        }
+
         public void Setup(RoomUIManager roomUIManager) {
             this.roomUIManager = roomUIManager;
+        }
+
+        private void RemoveListeners() {
+            CellGO.OnClick -= OnCellClickHandler;
+            TabCellGO.OnClick -= OnTabClickHandler;
+            roomUIStateManager.OnBiomeChange -= DropdownBiomeChanged;
+        }
+
+        private void CreateListeners() {
+            CellGO.OnClick += OnCellClickHandler;
+            TabCellGO.OnClick += OnTabClickHandler;
+            roomUIStateManager.OnBiomeChange += DropdownBiomeChanged;
         }
 
         private void InitGrid() {
@@ -95,14 +111,6 @@ namespace RoomUI {
             }
         }
 
-        private void OnDestroy() {
-            roomUIStateManager.OnBiomeChange -= DropdownBiomeChanged;
-        }
-
-        private void CreateListeners() {
-            roomUIStateManager.OnBiomeChange += DropdownBiomeChanged;
-        }
-
         private void DropdownBiomeChanged(string biome) {
             BiomeEnum? newBiome = Utilities.GetEnumValueFromDropdown<BiomeEnum>(biome);
             int nbItems = 10;
@@ -110,7 +118,6 @@ namespace RoomUI {
                 int nbrRows = (int)Math.Ceiling((decimal)nbItems / constraintCount);
                 int height = nbrRows * (cellSize + (cellSpacing * 2)) + (padding.bottom + padding.top);
                 rectTransform.sizeDelta = new Vector2(gridWidth, height);
-                // TODO changer le biome des objects configs !!!
             } else {
                 ResetPool();
             }
@@ -123,14 +130,16 @@ namespace RoomUI {
             tab.transform.SetParent(gridTabs.transform);
             tab.Setup(isFirst, sprite, type);
             GameObject cellGo = tab.gameObject;
-            tab.OnTabClicked += OnTabClickHandler;
             cellGo.SetActive(true);
         }
 
         private void OnTabClickHandler(ObjectType type) {
-            Debug.Log("SELECTED TYPE: "+ type);
-            // ToDO vider les cellules avant d'en charger des nouvelles
-            CreateDictionnary(type);
+            cellPool.ReleaseMany(usedCells);
+            CreateDictionnaryAndCellByObjectType(type);
+        }
+
+        private void OnCellClickHandler(ObjectConfig config) {
+            roomUIStateManager.OnSelectObject(config);
         }
 
         private void CreateTabs() {
@@ -156,7 +165,7 @@ namespace RoomUI {
                     case ObjectType.BLOCK:
                     case ObjectType.PEDESTRAL:
                     case ObjectType.DECORATION:
-                        CreateDictionnary(type);
+                        CreateDictionnaryAndCellByObjectType(type);
                         break;
                     case ObjectType.EQUIPMENT:
                         break;
@@ -167,25 +176,52 @@ namespace RoomUI {
             };
         }
 
-        private void CreateDictionnary(ObjectType type) {
+        private void CreateDictionnaryAndCellByObjectType(ObjectType type) {
             string cat = type.ToString().ToLower();
-            if (objectConfigsDictionnary.ContainsKey(type)) { return; }
-            ObjectConfig[] objectConfigs = Resources.LoadAll<ObjectConfig>(GlobalConfig.Instance.ScriptablePath + cat);
-            objectConfigsDictionnary[type] = new Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>();
+            if (!objectConfigsDictionnary.ContainsKey(type)) {
+                ObjectConfig[] objectConfigs = LoadObjectConfigs(cat);
+                BuildObjectConfigsDictionary(type, objectConfigs);
+            }else{
+                CreateCellWithExistingDictionnary(type);
+            }
+        }
+
+        private void CreateCellWithExistingDictionnary(ObjectType type) {
+            foreach (var category in objectConfigsDictionnary[type].Keys) {
+                foreach (var categoryValue in objectConfigsDictionnary[type][category].Keys) {
+                    foreach (var config in objectConfigsDictionnary[type][category][categoryValue]) {
+                        CreateCell(config);
+                    }
+                }
+            }
+        }
+
+        private ObjectConfig[] LoadObjectConfigs(string category) {
+            return Resources.LoadAll<ObjectConfig>(GlobalConfig.Instance.ScriptablePath + category);
+        }
+
+        private void BuildObjectConfigsDictionary(ObjectType type, ObjectConfig[] objectConfigs) {
+            if (!objectConfigsDictionnary.ContainsKey(type)) {
+                objectConfigsDictionnary[type] = new Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>();
+            }
             foreach (var config in objectConfigs) {
                 Type category = config.Category();
                 Enum categoryValue = config.CategoryValue<Enum>();
-                if (!objectConfigsDictionnary[type].ContainsKey(category)) {
-                    objectConfigsDictionnary[type][category] = new Dictionary<Enum, List<ObjectConfig>>();
-                }
-                if (!objectConfigsDictionnary[type][category].ContainsKey(categoryValue)) {
-                    objectConfigsDictionnary[type][category][categoryValue] = new List<ObjectConfig>();
-                }
+                EnsureNestedDictionariesExist(type, category, categoryValue);
+
                 objectConfigsDictionnary[type][category][categoryValue].Add(config);
                 CreateCell(config);
             }
         }
 
+        private void EnsureNestedDictionariesExist(ObjectType type, Type category, Enum categoryValue) {
+            if (!objectConfigsDictionnary[type].ContainsKey(category)) {
+                objectConfigsDictionnary[type][category] = new Dictionary<Enum, List<ObjectConfig>>();
+            }
+            if (!objectConfigsDictionnary[type][category].ContainsKey(categoryValue)) {
+                objectConfigsDictionnary[type][category][categoryValue] = new List<ObjectConfig>();
+            }
+        }
         public void CreateCell(ObjectConfig config) {
             CellGO cell = cellPool.GetOne();
             usedCells.Add(cell);

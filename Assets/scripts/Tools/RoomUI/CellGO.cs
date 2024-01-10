@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using NUnit.Framework.Constraints;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class CellGO: MonoBehaviour {
@@ -16,7 +13,19 @@ public class CellGO: MonoBehaviour {
     private RectTransform rectTransform;
     private RectTransform childRectTransform;
 
+    public delegate void CellClickEvent(ObjectConfig type);
+    public static event CellClickEvent OnClick;
+
+    private void OnCellClick() {
+        OnClick?.Invoke(config);
+    }
+
+    void OnDestroy() {
+        button.onClick.RemoveListener(OnCellClick);
+    }
+
     public void DesactivateCell() {
+        button.onClick.RemoveListener(OnCellClick);
         image.enabled = false;
         button.interactable = false;
     }
@@ -48,6 +57,7 @@ public class CellGO: MonoBehaviour {
         // todo revoir la façon de faire !!!
         if (button == null || image == null) {
             button = GetComponent<Button>();
+            button.onClick.AddListener(OnCellClick);
             image = GetComponent<Image>();
             defaultColor = image.color;
             icon = cell.GetComponent<Image>();

@@ -4,17 +4,15 @@ using UnityEngine.UI;
 public class TabCellGO : MonoBehaviour {
 
     public delegate void TabClickedEvent(ObjectType type);
-    public event TabClickedEvent OnTabClicked;
+    public static event TabClickedEvent OnClick;
     private ObjectType tabType;
 
     private void OnTabClick() {
-        OnTabClicked?.Invoke(tabType);
+        OnClick?.Invoke(tabType);
     }
 
     private Button button;
-    // private Color defaultColor;
     private Image backgroundImage;
-    // private Transform defaultBackgroundTransform;
     private RectTransform backgroundRectTransform;
 
     private Image icon;
@@ -25,10 +23,9 @@ public class TabCellGO : MonoBehaviour {
         button.interactable = false;
     }
 
-    /*public void AddWall() {
-        image.color = Color.gray;
-        button.interactable = false;
-    }*/
+    void OnDestroy() {
+        button.onClick.RemoveListener(OnTabClick);
+    }
 
     public void Setup(bool isActive, Sprite sprite, ObjectType objectType) {
 
@@ -36,7 +33,6 @@ public class TabCellGO : MonoBehaviour {
 
         if (button == null) {
             backgroundImage = backgroundGO.GetComponent<Image>();
-            // defaultBackgroundTransform = backgroundGO.transform;
             backgroundRectTransform = backgroundGO.GetComponent<RectTransform>();
             button = GetComponent<Button>();
             button.onClick.AddListener(OnTabClick);

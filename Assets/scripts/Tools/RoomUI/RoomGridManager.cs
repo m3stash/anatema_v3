@@ -64,10 +64,15 @@ namespace RoomUI {
 
         private void OnDestroy() {
             roomUIStateManager.OnShapeChange -= DropdownValueChanged;
+            roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
+            gridZoomMinus.onClick.RemoveListener(OnGridZoomMinusClick);
+            gridZoomPlus.onClick.RemoveListener(OnGridZoomPlus);
         }
 
         private void CreateListeners() {
+            CellGO.OnClick += OnCellClickHandler;
             roomUIStateManager.OnShapeChange += DropdownValueChanged;
+            roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
@@ -75,6 +80,14 @@ namespace RoomUI {
             if (gridZoomPlus != null) {
                 gridZoomPlus.onClick.AddListener(OnGridZoomPlus);
             }
+        }
+
+        private void OnCellClickHandler(ObjectConfig config) {
+            Debug.Log("OnCellClickHandler");
+        }
+
+        private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
+            /////////////////
         }
 
         private void OnGridZoomMinusClick() {

@@ -12,10 +12,15 @@ namespace RoomUI {
         public event Action<string> OnShapeChange;
         public event Action<string> OnBiomeChange;
         public event Action<string> OnDifficultyChange;
+        public event Action<ObjectConfig> OnObjectSelected;
 
         public string CurrentShape => shape;
         public string CurrentDifficulty => difficulty;
         public string CurrentBiome => biome;
+
+        public void OnSelectObject(ObjectConfig selectedObject) {
+            OnObjectSelected?.Invoke(selectedObject);
+        }
 
         public void OnChangeShape(string shape) {
             this.shape = shape;
