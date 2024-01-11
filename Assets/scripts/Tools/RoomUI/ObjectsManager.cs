@@ -128,6 +128,7 @@ namespace RoomUI {
             TabCellGO tab = tabCellPool.GetOne();
             usedTabCells.Add(tab);
             tab.transform.SetParent(gridTabs.transform);
+            // Be careful to call setup after setActive to avoid setting components to null !
             tab.Setup(isFirst, sprite, type);
             GameObject cellGo = tab.gameObject;
             cellGo.SetActive(true);
@@ -139,7 +140,6 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(ObjectConfig config) {
-            Debug.Log("OnCellClickHandler object cell");
             roomUIStateManager.OnSelectObject(config);
         }
 

@@ -12,6 +12,8 @@ namespace RoomUI {
         private Vector2Int roomSize;
         private List<CellRoomGO> usedCells = new List<CellRoomGO>();
 
+        public List<CellRoomGO> UsedCells { get => usedCells; }
+
         public RoomGrid(CellRoomPool pool, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
             this.pool = pool;
             this.roomSections = roomSections;
@@ -35,9 +37,9 @@ namespace RoomUI {
                     CellRoomGO cell = pool.GetOne();
                     usedCells.Add(cell);
                     cell.transform.SetParent(transform);
-                    cell.Setup(null);
                     GameObject cellRoomGo = cell.gameObject;
                     cellRoomGo.SetActive(true);
+                    cell.Setup(null);
                     ManageCells(col, row, cell);
                 }
             }

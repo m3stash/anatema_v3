@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class CellRoomGO: MonoBehaviour {
 
@@ -13,8 +14,20 @@ public class CellRoomGO: MonoBehaviour {
     private RectTransform rectTransform;
     private RectTransform childRectTransform;
 
+    private float lastWith = 0;
+
     public delegate void CellClickEvent(CellRoomGO cellRoomGO);
     public static event CellClickEvent OnClick;
+
+    void Awake() {
+        button = GetComponent<Button>();
+        button.onClick.AddListener(OnCellClick);
+        image = GetComponent<Image>();
+        defaultColor = image.color;
+        icon = cell.GetComponent<Image>();
+        rectTransform = GetComponent<RectTransform>();
+        childRectTransform = cell.GetComponent<RectTransform>();
+    }
 
     private void OnCellClick() {
         OnClick?.Invoke(this);
@@ -24,10 +37,8 @@ public class CellRoomGO: MonoBehaviour {
         return config;
     }
 
-    public void SetConfig(ObjectConfig config) {
-        Debug.Log("CellRoomGO SetConfig");
+    private void SetComponentValues(ObjectConfig config){
         this.config = config;
-        // toTest 
         Sprite cellIcon = config.GetSprite();
         icon.sprite = cellIcon;
     }
@@ -37,7 +48,6 @@ public class CellRoomGO: MonoBehaviour {
     }
 
     public void DesactivateCell() {
-        button.onClick.RemoveListener(OnCellClick);
         image.enabled = false;
         button.interactable = false;
         config = null;
@@ -59,45 +69,41 @@ public class CellRoomGO: MonoBehaviour {
         cell.SetActive(false);
     }
 
-    private void LateUpdate() {
-        transform.localScale = Vector3Int.one;
-        rectTransform = GetComponent<RectTransform>();
+    /*private void LateUpdate() {
+        float width = rectTransform.sizeDelta.x;
+        if(width == lastWith)return;
+        resizeCellSize(width);
+    }*/
+
+    private void ResizeCellSize() {
         float width = rectTransform.sizeDelta.x;
         float height = rectTransform.sizeDelta.y;
-        childRectTransform = cell.GetComponent<RectTransform>();
         childRectTransform.sizeDelta = new Vector2(width * 0.75f, height * 0.75f);
     }
 
-
     public void Setup(ObjectConfig config) {
-        // todo revoir la façon de faire !!!
-        if (button == null || image == null) {
-            button = GetComponent<Button>();
-            button.onClick.AddListener(OnCellClick);
-            image = GetComponent<Image>();
-            defaultColor = image.color;
-            icon = cell.GetComponent<Image>();
-        } else {
-            cell.SetActive(true);
-            image.enabled = true;
-            button.interactable = true;
-            image.color = defaultColor;
+        StartCoroutine(AdjustSizeAfterFrame());
+        DefaultCellConfiguration();
+        if (config) {
+            SetComponentValues(config);
         }
+    }
 
-        if (config == null) {
-            // toDo voir quoi faire...
-            // Debug.LogError("CellGO config cannot be null");
-        } else {
-            this.config = config;
-            Sprite cellIcon = config.GetSprite();
-            if (cellIcon) {
-                icon.sprite = cellIcon;
-            } else {
-                icon.sprite = defaultIcon;
-            }
+    private void DefaultCellConfiguration(){
+        cell.SetActive(true);
+        image.enabled = true;
+        button.interactable = true;
+        image.color = defaultColor;
+    }
 
-        }
+    public void ResizeCellZiseAfterZoom(){
+        StartCoroutine(AdjustSizeAfterFrame());
+    }
 
+    // used to solve the problem of recovering the size of the RectTransform, which is erroneous because it is driven by the gridLayout
+    private IEnumerator AdjustSizeAfterFrame() {
+        yield return new WaitForEndOfFrame();
+        ResizeCellSize();
     }
 
 }

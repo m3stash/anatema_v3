@@ -25,7 +25,6 @@ public class CellGO: MonoBehaviour {
     }
 
     public void DesactivateCell() {
-        button.onClick.RemoveListener(OnCellClick);
         image.enabled = false;
         button.interactable = false;
     }

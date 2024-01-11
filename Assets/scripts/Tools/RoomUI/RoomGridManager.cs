@@ -65,6 +65,7 @@ namespace RoomUI {
         }
 
         private void OnDestroy() {
+            CellRoomGO.OnClick -= OnCellClickHandler;
             roomUIStateManager.OnShapeChange -= DropdownValueChanged;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
             gridZoomMinus.onClick.RemoveListener(OnGridZoomMinusClick);
@@ -86,19 +87,10 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-
-            // Debug.Log("OnCellClickHandler CELL ROOM"+ cellRoomGO.GetConfig().name);
-            Debug.Log("OnCellClickHandler CELL ROOM"+ currenSelectedObject.name);
-            cellRoomGO.SetConfig(currenSelectedObject);
-            /*if(currenSelectedObject != null) {
-                // currentGrid.AddObjectToGrid(currenSelectedObject, config);
-            }else{
-                
-            }*/
+            cellRoomGO.Setup(currenSelectedObject);
         }
 
         private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
-            Debug.Log("_--------"+ selectedObject.name);
             currenSelectedObject = selectedObject;
         }
 
@@ -117,6 +109,11 @@ namespace RoomUI {
             float newHeight = currentZoom * defaultHeight;
             gridLayout.cellSize = new Vector2(cellSize * currentZoom, cellSize * currentZoom);
             rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
+            if(currentGrid != null){
+                currentGrid.UsedCells.ForEach(cell => {
+                    cell.ResizeCellZiseAfterZoom();
+                });
+            }
         }
 
         private void DropdownValueChanged(string shape) {
