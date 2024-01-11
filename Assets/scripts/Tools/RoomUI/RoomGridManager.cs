@@ -3,6 +3,7 @@ using RoomNs;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour {
@@ -10,6 +11,9 @@ namespace RoomUI {
         [SerializeField] private GameObject cellPool;
         [SerializeField] private Button gridZoomMinus;
         [SerializeField] private Button gridZoomPlus;
+        [SerializeField] private Button selectButton;
+        [SerializeField] private Button copyButton;
+        [SerializeField] private Button trashButton;
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
@@ -22,15 +26,39 @@ namespace RoomUI {
         private float currentZoom = 1;
         private float zoomIncrement = 0.5f;
         private bool initGrid = true;
+        private Color selectedButtonColor = Color.yellow;
+        private Color defaultButtonColor;
+
+        private RoomUIAction currentAction;
 
         private ObjectConfig currenSelectedObject;
 
         private void Awake() {
             VerifySerialisables();
             CreateListeners();
+            InitButtonPanel();
             CreatePooling();
             InitGrid();
             CreateRoomInstance();
+        }
+
+        private void InitButtonPanel() {
+            currentAction = RoomUIAction.SELECT;
+            defaultButtonColor = selectButton.colors.normalColor;
+            ChangeButtonColor(selectButton, Color.yellow);
+        }
+
+        private void ChangeButtonColor(Button button, Color color) {
+            ColorBlock colorBlock = button.colors;
+            colorBlock.normalColor = color;
+            colorBlock.selectedColor = color;
+            button.colors = colorBlock;
+        }
+
+        private void ResetButtonsColor() {
+            ChangeButtonColor(selectButton, defaultButtonColor);
+            ChangeButtonColor(copyButton, defaultButtonColor);
+            ChangeButtonColor(trashButton, defaultButtonColor);
         }
 
         private void InitGrid() {
@@ -69,7 +97,7 @@ namespace RoomUI {
             roomUIStateManager.OnShapeChange -= DropdownValueChanged;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
             gridZoomMinus.onClick.RemoveListener(OnGridZoomMinusClick);
-            gridZoomPlus.onClick.RemoveListener(OnGridZoomPlus);
+            gridZoomPlus.onClick.RemoveListener(OnGridZoomPlusClick);
         }
 
         private void CreateListeners() {
@@ -80,14 +108,57 @@ namespace RoomUI {
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
+            }else{
+                Debug.LogError("gridZoomMinus is null");
             }
             if (gridZoomPlus != null) {
-                gridZoomPlus.onClick.AddListener(OnGridZoomPlus);
+                gridZoomPlus.onClick.AddListener(OnGridZoomPlusClick);
+            }else{
+                Debug.LogError("gridZoomPlus is null");
+            }
+            if (selectButton != null) {
+                selectButton.onClick.AddListener(OnSelectButtonClick);
+            }else{
+                Debug.LogError("selectButton is null");
+            }
+            if (copyButton != null) {
+                copyButton.onClick.AddListener(OnCopyButtonClick);
+            }else{
+                Debug.LogError("copyButton is null");
+            }
+            if (trashButton != null) {
+                trashButton.onClick.AddListener(OnTrashButtonClick);
+            }else{
+                Debug.LogError("trashButton is null");
             }
         }
 
+        private void OnTrashButtonClick() {
+            currentAction = RoomUIAction.TRASH;
+            ResetButtonsColor();
+            ChangeButtonColor(trashButton, selectedButtonColor);
+        }
+
+        private void OnCopyButtonClick() {
+            currentAction = RoomUIAction.COPY;
+            ResetButtonsColor();
+            ChangeButtonColor(copyButton, selectedButtonColor);
+        }
+
+        private void OnSelectButtonClick() {
+            currentAction = RoomUIAction.SELECT;
+            ResetButtonsColor();
+            ChangeButtonColor(selectButton, selectedButtonColor);
+        }
+
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-            cellRoomGO.Setup(currenSelectedObject);
+            if(currentAction == RoomUIAction.TRASH) {
+                cellRoomGO.ResetCell();
+            } else if(currentAction == RoomUIAction.COPY) {
+                
+            } else if(currentAction == RoomUIAction.SELECT) {
+                cellRoomGO.Setup(currenSelectedObject);
+            }
         }
 
         private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
@@ -99,7 +170,7 @@ namespace RoomUI {
             Zoom(currentZoom);
         }
 
-        private void OnGridZoomPlus() {
+        private void OnGridZoomPlusClick() {
             currentZoom += zoomIncrement;
             Zoom(currentZoom);
         }

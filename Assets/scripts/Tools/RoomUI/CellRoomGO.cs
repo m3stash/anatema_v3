@@ -50,9 +50,7 @@ public class CellRoomGO: MonoBehaviour {
     public void DesactivateCell() {
         image.enabled = false;
         button.interactable = false;
-        config = null;
-        icon.sprite = null;
-        icon.color = Color.white;
+        ResetCell();
     }
 
     public void AddWall() {
@@ -67,6 +65,12 @@ public class CellRoomGO: MonoBehaviour {
         button.interactable = false;
         icon.sprite = null;
         cell.SetActive(false);
+    }
+
+    public void ResetCell(){
+        config = null;
+        icon.sprite = null;
+        icon.color = Color.white;
     }
 
     /*private void LateUpdate() {
