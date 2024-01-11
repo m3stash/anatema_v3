@@ -3,16 +3,16 @@ using UnityEngine;
 namespace RoomUI {
     public class RoomGrid {
 
-        private CellPool pool;
+        private CellRoomPool pool;
         private int rows; // Height
         private int cols; // Width
         private int sectionWidth;
         private int sectionHeight;
         private Vector2Int[] roomSections;
         private Vector2Int roomSize;
-        private List<CellGO> usedCells = new List<CellGO>();
+        private List<CellRoomGO> usedCells = new List<CellRoomGO>();
 
-        public RoomGrid(CellPool pool, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
+        public RoomGrid(CellRoomPool pool, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
             this.pool = pool;
             this.roomSections = roomSections;
             this.roomSize = roomSize;
@@ -32,12 +32,12 @@ namespace RoomUI {
         public void GenerateGrid(Transform transform) {
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {
-                    CellGO cell = pool.GetOne();
+                    CellRoomGO cell = pool.GetOne();
                     usedCells.Add(cell);
                     cell.transform.SetParent(transform);
                     cell.Setup(null);
-                    GameObject cellGo = cell.gameObject;
-                    cellGo.SetActive(true);
+                    GameObject cellRoomGo = cell.gameObject;
+                    cellRoomGo.SetActive(true);
                     ManageCells(col, row, cell);
                 }
             }
@@ -61,7 +61,7 @@ namespace RoomUI {
             return new Vector2Int(sectionCol, sectionRow);
         }
 
-        private void ManageCells(int col, int row, CellGO cell) {
+        private void ManageCells(int col, int row, CellRoomGO cell) {
             Vector2Int currentSection = GetCurrentSection(col, row);
 
             if (!FindedSection(currentSection)) {
@@ -143,7 +143,7 @@ namespace RoomUI {
 
         }
 
-        private void AddDoorOrWall(int pos, int middleSection, int sectionSize, CellGO cell) {
+        private void AddDoorOrWall(int pos, int middleSection, int sectionSize, CellRoomGO cell) {
             if ((pos + middleSection) % sectionSize == 0) {
                 cell.AddDoor();
                 return;

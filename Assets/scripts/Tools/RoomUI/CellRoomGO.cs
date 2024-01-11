@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class CellGO: MonoBehaviour {
+public class CellRoomGO: MonoBehaviour {
 
     private Image image;
     private Button button;
@@ -13,11 +13,23 @@ public class CellGO: MonoBehaviour {
     private RectTransform rectTransform;
     private RectTransform childRectTransform;
 
-    public delegate void CellClickEvent(ObjectConfig type);
+    public delegate void CellClickEvent(CellRoomGO cellRoomGO);
     public static event CellClickEvent OnClick;
 
     private void OnCellClick() {
-        OnClick?.Invoke(config);
+        OnClick?.Invoke(this);
+    }
+
+    public ObjectConfig GetConfig() {
+        return config;
+    }
+
+    public void SetConfig(ObjectConfig config) {
+        Debug.Log("CellRoomGO SetConfig");
+        this.config = config;
+        // toTest 
+        Sprite cellIcon = config.GetSprite();
+        icon.sprite = cellIcon;
     }
 
     void OnDestroy() {
@@ -28,6 +40,23 @@ public class CellGO: MonoBehaviour {
         button.onClick.RemoveListener(OnCellClick);
         image.enabled = false;
         button.interactable = false;
+        config = null;
+        icon.sprite = null;
+        icon.color = Color.white;
+    }
+
+    public void AddWall() {
+        image.color = Color.gray;
+        button.interactable = false;
+        icon.sprite = null;
+        cell.SetActive(false);
+    }
+
+    public void AddDoor() {
+        image.color = Color.yellow;
+        button.interactable = false;
+        icon.sprite = null;
+        cell.SetActive(false);
     }
 
     private void LateUpdate() {
@@ -39,6 +68,7 @@ public class CellGO: MonoBehaviour {
         childRectTransform.sizeDelta = new Vector2(width * 0.75f, height * 0.75f);
     }
 
+
     public void Setup(ObjectConfig config) {
         // todo revoir la façon de faire !!!
         if (button == null || image == null) {
@@ -48,6 +78,7 @@ public class CellGO: MonoBehaviour {
             defaultColor = image.color;
             icon = cell.GetComponent<Image>();
         } else {
+            cell.SetActive(true);
             image.enabled = true;
             button.interactable = true;
             image.color = defaultColor;

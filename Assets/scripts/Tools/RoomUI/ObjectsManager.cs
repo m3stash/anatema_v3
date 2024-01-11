@@ -139,6 +139,7 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(ObjectConfig config) {
+            Debug.Log("OnCellClickHandler object cell");
             roomUIStateManager.OnSelectObject(config);
         }
 

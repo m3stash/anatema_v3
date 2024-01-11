@@ -10,7 +10,7 @@ namespace RoomUI {
         [SerializeField] private GameObject cellPool;
         [SerializeField] private Button gridZoomMinus;
         [SerializeField] private Button gridZoomPlus;
-        private CellPool pool;
+        private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
         private RoomGrid currentGrid;
@@ -22,6 +22,8 @@ namespace RoomUI {
         private float currentZoom = 1;
         private float zoomIncrement = 0.5f;
         private bool initGrid = true;
+
+        private ObjectConfig currenSelectedObject;
 
         private void Awake() {
             VerifySerialisables();
@@ -39,7 +41,7 @@ namespace RoomUI {
         }
 
         private void CreatePooling() {
-            pool = cellPool.GetComponent<CellPool>();
+            pool = cellPool.GetComponent<CellRoomPool>();
             PoolConfig config = pool.GetConfig();
             if (!config) {
                 Debug.LogError("Error no config for cellPool on GridManager awake !");
@@ -70,7 +72,8 @@ namespace RoomUI {
         }
 
         private void CreateListeners() {
-            CellGO.OnClick += OnCellClickHandler;
+            //TODO créer un autre script pour CellGo pour éviter les soucis de doublons avec le static click !!!!!!!!!! voir pour creer une abstract classe si possible
+            CellRoomGO.OnClick += OnCellClickHandler;
             roomUIStateManager.OnShapeChange += DropdownValueChanged;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
 
@@ -82,12 +85,21 @@ namespace RoomUI {
             }
         }
 
-        private void OnCellClickHandler(ObjectConfig config) {
-            Debug.Log("OnCellClickHandler");
+        private void OnCellClickHandler(CellRoomGO cellRoomGO) {
+
+            // Debug.Log("OnCellClickHandler CELL ROOM"+ cellRoomGO.GetConfig().name);
+            Debug.Log("OnCellClickHandler CELL ROOM"+ currenSelectedObject.name);
+            cellRoomGO.SetConfig(currenSelectedObject);
+            /*if(currenSelectedObject != null) {
+                // currentGrid.AddObjectToGrid(currenSelectedObject, config);
+            }else{
+                
+            }*/
         }
 
         private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
-            /////////////////
+            Debug.Log("_--------"+ selectedObject.name);
+            currenSelectedObject = selectedObject;
         }
 
         private void OnGridZoomMinusClick() {

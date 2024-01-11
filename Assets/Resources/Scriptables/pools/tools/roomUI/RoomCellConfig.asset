@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9370de55a8f8f481cb411283c035eb23, type: 3}
   m_Name: RoomCellConfig
   m_EditorClassIdentifier: 
-  prefab: {fileID: 2225361881063159815, guid: cad029b4a7f5841af9e6df97cce0bac7, type: 3}
+  prefab: {fileID: 8913333709517991465, guid: bad1abab2e1214124b9ee93736df1650, type: 3}
   poolSize: 1260

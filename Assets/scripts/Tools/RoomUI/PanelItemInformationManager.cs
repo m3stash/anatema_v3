@@ -10,13 +10,10 @@ namespace RoomUI {
         [SerializeField] private GameObject nameGo;
         [SerializeField] private GameObject typeGo;
         [SerializeField] private GameObject descGo;
-
         [SerializeField] private GameObject categoryGO;
-
         private TextMeshProUGUI objectNameText;
         private TextMeshProUGUI typeText;
         private TextMeshProUGUI descriptionText;
-
         private TextMeshProUGUI categoryText;
 
         private Image icon; 
@@ -43,11 +40,16 @@ namespace RoomUI {
         }
         
         private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
+            Debug.Log("PanelItemInformationManager OnObjectSelectedHandler ->"+ selectedObject.name);
             SetInformation(selectedObject);
         }
 
         private void SetInformation(ObjectConfig selectedObject) {
-            
+            objectNameText.text = selectedObject.GetName();
+            typeText.text = selectedObject.CategoryValue<object>().ToString();
+            descriptionText.text = selectedObject.GetDescription();
+            icon.sprite = selectedObject.GetSprite();
+            categoryText.text = selectedObject.ObjectType.ToString();
         }
 
     }
