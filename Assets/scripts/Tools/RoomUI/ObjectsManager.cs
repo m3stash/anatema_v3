@@ -119,7 +119,8 @@ namespace RoomUI {
                 int height = nbrRows * (cellSize + (cellSpacing * 2)) + (padding.bottom + padding.top);
                 rectTransform.sizeDelta = new Vector2(gridWidth, height);
             } else {
-                ResetPool();
+                //ResetPool();
+                // ToDo : refresh object categories !!
             }
         }
 

@@ -15,6 +15,7 @@ public class CellRoomGO: MonoBehaviour {
     private RectTransform childRectTransform;
 
     private float lastWith = 0;
+    private float ratioCellSize = 0.80f;
 
     public delegate void CellClickEvent(CellRoomGO cellRoomGO);
     public static event CellClickEvent OnClick;
@@ -73,16 +74,10 @@ public class CellRoomGO: MonoBehaviour {
         icon.color = Color.white;
     }
 
-    /*private void LateUpdate() {
-        float width = rectTransform.sizeDelta.x;
-        if(width == lastWith)return;
-        resizeCellSize(width);
-    }*/
-
     private void ResizeCellSize() {
         float width = rectTransform.sizeDelta.x;
         float height = rectTransform.sizeDelta.y;
-        childRectTransform.sizeDelta = new Vector2(width * 0.75f, height * 0.75f);
+        childRectTransform.sizeDelta = new Vector2(width * ratioCellSize, height * ratioCellSize);
     }
 
     public void Setup(ObjectConfig config) {

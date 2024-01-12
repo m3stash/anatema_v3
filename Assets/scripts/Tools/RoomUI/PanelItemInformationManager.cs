@@ -40,11 +40,18 @@ namespace RoomUI {
         }
         
         private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
-            Debug.Log("PanelItemInformationManager OnObjectSelectedHandler ->"+ selectedObject.name);
             SetInformation(selectedObject);
         }
 
         private void SetInformation(ObjectConfig selectedObject) {
+            if(selectedObject == null) {
+                objectNameText.text = "-";
+                typeText.text = "-";
+                descriptionText.text = "-";
+                icon.sprite = null;
+                categoryText.text = "-";
+                return;
+            }
             objectNameText.text = selectedObject.GetName();
             typeText.text = selectedObject.CategoryValue<object>().ToString();
             descriptionText.text = selectedObject.GetDescription();

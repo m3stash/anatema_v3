@@ -143,6 +143,7 @@ namespace RoomUI {
             currentAction = RoomUIAction.COPY;
             ResetButtonsColor();
             ChangeButtonColor(copyButton, selectedButtonColor);
+            // roomUIStateManager.OnSelectObject(null);
         }
 
         private void OnSelectButtonClick() {
@@ -155,7 +156,11 @@ namespace RoomUI {
             if(currentAction == RoomUIAction.TRASH) {
                 cellRoomGO.ResetCell();
             } else if(currentAction == RoomUIAction.COPY) {
-                
+                ObjectConfig config = cellRoomGO.GetConfig();
+                if(config != null){
+                    roomUIStateManager.OnSelectObject(config);
+                    OnSelectButtonClick();
+                }
             } else if(currentAction == RoomUIAction.SELECT) {
                 cellRoomGO.Setup(currenSelectedObject);
             }
@@ -163,6 +168,7 @@ namespace RoomUI {
 
         private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
             currenSelectedObject = selectedObject;
+            OnSelectButtonClick();
         }
 
         private void OnGridZoomMinusClick() {
@@ -235,5 +241,3 @@ namespace RoomUI {
 
     }
 }
-
-
