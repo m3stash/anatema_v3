@@ -21,7 +21,9 @@ public class CellGO: MonoBehaviour {
     }
 
     void OnDestroy() {
-        button.onClick.RemoveListener(OnCellClick);
+        if(button != null){
+            button.onClick.RemoveListener(OnCellClick);
+        }
     }
 
     public void DesactivateCell() {

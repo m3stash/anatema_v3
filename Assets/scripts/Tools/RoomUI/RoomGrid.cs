@@ -39,7 +39,7 @@ namespace RoomUI {
                     cell.transform.SetParent(transform);
                     GameObject cellRoomGo = cell.gameObject;
                     cellRoomGo.SetActive(true);
-                    cell.Setup(null);
+                    cell.Setup(null, Vector2.zero, new Vector2Int(col, row));
                     ManageCells(col, row, cell);
                 }
             }

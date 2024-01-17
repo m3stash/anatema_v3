@@ -3,7 +3,7 @@ using RoomNs;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour {
@@ -14,6 +14,8 @@ namespace RoomUI {
         [SerializeField] private Button selectButton;
         [SerializeField] private Button copyButton;
         [SerializeField] private Button trashButton;
+
+        [SerializeField] private Camera mainCamera;
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
@@ -101,7 +103,8 @@ namespace RoomUI {
         }
 
         private void CreateListeners() {
-            //TODO créer un autre script pour CellGo pour éviter les soucis de doublons avec le static click !!!!!!!!!! voir pour creer une abstract classe si possible
+            CellRoomGO.OnPointerEnterEvent += OnCellPointerEnterHandler;
+            CellRoomGO.OnPointerExitEvent += OnCellPointerExitHandler;
             CellRoomGO.OnClick += OnCellClickHandler;
             roomUIStateManager.OnShapeChange += DropdownValueChanged;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
@@ -133,6 +136,27 @@ namespace RoomUI {
             }
         }
 
+        private void OnCellPointerExitHandler(CellRoomGO cellRoomGO) {
+            /*if(cellRoomGO.GetConfig() != null){
+                cellRoomGO.SetDefaultColor();
+            }*/
+        }
+
+        private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
+            if(cellRoomGO.GetConfig() != null){
+                switch(currentAction){
+                    case RoomUIAction.COPY:
+                    break;
+                    case RoomUIAction.SELECT:
+                        cellRoomGO.ForbidenAction();
+                    break;
+                    case RoomUIAction.TRASH:
+
+                    break;
+                }    
+            }
+        }
+
         private void OnTrashButtonClick() {
             currentAction = RoomUIAction.TRASH;
             ResetButtonsColor();
@@ -154,6 +178,23 @@ namespace RoomUI {
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
             if(currentAction == RoomUIAction.TRASH) {
+                if(currenSelectedObject.Size.x > 1 || currenSelectedObject.Size.y > 1) {
+                    Vector2Int position = cellRoomGO.GetPosition();
+                    int x = position.x;
+                    int y = position.y;
+                    int gridSizeX = gridLayout.constraintCount;
+                    for (int yOffset = 0; yOffset < currenSelectedObject.Size.y; yOffset++) {
+                        for (int xOffset = 0; xOffset < currenSelectedObject.Size.x; xOffset++) {
+                            int targetX = x + xOffset;
+                            int targetY = y - yOffset;
+                            int targetChildIndex = targetY * gridSizeX + targetX;
+                            if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
+                                CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
+                                targetCell.ActivateCell();
+                            }
+                        }
+                    }
+                }
                 cellRoomGO.ResetCell();
             } else if(currentAction == RoomUIAction.COPY) {
                 ObjectConfig config = cellRoomGO.GetConfig();
@@ -162,7 +203,29 @@ namespace RoomUI {
                     OnSelectButtonClick();
                 }
             } else if(currentAction == RoomUIAction.SELECT) {
-                cellRoomGO.Setup(currenSelectedObject);
+                if(currenSelectedObject == null) return;
+                if(cellRoomGO.GetConfig() == currenSelectedObject){
+                    cellRoomGO.ForbidenAction();
+                    return;
+                }
+                if(currenSelectedObject.Size.x > 1 || currenSelectedObject.Size.y > 1) {
+                    Vector2Int position = cellRoomGO.GetPosition();
+                    int x = position.x;
+                    int y = position.y;
+                    int gridSizeX = gridLayout.constraintCount;
+                    for (int yOffset = 0; yOffset < currenSelectedObject.Size.y; yOffset++) {
+                        for (int xOffset = 0; xOffset < currenSelectedObject.Size.x; xOffset++) {
+                            int targetX = x + xOffset;
+                            int targetY = y - yOffset;
+                            int targetChildIndex = targetY * gridSizeX + targetX;
+                            if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
+                                CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
+                                targetCell.DesactivateCell();
+                            }
+                        }
+                    }
+                }
+                cellRoomGO.Setup(currenSelectedObject, gridLayout.spacing, cellRoomGO.GetPosition());
             }
         }
 

@@ -1,3 +1,22 @@
 {
-  "dotnet.preferCSharpExtension": true
+    "dotnet.preferCSharpExtension": true,
+    "files.exclude": {
+        "**/*.asset": true,
+        "**/*.meta": true,
+        "**/Prefabs": true,
+        "**/Physics": true,
+        "**/Resources/Scriptables": true,
+        "**/Materials": true,
+        "**/Editor": true,
+        "**/Scenes": true,
+        "**/TextMesh Pro": true,
+        "**/Library": true,
+        "**/obj": true,
+        "**/Packages": true,
+        "**/Logs": true,
+        "**/Temp": true,
+        "**/UIElementsSchema": true,
+        "**/UserSettings": true
+    },
+    "dotnet.defaultSolution": "anatema_v3.sln"
 }

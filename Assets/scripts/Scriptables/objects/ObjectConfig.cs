@@ -10,6 +10,8 @@ public abstract class ObjectConfig : ScriptableObject {
 
     public abstract ObjectType ObjectType { get; }
 
+    public abstract Vector2Int Size { get; }
+
     public abstract T CategoryValue<T>();
     public abstract Type Category();
 

@@ -24,7 +24,9 @@ public class TabCellGO : MonoBehaviour {
     }
 
     void OnDestroy() {
-        button.onClick.RemoveListener(OnTabClick);
+        if(button){
+            button.onClick.RemoveListener(OnTabClick);
+        }
     }
 
     public void Setup(bool isActive, Sprite sprite, ObjectType objectType) {

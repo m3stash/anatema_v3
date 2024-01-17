@@ -11,6 +11,7 @@ public abstract class ItemConfig : ObjectConfig {
     [SerializeField] private float weight;
 
     public override ObjectType ObjectType => ObjectType.ITEM;
+    public override Vector2Int Size => itemSize;
 
     public override Type Category() {
         return typeof(ItemCategory);
