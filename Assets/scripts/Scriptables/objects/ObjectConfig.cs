@@ -15,6 +15,10 @@ public abstract class ObjectConfig : ScriptableObject {
     public abstract T CategoryValue<T>();
     public abstract Type Category();
 
+    public int GetId() {
+        return id;
+    }
+
     public Sprite GetSprite() {
         return icon;
     }

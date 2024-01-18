@@ -11,8 +11,13 @@ namespace RoomUI {
         private Vector2Int[] roomSections;
         private Vector2Int roomSize;
         private List<CellRoomGO> usedCells = new List<CellRoomGO>();
+        private string[,] roomGridPlane;
+        private string doorId = "D";
+        private string wallId = "W";
 
         public List<CellRoomGO> UsedCells { get => usedCells; }
+
+        public string[,] RoomGridPlane { get => roomGridPlane; }
 
         public RoomGrid(CellRoomPool pool, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
             this.pool = pool;
@@ -22,6 +27,7 @@ namespace RoomUI {
             this.cols = cols;
             sectionWidth = cols / roomSize.x;
             sectionHeight = rows / roomSize.y;
+            roomGridPlane = new string[cols, rows];
         }
 
         public void ResetPool() {
@@ -146,11 +152,14 @@ namespace RoomUI {
         }
 
         private void AddDoorOrWall(int pos, int middleSection, int sectionSize, CellRoomGO cell) {
+            Vector2Int position = cell.GetPosition();
             if ((pos + middleSection) % sectionSize == 0) {
                 cell.AddDoor();
+                roomGridPlane[position.x, position.y] = doorId;
                 return;
             }
             cell.AddWall();
+            roomGridPlane[position.x, position.y] = wallId;
             return;
         }
 

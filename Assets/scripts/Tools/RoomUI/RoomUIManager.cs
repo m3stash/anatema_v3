@@ -12,12 +12,9 @@ namespace RoomUI {
         private RoomGridManager roomGridManager;
         private ObjectsManager objectsManager;
         private RoomUIStateManager roomUIStateManager;
-        // private List<ItemCellGO> usedCells = new List<ItemCellGO>();
 
         public ObjectSlotGO GetObjectCell() {
             ObjectSlotGO slot = pool.GetOne();
-            //cell.transform.SetParent(gridTabs.transform);
-            //cell.Setup();
             GameObject cellGo = slot.gameObject;
             cellGo.SetActive(true);
             return slot;
