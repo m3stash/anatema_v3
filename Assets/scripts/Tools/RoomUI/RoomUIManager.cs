@@ -73,6 +73,38 @@ namespace RoomUI {
             objectTable.CreateTable();
             itemTableManager = new ItemTableManager();
             itemTableManager.Setup(dbManager);
+            MockDb();
+        }
+
+        private void MockDb(){
+            // objectTable.Insert(ObjectType.ITEM.ToString());
+            int objectId = objectTable.GetIdByType("ITEM");
+            Debug.Log($"ID for type ITEM: {objectId}");
+            CreateItemMock(objectId);
+        }
+
+        private void CreateItemMock(int objectId){
+            int lastInsertedItemId = itemTableManager.GetItemTable().Insert(
+                objectId, // int objectId,
+                false, // bool dropables
+                true, // bool consumable
+                false, // bool craftable
+                10, // int limit
+                0f, // float weight
+                1, // int sizeX
+                1, // int sizeY
+                "potion-estus-1", // string icon
+                "POTION", // string category
+                "Regenerates your health" // string description
+            );
+            Debug.Log("------ "+lastInsertedItemId);
+
+            if(lastInsertedItemId != -1){
+                itemTableManager.GetPotionTable().Insert("HEALING", lastInsertedItemId);
+                // toDO -> rajouter amout & cie !!!
+            }
+            // int lastInsertedItemId = itemTable.GetLastInsertedId();
+
         }
 
     }

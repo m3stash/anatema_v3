@@ -42,7 +42,7 @@ public class DatabaseManager {
         }
     }
 
-    public  void AddParameter(IDbCommand command, string paramName, object paramValue) {
+    public void AddParameter(IDbCommand command, string paramName, object paramValue) {
         IDbDataParameter parameter = command.CreateParameter();
         parameter.ParameterName = paramName;
         parameter.Value = paramValue;

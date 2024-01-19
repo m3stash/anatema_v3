@@ -25,32 +25,28 @@ public class PotionTable {
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
     }
 
-    public void ReadTable() {
+    public void Read() {
         try {
-            using (IDbCommand dbcmd = dbconn.CreateCommand()) {
-                dbcmd.CommandText = $"SELECT * FROM {tableName}";
-
-                using (IDataReader dbreader = dbcmd.ExecuteReader()) {
-                    while (dbreader.Read()) {
-                        int id = dbreader.GetInt32(0);
-                        int itemId = dbreader.GetInt32(1);
-                        string subCategory = dbreader.GetString(2);
-                        Debug.Log($"ID: {id}, ItemID: {itemId}, SubCategory: {subCategory}");
-                    }
-                    Debug.Log("Table read successfully.");
-                }
+            using IDbCommand dbcmd = dbconn.CreateCommand();
+            dbcmd.CommandText = $"SELECT * FROM {tableName}";
+            using IDataReader dbreader = dbcmd.ExecuteReader();
+            while (dbreader.Read()) {
+                int id = dbreader.GetInt32(0);
+                int itemId = dbreader.GetInt32(1);
+                string subCategory = dbreader.GetString(2);
+                Debug.Log($"ID: {id}, ItemID: {itemId}, SubCategory: {subCategory}");
             }
+            Debug.Log("Table read successfully.");
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Debug.LogError($"Error reading table: {e.Message}");
         }
     }
 
-    public void InsertItem(string subCategory, int itemId) {
+    public void Insert(string subCategory, int itemId) {
         try {
             dbconn.Open();
-            IDbCommand dbcmd = dbconn.CreateCommand();
+            using IDbCommand dbcmd = dbconn.CreateCommand();
             dbcmd.CommandText = $"INSERT INTO {tableName} (ItemID, SubCategory) " +
                 "VALUES (@ItemID, @SubCategory)";
             dbManager.AddParameter(dbcmd, "@ItemID", itemId);
@@ -59,14 +55,11 @@ public class PotionTable {
             dbcmd.ExecuteNonQuery();
             Debug.Log($"{tableName} inserted successfully.");
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Debug.LogError($"Error inserting {tableName}: {e.Message}");
         }
-        finally
-        {
-            if (dbconn.State == ConnectionState.Open)
-            {
+        finally {
+            if (dbconn.State == ConnectionState.Open) {
                 dbconn.Close();
             }
         }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Potion : ItemConfig {
+public abstract class Potion : ItemConfig {
 
     protected PotionType potionType;
     public Potion() {

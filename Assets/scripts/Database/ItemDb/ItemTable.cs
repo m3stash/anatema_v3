@@ -12,6 +12,7 @@ public class ItemTable {
     private DatabaseManager dbManager;
 
     public ItemTable(DatabaseManager dbManager) {
+        this.dbManager = dbManager;
         dbconn = dbManager.GetConnection(tableName);
         tableManager = dbManager.GetTableManager();
     }
@@ -23,7 +24,7 @@ public class ItemTable {
             "[Dropables] BOOLEAN NOT NULL," +
             "[Consumable] BOOLEAN NOT NULL," +
             "[Craftable] BOOLEAN NOT NULL," +
-            "[Limit] INTEGER NOT NULL," +
+            "[Max] INTEGER NOT NULL," +
             "[Weight] REAL NOT NULL," +
             "[SizeX] INTEGER NOT NULL," +
             "[SizeY] INTEGER NOT NULL," +
@@ -33,41 +34,40 @@ public class ItemTable {
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
     }
 
-    public void ReadTable() {
+    public void Read() {
         try {
-            using (IDbCommand dbcmd = dbconn.CreateCommand()) {
-                dbcmd.CommandText = $"SELECT * FROM {tableName}";
-                using (IDataReader dbreader = dbcmd.ExecuteReader()) {
-                    while (dbreader.Read()) {
-                        int id = dbreader.GetInt32(0);
-                        int objectId = dbreader.GetInt32(1);
-                        bool dropables = dbreader.GetBoolean(2);
-                        bool consumable = dbreader.GetBoolean(3);
-                        bool craftable = dbreader.GetBoolean(4);
-                        int limit = dbreader.GetInt32(5);
-                        float weight = dbreader.GetFloat(6);
-                        int sizeX = dbreader.GetInt32(7);
-                        int sizeY = dbreader.GetInt32(8);
-                        string icon = dbreader.GetString(9);
-                        string category = dbreader.GetString(10);
-                        string description = dbreader.GetString(11);
-                        Debug.Log($"ID: {id}, ObjectId: {objectId}, Dropables: {dropables}, Consumable: {consumable}, Craftable: {craftable}, Limit: {limit}, Weight: {weight}, SizeX: {sizeX}, SizeY: {sizeY}, Icon: {icon}, Category: {category}, Description: {description}");
-                    }
-                    Debug.Log("Table read successfully.");
-                }
+            using IDbCommand dbcmd = dbconn.CreateCommand();
+            dbcmd.CommandText = $"SELECT * FROM {tableName}";
+            using IDataReader dbreader = dbcmd.ExecuteReader();
+            while (dbreader.Read()) {
+                int id = dbreader.GetInt32(0);
+                int objectId = dbreader.GetInt32(1);
+                bool dropables = dbreader.GetBoolean(2);
+                bool consumable = dbreader.GetBoolean(3);
+                bool craftable = dbreader.GetBoolean(4);
+                int max = dbreader.GetInt32(5);
+                float weight = dbreader.GetFloat(6);
+                int sizeX = dbreader.GetInt32(7);
+                int sizeY = dbreader.GetInt32(8);
+                string icon = dbreader.GetString(9);
+                string category = dbreader.GetString(10);
+                string description = dbreader.GetString(11);
+                Debug.Log($"ID: {id}, ObjectId: {objectId}, Dropables: {dropables}, Consumable: {consumable}, Craftable: {craftable}, Max: {max}, Weight: {weight}, SizeX: {sizeX}, SizeY: {sizeY}, Icon: {icon}, Category: {category}, Description: {description}");
             }
+            Debug.Log("Table read successfully.");
+
         }
         catch (Exception e) {
             Debug.LogError($"Error reading table ${tableName}: {e.Message}");
         }
     }
 
-    public void InsertItem(
+    public int Insert(
         int objectId,
         bool dropables, 
         bool consumable, 
         bool craftable, 
-        int limit, 
+        int max, 
         float weight, 
         int sizeX, 
         int sizeY, 
@@ -75,16 +75,19 @@ public class ItemTable {
         string category, 
         string description) {
 
+        int lastInsertedId = -1;
+
         try {
             dbconn.Open();
-            IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (ObjectID, Dropables, Consumable, Craftable, Limit, Weight, SizeX, SizeY, Icon, Category, Description) " +
-                "VALUES (@ObjectID, @Dropables, @Consumable, @Craftable, @Limit, @Weight, @SizeX, @SizeY, @Icon, @Category, @Description)";
+            using IDbCommand dbcmd = dbconn.CreateCommand();
+            dbcmd.CommandText = $"INSERT INTO {tableName} (ObjectID, Dropables, Consumable, Craftable, Max, Weight, SizeX, SizeY, Icon, Category, Description) " +
+                "VALUES (@ObjectID, @Dropables, @Consumable, @Craftable, @Max, @Weight, @SizeX, @SizeY, @Icon, @Category, @Description); " +
+                "SELECT last_insert_rowid() AS new_id;";
             dbManager.AddParameter(dbcmd, "@ObjectID", objectId);
             dbManager.AddParameter(dbcmd, "@Dropables", dropables);
             dbManager.AddParameter(dbcmd, "@Consumable", consumable);
             dbManager.AddParameter(dbcmd, "@Craftable", craftable);
-            dbManager.AddParameter(dbcmd, "@Limit", limit);
+            dbManager.AddParameter(dbcmd, "@Max", max);
             dbManager.AddParameter(dbcmd, "@Weight", weight);
             dbManager.AddParameter(dbcmd, "@SizeX", sizeX);
             dbManager.AddParameter(dbcmd, "@SizeY", sizeY);
@@ -92,17 +95,25 @@ public class ItemTable {
             dbManager.AddParameter(dbcmd, "@Category", category);
             dbManager.AddParameter(dbcmd, "@Description", description);
 
-            dbcmd.ExecuteNonQuery();
-            Debug.Log($"{tableName} inserted successfully.");
+            /*dbcmd.ExecuteNonQuery();
+            Debug.Log($"{tableName} inserted successfully.");*/
+            using IDataReader reader = dbcmd.ExecuteReader();
+            if (reader.Read()) {
+                lastInsertedId = Convert.ToInt32(reader["new_id"]);
+                Debug.Log($"{tableName} inserted successfully. Last inserted ID: {lastInsertedId}");
+            }
         }
         catch (Exception e) {
             Debug.LogError($"Error inserting {tableName}: {e.Message}");
+            return lastInsertedId;
         }
         finally {
             if (dbconn.State == ConnectionState.Open) {
                 dbconn.Close();
             }
         }
+
+        return lastInsertedId;
     }
 
 
