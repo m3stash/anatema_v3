@@ -63,7 +63,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     private void SetComponentValues(ObjectConfig config){
         this.config = config;
-        Sprite cellIcon = config.GetSprite();
+        Sprite cellIcon = config.Sprite;
         image.sprite = cellIcon;
     }
 
@@ -142,7 +142,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         this.spacing = spacing;
         StartCoroutine(AdjustSizeAfterFrame());
         DefaultCellConfiguration();
-        if (config) {
+        if (config != null) {
             SetComponentValues(config);
             // remove current selected param : for issue with selected white color > than highlight color
             button.interactable = false;

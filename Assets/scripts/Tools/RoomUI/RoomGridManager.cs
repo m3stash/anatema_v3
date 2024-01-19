@@ -213,7 +213,7 @@ namespace RoomUI {
                             int targetChildIndex = targetY * gridSizeX + targetX;
                             if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
                                 CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
-                                if(targetCell.GetConfig()){
+                                if(targetCell.GetConfig() != null){
                                     findExistingCell = true;
                                     break;
                                 }

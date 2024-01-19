@@ -7,11 +7,13 @@ namespace RoomUI {
         [SerializeField] GameObject itemGrid;
         [SerializeField] GameObject stateManager;
         [SerializeField] GameObject itemPool;
-
         private ObjectPool pool;
         private RoomGridManager roomGridManager;
         private ObjectsManager objectsManager;
         private RoomUIStateManager roomUIStateManager;
+        private DatabaseManager dbManager;
+        private ItemTableManager itemTableManager;
+        private ObjectTable objectTable;
 
         public ObjectSlotGO GetObjectCell() {
             ObjectSlotGO slot = pool.GetOne();
@@ -27,7 +29,8 @@ namespace RoomUI {
         private void Awake() {
             VerifySerialisables();
             CreatePooling();
-            InitComponents();
+            InitComponents();       
+            InitDb();
         }
 
         private ObjectPool CreatePooling() {
@@ -42,17 +45,17 @@ namespace RoomUI {
         }
 
         private void VerifySerialisables() {
-            if (roomGridManager == null) {
-                Debug.Log("Error: SerializeField roomGrid not Set !");
+            if (roomGrid == null) {
+                Debug.LogError("Error: SerializeField roomGrid not Set !");
             }
-            if (objectsManager == null) {
-                Debug.Log("Error: SerializeField itemGridManager not Set !");
+            if (itemGrid == null) {
+                Debug.LogError("Error: SerializeField itemGridManager not Set !");
             }
             if (stateManager == null) {
-                Debug.Log("Error: SerializeField stateManager not Set !");
+                Debug.LogError("Error: SerializeField stateManager not Set !");
             }
-            if (pool == null) {
-                Debug.Log("Error: SerializeField pool not Set !");
+            if (itemPool == null) {
+                Debug.LogError("Error: SerializeField pool not Set !");
             }
         }
 
@@ -61,6 +64,15 @@ namespace RoomUI {
             objectsManager = itemGrid.GetComponent<ObjectsManager>();
             objectsManager.Setup(this);
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
+        }
+
+        private void InitDb() {
+            dbManager = new DatabaseManager();
+            dbManager.Init();
+            objectTable = new ObjectTable(dbManager);
+            objectTable.CreateTable();
+            itemTableManager = new ItemTableManager();
+            itemTableManager.Setup(dbManager);
         }
 
     }

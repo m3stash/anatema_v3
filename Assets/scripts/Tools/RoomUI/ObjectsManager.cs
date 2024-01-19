@@ -182,7 +182,11 @@ namespace RoomUI {
             string cat = type.ToString().ToLower();
             if (!objectConfigsDictionnary.ContainsKey(type)) {
                 ObjectConfig[] objectConfigs = LoadObjectConfigs(cat);
-                BuildObjectConfigsDictionary(type, objectConfigs);
+                if(objectConfigs == null) {
+                    // Debug.Log("Error: objectConfigs is null !");
+                }else{
+                    BuildObjectConfigsDictionary(type, objectConfigs);
+                }
             }else{
                 CreateCellWithExistingDictionnary(type);
             }
@@ -199,7 +203,9 @@ namespace RoomUI {
         }
 
         private ObjectConfig[] LoadObjectConfigs(string category) {
-            return Resources.LoadAll<ObjectConfig>(GlobalConfig.Instance.ScriptablePath + category);
+            // toDo ICI
+            return null;
+            // return Resources.LoadAll<ObjectConfig>(GlobalConfig.Instance.ScriptablePath + category);
         }
 
         private void BuildObjectConfigsDictionary(ObjectType type, ObjectConfig[] objectConfigs) {

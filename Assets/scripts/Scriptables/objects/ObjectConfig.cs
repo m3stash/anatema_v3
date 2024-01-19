@@ -1,12 +1,14 @@
 ﻿using System;
 using UnityEngine;
 
-public abstract class ObjectConfig : ScriptableObject {
-    [Header("Settings")]
-    [SerializeField] private string displayName;
-    [SerializeField] private Sprite icon;
-    [SerializeField] private string description;
-    [SerializeField] private int id;
+public abstract class ObjectConfig {
+
+    public string DisplayName { get; set; }
+    public string IconPath { get; set; }
+    public string Description { get; set; }
+    public Sprite Sprite { get; set; }
+
+    public string Id { get; set; }
 
     public abstract ObjectType ObjectType { get; }
 
@@ -14,19 +16,5 @@ public abstract class ObjectConfig : ScriptableObject {
 
     public abstract T CategoryValue<T>();
     public abstract Type Category();
-
-    public int GetId() {
-        return id;
-    }
-
-    public Sprite GetSprite() {
-        return icon;
-    }
-
-    public string GetName() {
-        return displayName;
-    }
-    public string GetDescription() {
-        return description;
-    }
+    
 }

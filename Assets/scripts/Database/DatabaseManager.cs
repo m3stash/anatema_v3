@@ -4,74 +4,49 @@ using Mono.Data.Sqlite;
 using UnityEngine;
 using System.Data;
 using System;
-public class DatabaseManager: MonoBehaviour {
+using Database;
 
-    string conn;
-    string sqlQuery;
-    IDbConnection dbconn;
-    IDbCommand dbcmd;
-    IDataReader dbreader;
-    string DATABASE_NAME = "/objects.s3db";
-    void Start() {
-        string filepath = Application.persistentDataPath + DATABASE_NAME;
+public class DatabaseManager {
+
+    private TableManager tableManager;
+
+    public void Init(){
+        tableManager = new TableManager();
+    }
+
+    public TableManager GetTableManager() {
+        return tableManager;
+    }
+
+    public IDbConnection GetConnection(string dbName) {
+        string filepath = Application.persistentDataPath + "/" + dbName + ".s3db";
         Debug.Log($"filepath={filepath}");
-        conn = "URI=file:" + filepath;
-        CreateATable("objects");
-        ReadTable("objects");
-    }
+        string connString = "URI=file:" + filepath;
 
-    private void CreateATable(string tableName) {
-        using (dbconn = new SqliteConnection(conn)) {
-            try {
-                dbconn.Open();
-                dbcmd = dbconn.CreateCommand();
-                string sqlQuery = $"CREATE TABLE IF NOT EXISTS {tableName} (" +
-                                "[id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                                "[name] VARCHAR(255) NOT NULL," +
-                                "[age] INTEGER DEFAULT '18' NOT NULL)";
-                dbcmd.CommandText = sqlQuery;
-                dbcmd.ExecuteScalar();
-                Debug.Log("Table created successfully.");
-            } catch (Exception e) {
-                Debug.LogError($"Error creating table: {e.Message}");
-            } finally {
-                if (dbconn.State == ConnectionState.Open) {
-                    dbconn.Close();
-                }
-            }
+        try {
+            IDbConnection dbconn = new SqliteConnection(connString);
+            dbconn.Open();
+            Debug.Log("Database connection opened.");
+            return dbconn;
+        }
+        catch (Exception e) {
+            Debug.LogError($"Error opening database connection: {e.Message}");
+            throw;
         }
     }
 
-    private void ReadTable(string tableName) {
-        using (dbconn = new SqliteConnection(conn)) {
-            try {
-                dbconn.Open();
-                Debug.Log("Database connection opened.");
-
-                dbcmd = dbconn.CreateCommand();
-                // Utilisez tableName directement dans la requête SQL
-                dbcmd.CommandText = $"SELECT * FROM {tableName}";
-                dbreader = dbcmd.ExecuteReader();
-
-                while (dbreader.Read()) {
-                    int id = dbreader.GetInt32(0);
-                    string name = dbreader.GetString(1);
-                    int age = dbreader.GetInt32(2);
-                    Debug.Log($"ID: {id}, Name: {name}, Age: {age}");
-                }
-                Debug.Log("Table read successfully.");
-            } catch (Exception e) {
-                Debug.LogError($"Error reading table: {e.Message}");
-            } finally {
-                if (dbreader != null && !dbreader.IsClosed) {
-                    dbreader.Close();
-                }
-                if (dbconn.State == ConnectionState.Open) {
-                    dbconn.Close();
-                    Debug.Log("Database connection closed.");
-                }
-            }
+    public void CloseDbConnection(IDbConnection dbconn) {
+        if (dbconn != null && dbconn.State == ConnectionState.Open) {
+            dbconn.Close();
+            Debug.Log("Database connection closed.");
         }
     }
 
+    public  void AddParameter(IDbCommand command, string paramName, object paramValue) {
+        IDbDataParameter parameter = command.CreateParameter();
+        parameter.ParameterName = paramName;
+        parameter.Value = paramValue;
+        command.Parameters.Add(parameter);
+    }
+    
 }

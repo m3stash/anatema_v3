@@ -59,7 +59,7 @@ public class CellGO: MonoBehaviour {
             // Debug.LogError("CellGO config cannot be null");
         } else {
             this.config = config;
-            Sprite cellIcon = config.GetSprite();
+            Sprite cellIcon = config.Sprite;
             if (cellIcon) {
                 icon.sprite = cellIcon;
             } else {

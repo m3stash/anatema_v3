@@ -52,10 +52,10 @@ namespace RoomUI {
                 categoryText.text = "-";
                 return;
             }
-            objectNameText.text = selectedObject.GetName();
+            objectNameText.text = selectedObject.DisplayName;
             typeText.text = selectedObject.CategoryValue<object>().ToString();
-            descriptionText.text = selectedObject.GetDescription();
-            icon.sprite = selectedObject.GetSprite();
+            descriptionText.text = selectedObject.Description;
+            icon.sprite = selectedObject.Sprite;
             categoryText.text = selectedObject.ObjectType.ToString();
         }
 
