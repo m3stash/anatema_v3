@@ -6,14 +6,14 @@ public class CellGO: MonoBehaviour {
     private Image image;
     private Button button;
     private Color defaultColor;
-    private ObjectConfig config;
+    private Element config;
     [SerializeField] private GameObject cell;
     [SerializeField] private Sprite defaultIcon;
     private Image icon;
     private RectTransform rectTransform;
     private RectTransform childRectTransform;
 
-    public delegate void CellClickEvent(ObjectConfig type);
+    public delegate void CellClickEvent(Element type);
     public static event CellClickEvent OnClick;
 
     private void OnCellClick() {
@@ -40,7 +40,7 @@ public class CellGO: MonoBehaviour {
         childRectTransform.sizeDelta = new Vector2(width * 0.75f, height * 0.75f);
     }
 
-    public void Setup(ObjectConfig config) {
+    public void Setup(Element config) {
         // todo revoir la façon de faire !!!
         if (button == null || image == null) {
             button = GetComponent<Button>();

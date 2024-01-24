@@ -9,8 +9,9 @@ using Database;
 public class DatabaseManager {
 
     private TableManager tableManager;
+    private string dbName = "game_db";
 
-    public void Init(){
+    public DatabaseManager(){
         tableManager = new TableManager();
     }
 
@@ -18,7 +19,7 @@ public class DatabaseManager {
         return tableManager;
     }
 
-    public IDbConnection GetConnection(string dbName) {
+    public IDbConnection GetConnection() {
         string filepath = Application.persistentDataPath + "/" + dbName + ".s3db";
         Debug.Log($"filepath={filepath}");
         string connString = "URI=file:" + filepath;

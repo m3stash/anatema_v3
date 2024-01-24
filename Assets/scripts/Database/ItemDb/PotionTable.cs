@@ -13,15 +13,17 @@ public class PotionTable {
 
     public PotionTable(DatabaseManager dbManager) {
         this.dbManager = dbManager;
-        dbconn = dbManager.GetConnection(tableName);
+        dbconn = dbManager.GetConnection();
         tableManager = dbManager.GetTableManager();
     }
 
-    public void CreateTable() {
-        string sqlQuery = $"CREATE TABLE IF NOT EXISTS {tableName} (" +
-            "[id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
-            "[ItemID] INTEGER NOT NULL," +
-            "[SubCategory] TEXT NOT NULL)";
+    public void CreateTable(string itemTableName) {
+        string sqlQuery = $@"CREATE TABLE IF NOT EXISTS {tableName} (
+            [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            [ItemID] INTEGER NOT NULL,
+            [SubCategory] TEXT NOT NULL,
+            FOREIGN KEY (ItemID) REFERENCES {itemTableName}(id)
+        )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
     }
 
@@ -45,7 +47,6 @@ public class PotionTable {
 
     public void Insert(string subCategory, int itemId) {
         try {
-            dbconn.Open();
             using IDbCommand dbcmd = dbconn.CreateCommand();
             dbcmd.CommandText = $"INSERT INTO {tableName} (ItemID, SubCategory) " +
                 "VALUES (@ItemID, @SubCategory)";
@@ -57,11 +58,6 @@ public class PotionTable {
         }
         catch (Exception e) {
             Debug.LogError($"Error inserting {tableName}: {e.Message}");
-        }
-        finally {
-            if (dbconn.State == ConnectionState.Open) {
-                dbconn.Close();
-            }
         }
     }
 

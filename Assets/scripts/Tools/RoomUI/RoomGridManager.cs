@@ -33,7 +33,7 @@ namespace RoomUI {
 
         private RoomUIAction currentAction;
 
-        private ObjectConfig currenSelectedObject;
+        private Element currenSelectedObject;
 
         private string[,] roomGridPlane;
 
@@ -178,7 +178,7 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-            ObjectConfig config = cellRoomGO.GetConfig();
+            Element config = cellRoomGO.GetConfig();
             switch(currentAction){
                 case RoomUIAction.COPY:
                     CopyCell(config);
@@ -192,7 +192,7 @@ namespace RoomUI {
             }
         }
 
-        private void CreateCell(ObjectConfig config, CellRoomGO cellRoomGO){
+        private void CreateCell(Element config, CellRoomGO cellRoomGO){
             if(currenSelectedObject == null) return;
                 if(config == currenSelectedObject){
                     cellRoomGO.ForbidenAction();
@@ -237,7 +237,7 @@ namespace RoomUI {
                 }
         }
 
-        private void CopyCell(ObjectConfig config){
+        private void CopyCell(Element config){
             // toDO : voir la taille de la cell pour empêcher de copier si il y a un voisin, tout doit être vide !!!!
             if(config != null){
                 roomUIStateManager.OnSelectObject(config);
@@ -267,7 +267,7 @@ namespace RoomUI {
             cellRoomGO.ResetCell();
         }
 
-        private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
+        private void OnObjectSelectedHandler(Element selectedObject) {
             currenSelectedObject = selectedObject;
             OnSelectButtonClick();
         }

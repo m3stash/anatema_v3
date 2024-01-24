@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public abstract class ObjectConfig {
+public abstract class Element {
 
     public string DisplayName { get; set; }
     public string IconPath { get; set; }

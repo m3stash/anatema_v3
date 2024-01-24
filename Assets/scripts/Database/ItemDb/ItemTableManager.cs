@@ -5,19 +5,29 @@ public class ItemTableManager {
     private ItemTable itemTable;
     private PotionTable potionTable;
 
-    public void Setup(DatabaseManager dbManager) {
+    public ItemTableManager(DatabaseManager dbManager, string elementTableName) {
+        Setup(dbManager, elementTableName);
+    }
+
+    private void Setup(DatabaseManager dbManager, string elementTableName) {
         if(dbManager == null) {
             Debug.LogError("DatabaseManager Serialisable is not set.");
+        } else if(elementTableName == null){
+            Debug.LogError("Element table name is not set.");
         } else {
-            SetupItemDb(dbManager);
+            SetupItemDb(dbManager, elementTableName);
         }
     }
 
-    private void SetupItemDb(DatabaseManager dbManager) {
+    private void SetupItemDb(DatabaseManager dbManager, string elementTableName) {
         itemTable = new ItemTable(dbManager);
-        itemTable.CreateTable();
+        itemTable.CreateTable(elementTableName);
+        string itemTableName = itemTable.GetTableName();
+        if(itemTableName == null) {
+            Debug.LogError("Item table name is not set.");
+        }
         potionTable = new PotionTable(dbManager);
-        potionTable.CreateTable();
+        potionTable.CreateTable(itemTableName);
     }
 
     public ItemTable GetItemTable() {

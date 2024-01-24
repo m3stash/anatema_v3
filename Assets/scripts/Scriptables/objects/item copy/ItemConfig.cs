@@ -1,7 +1,7 @@
 /*using System;
 using UnityEngine;
 
-public abstract class ItemConfig : ObjectConfig {
+public abstract class Item : Element {
     [Header("Settings")]
     [SerializeField] private bool dropable;
     [SerializeField] private bool consumable;

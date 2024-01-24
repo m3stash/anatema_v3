@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace RoomUI {
-    public class ObjectsManager : MonoBehaviour {
+    public class ElementManager : MonoBehaviour {
         [SerializeField] private RoomUIStateManager roomUIStateManager;
         [SerializeField] private GameObject cellPoolGO;
         [SerializeField] private GameObject tabCellPoolGO;
@@ -30,7 +30,7 @@ namespace RoomUI {
         private float gridWidth;
         private ObjectType selectedTab;
         private RoomUIManager roomUIManager;
-        private Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>> objectConfigsDictionnary = new Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>>();
+        private Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<Element>>>> ElementsDictionnary = new Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<Element>>>>();
 
         void Awake() {
             VerifySerialisables();
@@ -140,7 +140,7 @@ namespace RoomUI {
             CreateDictionnaryAndCellByObjectType(type);
         }
 
-        private void OnCellClickHandler(ObjectConfig config) {
+        private void OnCellClickHandler(Element config) {
             roomUIStateManager.OnSelectObject(config);
         }
 
@@ -180,12 +180,12 @@ namespace RoomUI {
 
         private void CreateDictionnaryAndCellByObjectType(ObjectType type) {
             string cat = type.ToString().ToLower();
-            if (!objectConfigsDictionnary.ContainsKey(type)) {
-                ObjectConfig[] objectConfigs = LoadObjectConfigs(cat);
-                if(objectConfigs == null) {
-                    // Debug.Log("Error: objectConfigs is null !");
+            if (!ElementsDictionnary.ContainsKey(type)) {
+                Element[] Elements = LoadElements(cat);
+                if(Elements == null) {
+                    // Debug.Log("Error: Elements is null !");
                 }else{
-                    BuildObjectConfigsDictionary(type, objectConfigs);
+                    BuildElementsDictionary(type, Elements);
                 }
             }else{
                 CreateCellWithExistingDictionnary(type);
@@ -193,44 +193,44 @@ namespace RoomUI {
         }
 
         private void CreateCellWithExistingDictionnary(ObjectType type) {
-            foreach (var category in objectConfigsDictionnary[type].Keys) {
-                foreach (var categoryValue in objectConfigsDictionnary[type][category].Keys) {
-                    foreach (var config in objectConfigsDictionnary[type][category][categoryValue]) {
+            foreach (var category in ElementsDictionnary[type].Keys) {
+                foreach (var categoryValue in ElementsDictionnary[type][category].Keys) {
+                    foreach (var config in ElementsDictionnary[type][category][categoryValue]) {
                         CreateCell(config);
                     }
                 }
             }
         }
 
-        private ObjectConfig[] LoadObjectConfigs(string category) {
+        private Element[] LoadElements(string category) {
             // toDo ICI
             return null;
-            // return Resources.LoadAll<ObjectConfig>(GlobalConfig.Instance.ScriptablePath + category);
+            // return Resources.LoadAll<Element>(GlobalConfig.Instance.ScriptablePath + category);
         }
 
-        private void BuildObjectConfigsDictionary(ObjectType type, ObjectConfig[] objectConfigs) {
-            if (!objectConfigsDictionnary.ContainsKey(type)) {
-                objectConfigsDictionnary[type] = new Dictionary<Type, Dictionary<Enum, List<ObjectConfig>>>();
+        private void BuildElementsDictionary(ObjectType type, Element[] Elements) {
+            if (!ElementsDictionnary.ContainsKey(type)) {
+                ElementsDictionnary[type] = new Dictionary<Type, Dictionary<Enum, List<Element>>>();
             }
-            foreach (var config in objectConfigs) {
+            foreach (var config in Elements) {
                 Type category = config.Category();
                 Enum categoryValue = config.CategoryValue<Enum>();
                 EnsureNestedDictionariesExist(type, category, categoryValue);
 
-                objectConfigsDictionnary[type][category][categoryValue].Add(config);
+                ElementsDictionnary[type][category][categoryValue].Add(config);
                 CreateCell(config);
             }
         }
 
         private void EnsureNestedDictionariesExist(ObjectType type, Type category, Enum categoryValue) {
-            if (!objectConfigsDictionnary[type].ContainsKey(category)) {
-                objectConfigsDictionnary[type][category] = new Dictionary<Enum, List<ObjectConfig>>();
+            if (!ElementsDictionnary[type].ContainsKey(category)) {
+                ElementsDictionnary[type][category] = new Dictionary<Enum, List<Element>>();
             }
-            if (!objectConfigsDictionnary[type][category].ContainsKey(categoryValue)) {
-                objectConfigsDictionnary[type][category][categoryValue] = new List<ObjectConfig>();
+            if (!ElementsDictionnary[type][category].ContainsKey(categoryValue)) {
+                ElementsDictionnary[type][category][categoryValue] = new List<Element>();
             }
         }
-        public void CreateCell(ObjectConfig config) {
+        public void CreateCell(Element config) {
             CellGO cell = cellPool.GetOne();
             usedCells.Add(cell);
             cell.transform.SetParent(grid.transform);

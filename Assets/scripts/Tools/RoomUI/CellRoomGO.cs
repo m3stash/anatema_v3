@@ -17,7 +17,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     private Button button;
     private Color defaultColor;
     private ColorBlock defaultButtonColor;
-    private ObjectConfig config;
+    private Element config;
     private float lastWith = 0;
     private float ratioCellSize = 1f;
     private Vector2 spacing;
@@ -57,11 +57,11 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         OnClick?.Invoke(this);
     }
 
-    public ObjectConfig GetConfig() {
+    public Element GetConfig() {
         return config;
     }
 
-    private void SetComponentValues(ObjectConfig config){
+    private void SetComponentValues(Element config){
         this.config = config;
         Sprite cellIcon = config.Sprite;
         image.sprite = cellIcon;
@@ -137,7 +137,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         return position;
     }
 
-    public void Setup(ObjectConfig config, Vector2 spacing, Vector2Int position) {
+    public void Setup(Element config, Vector2 spacing, Vector2Int position) {
         this.position = position;
         this.spacing = spacing;
         StartCoroutine(AdjustSizeAfterFrame());

@@ -1,7 +1,7 @@
 ﻿/*using System;
 using UnityEngine;
 
-public abstract class ObjectConfig : ScriptableObject {
+public abstract class Element : ScriptableObject {
     [Header("Settings")]
     [SerializeField] private string displayName;
     [SerializeField] private Sprite icon;

@@ -39,11 +39,11 @@ namespace RoomUI {
             categoryText = categoryGO.GetComponent<TextMeshProUGUI>();
         }
         
-        private void OnObjectSelectedHandler(ObjectConfig selectedObject) {
+        private void OnObjectSelectedHandler(Element selectedObject) {
             SetInformation(selectedObject);
         }
 
-        private void SetInformation(ObjectConfig selectedObject) {
+        private void SetInformation(Element selectedObject) {
             if(selectedObject == null) {
                 objectNameText.text = "-";
                 typeText.text = "-";

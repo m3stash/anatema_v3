@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public abstract class ItemConfig : ObjectConfig {
+public abstract class Item : Element {
 
     public bool Dropable { get; set; }
     public bool Consumable { get; set; }

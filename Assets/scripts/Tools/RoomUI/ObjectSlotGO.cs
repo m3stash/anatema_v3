@@ -2,7 +2,7 @@
 
 public class ObjectSlotGO : MonoBehaviour {
 
-    [SerializeField] private ObjectConfig config;
+    [SerializeField] private Element config;
 
 }
 

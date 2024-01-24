@@ -9,11 +9,11 @@ namespace RoomUI {
         [SerializeField] GameObject itemPool;
         private ObjectPool pool;
         private RoomGridManager roomGridManager;
-        private ObjectsManager objectsManager;
+        private ElementManager elementManager;
         private RoomUIStateManager roomUIStateManager;
         private DatabaseManager dbManager;
         private ItemTableManager itemTableManager;
-        private ObjectTable objectTable;
+        private ElementTable ElementTable;
 
         public ObjectSlotGO GetObjectCell() {
             ObjectSlotGO slot = pool.GetOne();
@@ -61,31 +61,33 @@ namespace RoomUI {
 
         private void InitComponents() {
             roomGridManager = roomGrid.GetComponent<RoomGridManager>();
-            objectsManager = itemGrid.GetComponent<ObjectsManager>();
-            objectsManager.Setup(this);
+            elementManager = itemGrid.GetComponent<ElementManager>();
+            elementManager.Setup(this);
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
         }
 
         private void InitDb() {
-            dbManager = new DatabaseManager();
-            dbManager.Init();
-            objectTable = new ObjectTable(dbManager);
-            objectTable.CreateTable();
-            itemTableManager = new ItemTableManager();
-            itemTableManager.Setup(dbManager);
-            MockDb();
+            DatabaseManager dbManager = new DatabaseManager();
+            ElementTable elementTable = new ElementTable(dbManager);
+            ItemTableManager itemTableManager = new ItemTableManager(dbManager, elementTable.GetTableName());
+            //MockDb();
+            // elementTable.Read();
+            // itemTableManager.GetItemTable().Read();
+            // int elementId = ElementTable.GetIdByType("ITEM");
+            // Debug.Log("elementId -- "+ elementId);
         }
 
         private void MockDb(){
-            // objectTable.Insert(ObjectType.ITEM.ToString());
-            int objectId = objectTable.GetIdByType("ITEM");
-            Debug.Log($"ID for type ITEM: {objectId}");
-            CreateItemMock(objectId);
+            // ElementTable.Insert(ObjectType.ITEM.ToString());
+            // ElementTable.Insert(ObjectType.BLOCK.ToString());
+            int elementId = ElementTable.GetIdByType("ITEM");
+            Debug.Log($"ID for type ITEM: {elementId}");
+            CreateItemMock(elementId);
         }
 
-        private void CreateItemMock(int objectId){
+        private void CreateItemMock(int elementId){
             int lastInsertedItemId = itemTableManager.GetItemTable().Insert(
-                objectId, // int objectId,
+                elementId, // int elementId,
                 false, // bool dropables
                 true, // bool consumable
                 false, // bool craftable
@@ -97,14 +99,10 @@ namespace RoomUI {
                 "POTION", // string category
                 "Regenerates your health" // string description
             );
-            Debug.Log("------ "+lastInsertedItemId);
-
             if(lastInsertedItemId != -1){
                 itemTableManager.GetPotionTable().Insert("HEALING", lastInsertedItemId);
                 // toDO -> rajouter amout & cie !!!
             }
-            // int lastInsertedItemId = itemTable.GetLastInsertedId();
-
         }
 
     }
