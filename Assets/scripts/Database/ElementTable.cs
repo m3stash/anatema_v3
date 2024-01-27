@@ -28,7 +28,8 @@ public class ElementTable {
             [Description] TEXT NOT NULL,
             [IconPath] TEXT NOT NULL,
             [SizeX] INTEGER NOT NULL,
-            [SizeY] INTEGER NOT NULL
+            [SizeY] INTEGER NOT NULL,
+            [Biome] TEXT NOT NULL
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
     }
@@ -51,7 +52,8 @@ public class ElementTable {
                 string iconPath = dbreader.GetString(4);
                 int sizeX = dbreader.GetInt32(5);
                 int sizeY = dbreader.GetInt32(6);
-                Debug.Log($"ID: {id}, Type: {displayName}, Category: {category}, Description: {description}, IconPath: {iconPath}, SizeX: {sizeX}, SizeY: {sizeY}");
+                string biome = dbreader.GetString(7);
+                Debug.Log($"ID: {id}, Type: {displayName}, Category: {category}, Description: {description}, IconPath: {iconPath}, SizeX: {sizeX}, SizeY: {sizeY}, Biome: {biome}");
             }
             Debug.Log("Table read successfully.");
         }
@@ -66,18 +68,20 @@ public class ElementTable {
             string description,
             string iconPath,
             int sizeX,
-            int sizeY
+            int sizeY,
+            string biome
         ) {
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (DisplayName, Category, Description, IconPath, SizeX, SizeY) "+ 
-                "VALUES (@DisplayName, @Category, @Description, @IconPath, @SizeX, @SizeY)";
+            dbcmd.CommandText = $"INSERT INTO {tableName} (DisplayName, Category, Description, IconPath, SizeX, SizeY, Biome) "+ 
+                "VALUES (@DisplayName, @Category, @Description, @IconPath, @SizeX, @SizeY, @Biome)";
             dbManager.AddParameter(dbcmd, "@DisplayName", displayName);
             dbManager.AddParameter(dbcmd, "@Category", category);
             dbManager.AddParameter(dbcmd, "@Description", description);
             dbManager.AddParameter(dbcmd, "@IconPath", iconPath);
             dbManager.AddParameter(dbcmd, "@SizeX", sizeX);
             dbManager.AddParameter(dbcmd, "@SizeY", sizeY);
+            dbManager.AddParameter(dbcmd, "@Biome", biome);
             dbcmd.ExecuteNonQuery();
             Debug.Log("Item inserted successfully.");
         } catch (Exception e) {
@@ -222,7 +226,6 @@ public class ElementTable {
                                     Id = id,
                                     DisplayName = displayName
                                 };
-                                Debug.Log("coucou");
                                 // elements.Add(new Potion(id, displayName, subCategory));
                             }
                         }
