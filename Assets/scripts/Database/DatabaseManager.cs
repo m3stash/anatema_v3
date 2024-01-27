@@ -9,7 +9,7 @@ using Database;
 public class DatabaseManager {
 
     private TableManager tableManager;
-    private string dbName = "game_db";
+    private readonly string dbName = "game_db";
 
     public DatabaseManager(){
         tableManager = new TableManager();

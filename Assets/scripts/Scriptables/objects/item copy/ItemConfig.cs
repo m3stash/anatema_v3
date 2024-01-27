@@ -10,7 +10,7 @@ public abstract class Item : Element {
     [SerializeField] protected Vector2Int itemSize = new Vector2Int(1, 1);
     [SerializeField] private float weight;
 
-    public override ObjectType ObjectType => ObjectType.ITEM;
+    public override ElementCategoryType ElementCategoryType => ElementCategoryType.ITEM;
     public override Vector2Int Size => itemSize;
 
     public override Type Category() {

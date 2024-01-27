@@ -1,4 +1,4 @@
-﻿public enum ObjectType {
+﻿public enum ElementCategoryType {
     ITEM,
     ENTITY,
     BLOCK,
@@ -6,4 +6,3 @@
     PEDESTRAL,
     EQUIPMENT
 }
-

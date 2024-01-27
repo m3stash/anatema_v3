@@ -1,13 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Drawing;
+using UnityEngine;
 
-public abstract class Potion : Item {
+public class Potion : Item {
 
     protected PotionType potionType;
     public Potion() {
-        itemSize = new Vector2Int(1, 1);
+        SubCategory = ItemType.POTION.ToString();
     }
 
-    public override T CategoryValue<T>() {
-        return (T)(object)ItemCategory.POTION;
+    public override T GetSubCategoryType<T>() {
+        return (T)(object)ItemType.POTION;
     }
 }

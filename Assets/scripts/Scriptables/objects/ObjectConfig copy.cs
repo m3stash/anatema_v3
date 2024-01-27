@@ -8,7 +8,7 @@ public abstract class Element : ScriptableObject {
     [SerializeField] private string description;
     [SerializeField] private int id;
 
-    public abstract ObjectType ObjectType { get; }
+    public abstract ElementCategoryType ElementCategoryType { get; }
 
     public abstract Vector2Int Size { get; }
 

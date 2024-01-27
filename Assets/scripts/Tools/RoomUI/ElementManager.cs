@@ -28,9 +28,9 @@ namespace RoomUI {
         private int cellTabSpacing = 1;
         private int constraintCount;
         private float gridWidth;
-        private ObjectType selectedTab;
+        private ElementCategoryType selectedTab;
         private RoomUIManager roomUIManager;
-        private Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<Element>>>> ElementsDictionnary = new Dictionary<ObjectType, Dictionary<Type, Dictionary<Enum, List<Element>>>>();
+        private Dictionary<ElementCategoryType, Dictionary<Type, Dictionary<Enum, List<Element>>>> ElementsDictionnary = new Dictionary<ElementCategoryType, Dictionary<Type, Dictionary<Enum, List<Element>>>>();
 
         void Awake() {
             VerifySerialisables();
@@ -124,7 +124,7 @@ namespace RoomUI {
             }
         }
 
-        private void CreateTab(ObjectType type, bool isFirst) {
+        private void CreateTab(ElementCategoryType type, bool isFirst) {
             Sprite sprite = tabsCategoryConfig.GetItemByCategory(type);
             TabCellGO tab = tabCellPool.GetOne();
             usedTabCells.Add(tab);
@@ -135,9 +135,9 @@ namespace RoomUI {
             cellGo.SetActive(true);
         }
 
-        private void OnTabClickHandler(ObjectType type) {
+        private void OnTabClickHandler(ElementCategoryType type) {
             cellPool.ReleaseMany(usedCells);
-            CreateDictionnaryAndCellByObjectType(type);
+            CreateDictionnaryAndCellByElementCategoryType(type);
         }
 
         private void OnCellClickHandler(Element config) {
@@ -146,8 +146,8 @@ namespace RoomUI {
 
         private void CreateTabs() {
             bool isFirstElement = true;
-            foreach (ObjectType type in Enum.GetValues(typeof(ObjectType))) {
-                if(type != ObjectType.EQUIPMENT) {
+            foreach (ElementCategoryType type in Enum.GetValues(typeof(ElementCategoryType))) {
+                if(type != ElementCategoryType.EQUIPMENT) {
                     if (isFirstElement) {
                         selectedTab = type;
                         CreateTab(type, true);
@@ -160,16 +160,16 @@ namespace RoomUI {
         }
 
         void LoadObjects() {
-            foreach (ObjectType type in Enum.GetValues(typeof(ObjectType))) {
+            foreach (ElementCategoryType type in Enum.GetValues(typeof(ElementCategoryType))) {
                 switch (type) {
-                    case ObjectType.ITEM:
-                    case ObjectType.ENTITY:
-                    case ObjectType.BLOCK:
-                    case ObjectType.PEDESTRAL:
-                    case ObjectType.DECORATION:
-                        CreateDictionnaryAndCellByObjectType(type);
+                    case ElementCategoryType.ITEM:
+                    case ElementCategoryType.ENTITY:
+                    case ElementCategoryType.BLOCK:
+                    case ElementCategoryType.PEDESTRAL:
+                    case ElementCategoryType.DECORATION:
+                        CreateDictionnaryAndCellByElementCategoryType(type);
                         break;
-                    case ObjectType.EQUIPMENT:
+                    case ElementCategoryType.EQUIPMENT:
                         break;
                     default:
                         Debug.LogError("LoadObjects: type not found: " + type);
@@ -178,7 +178,7 @@ namespace RoomUI {
             };
         }
 
-        private void CreateDictionnaryAndCellByObjectType(ObjectType type) {
+        private void CreateDictionnaryAndCellByElementCategoryType(ElementCategoryType type) {
             string cat = type.ToString().ToLower();
             if (!ElementsDictionnary.ContainsKey(type)) {
                 Element[] Elements = LoadElements(cat);
@@ -192,7 +192,7 @@ namespace RoomUI {
             }
         }
 
-        private void CreateCellWithExistingDictionnary(ObjectType type) {
+        private void CreateCellWithExistingDictionnary(ElementCategoryType type) {
             foreach (var category in ElementsDictionnary[type].Keys) {
                 foreach (var categoryValue in ElementsDictionnary[type][category].Keys) {
                     foreach (var config in ElementsDictionnary[type][category][categoryValue]) {
@@ -208,13 +208,13 @@ namespace RoomUI {
             // return Resources.LoadAll<Element>(GlobalConfig.Instance.ScriptablePath + category);
         }
 
-        private void BuildElementsDictionary(ObjectType type, Element[] Elements) {
+        private void BuildElementsDictionary(ElementCategoryType type, Element[] Elements) {
             if (!ElementsDictionnary.ContainsKey(type)) {
                 ElementsDictionnary[type] = new Dictionary<Type, Dictionary<Enum, List<Element>>>();
             }
             foreach (var config in Elements) {
-                Type category = config.Category();
-                Enum categoryValue = config.CategoryValue<Enum>();
+                Type category = config.GetSubCategory();
+                Enum categoryValue = config.GetSubCategoryType<Enum>();
                 EnsureNestedDictionariesExist(type, category, categoryValue);
 
                 ElementsDictionnary[type][category][categoryValue].Add(config);
@@ -222,7 +222,7 @@ namespace RoomUI {
             }
         }
 
-        private void EnsureNestedDictionariesExist(ObjectType type, Type category, Enum categoryValue) {
+        private void EnsureNestedDictionariesExist(ElementCategoryType type, Type category, Enum categoryValue) {
             if (!ElementsDictionnary[type].ContainsKey(category)) {
                 ElementsDictionnary[type][category] = new Dictionary<Enum, List<Element>>();
             }

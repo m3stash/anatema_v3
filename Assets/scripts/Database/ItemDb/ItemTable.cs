@@ -24,18 +24,14 @@ public class ItemTable {
     public void CreateTable(string elementTableName) {
         string sqlQuery = $@"CREATE TABLE IF NOT EXISTS {tableName} (
             [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-            [ObjectID] INTEGER NOT NULL,
-            [Dropables] BOOLEAN NOT NULL,
+            [ElementID] INTEGER NOT NULL,
+            [Dropable] BOOLEAN NOT NULL,
             [Consumable] BOOLEAN NOT NULL,
             [Craftable] BOOLEAN NOT NULL,
             [Max] INTEGER NOT NULL,
             [Weight] REAL NOT NULL,
-            [SizeX] INTEGER NOT NULL,
-            [SizeY] INTEGER NOT NULL,
-            [Icon] TEXT NOT NULL,
-            [Category] TEXT NOT NULL,
-            [Description] TEXT NOT NULL,
-            FOREIGN KEY (ObjectID) REFERENCES {elementTableName}(id)
+            [SubCategory] TEXT NOT NULL,
+            FOREIGN KEY (ElementID) REFERENCES {elementTableName}(id)
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
     }
@@ -53,12 +49,8 @@ public class ItemTable {
                 bool craftable = dbreader.GetBoolean(4);
                 int max = dbreader.GetInt32(5);
                 float weight = dbreader.GetFloat(6);
-                int sizeX = dbreader.GetInt32(7);
-                int sizeY = dbreader.GetInt32(8);
-                string icon = dbreader.GetString(9);
-                string category = dbreader.GetString(10);
-                string description = dbreader.GetString(11);
-                Debug.Log($"ID: {id}, ObjectId: {elementId}, Dropables: {dropables}, Consumable: {consumable}, Craftable: {craftable}, Max: {max}, Weight: {weight}, SizeX: {sizeX}, SizeY: {sizeY}, Icon: {icon}, Category: {category}, Description: {description}");
+                string subCategory = dbreader.GetString(7);
+                Debug.Log($"ID: {id}, ElementId: {elementId}, Dropables: {dropables}, Consumable: {consumable}, Craftable: {craftable}, Max: {max}, Weight: {weight}, SubCategory: {subCategory}");
             }
             Debug.Log("Table read successfully.");
 
@@ -75,30 +67,22 @@ public class ItemTable {
         bool craftable, 
         int max, 
         float weight, 
-        int sizeX, 
-        int sizeY, 
-        string icon, 
-        string category, 
-        string description) {
+        string subCategory) {
 
         int lastInsertedId = -1;
 
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (ObjectID, Dropables, Consumable, Craftable, Max, Weight, SizeX, SizeY, Icon, Category, Description) " +
-                "VALUES (@ObjectID, @Dropables, @Consumable, @Craftable, @Max, @Weight, @SizeX, @SizeY, @Icon, @Category, @Description); " +
+            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, Dropables, Consumable, Craftable, Max, Weight, SubCategory) " +
+                "VALUES (@ElementID, @Dropables, @Consumable, @Craftable, @Max, @Weight, @SubCategory); " +
                 "SELECT last_insert_rowid() AS new_id;";
-            dbManager.AddParameter(dbcmd, "@ObjectID", elementId);
+            dbManager.AddParameter(dbcmd, "@ElementID", elementId);
             dbManager.AddParameter(dbcmd, "@Dropables", dropables);
             dbManager.AddParameter(dbcmd, "@Consumable", consumable);
             dbManager.AddParameter(dbcmd, "@Craftable", craftable);
             dbManager.AddParameter(dbcmd, "@Max", max);
             dbManager.AddParameter(dbcmd, "@Weight", weight);
-            dbManager.AddParameter(dbcmd, "@SizeX", sizeX);
-            dbManager.AddParameter(dbcmd, "@SizeY", sizeY);
-            dbManager.AddParameter(dbcmd, "@Icon", icon);
-            dbManager.AddParameter(dbcmd, "@Category", category);
-            dbManager.AddParameter(dbcmd, "@Description", description);
+            dbManager.AddParameter(dbcmd, "@SubCategory", subCategory);
 
             /*dbcmd.ExecuteNonQuery();
             Debug.Log($"{tableName} inserted successfully.");*/
@@ -130,11 +114,8 @@ public class ItemTable {
                         bool craftable = dbreader.GetBoolean(4);
                         int max = dbreader.GetInt32(5);
                         float weight = dbreader.GetFloat(6);
-                        int sizeX = dbreader.GetInt32(7);
-                        int sizeY = dbreader.GetInt32(8);
-                        string icon = dbreader.GetString(9);
-                        string category = dbreader.GetString(10);
-                        string description = dbreader.GetString(11);
+                        string subCategory = dbreader.GetString(7);
+                        // TODO TOUT REFAIRE !!!
                         return null;
                         //return new Item(id, elementId, dropables, consumable, craftable, max, weight, sizeX, sizeY, icon, category, description);
                     }
