@@ -4,12 +4,14 @@ using UnityEngine;
 using System.Data;
 using System;
 using Database;
+using System.Collections.Generic;
 
 public class ItemTable {
     private IDbConnection dbconn;
     private readonly string tableName = "item_table";
     private TableManager tableManager;
     private DatabaseManager dbManager;
+    private readonly string category = ElementCategoryType.ITEM.ToString();
 
     public ItemTable(DatabaseManager dbManager) {
         this.dbManager = dbManager;
@@ -25,12 +27,17 @@ public class ItemTable {
         string sqlQuery = $@"CREATE TABLE IF NOT EXISTS {tableName} (
             [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             [ElementID] INTEGER NOT NULL,
+            [DisplayName] TEXT NOT NULL,
+            [SubCategory] TEXT NOT NULL,
+            [Description] TEXT NOT NULL,
+            [IconPath] TEXT NOT NULL,
+            [SizeX] INTEGER NOT NULL,
+            [SizeY] INTEGER NOT NULL,
+            [Biome] TEXT NOT NULL,
             [Dropable] BOOLEAN NOT NULL,
             [Consumable] BOOLEAN NOT NULL,
             [Craftable] BOOLEAN NOT NULL,
-            [Max] INTEGER NOT NULL,
-            [Weight] REAL NOT NULL,
-            [SubCategory] TEXT NOT NULL,
+            [GroupType] TEXT NOT NULL,
             FOREIGN KEY (ElementID) REFERENCES {elementTableName}(id)
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
@@ -44,80 +51,153 @@ public class ItemTable {
             while (dbreader.Read()) {
                 int id = dbreader.GetInt32(0);
                 int elementId = dbreader.GetInt32(1);
-                bool dropables = dbreader.GetBoolean(2);
-                bool consumable = dbreader.GetBoolean(3);
-                bool craftable = dbreader.GetBoolean(4);
-                int max = dbreader.GetInt32(5);
-                float weight = dbreader.GetFloat(6);
-                string subCategory = dbreader.GetString(7);
-                Debug.Log($"ID: {id}, ElementId: {elementId}, Dropables: {dropables}, Consumable: {consumable}, Craftable: {craftable}, Max: {max}, Weight: {weight}, SubCategory: {subCategory}");
+                string displayName = dbreader.GetString(2);
+                string subCategory = dbreader.GetString(3);
+                string description = dbreader.GetString(4);
+                string iconPath = dbreader.GetString(5);
+                int sizeX = dbreader.GetInt32(6);
+                int sizeY = dbreader.GetInt32(7);
+                string biome = dbreader.GetString(8);
+                bool dropables = dbreader.GetBoolean(9);
+                bool consumable = dbreader.GetBoolean(10);
+                bool craftable = dbreader.GetBoolean(11);
+                string groupType = dbreader.GetString(12);
             }
             Debug.Log("Table read successfully.");
-
         }
         catch (Exception e) {
             Debug.LogError($"Error reading table ${tableName}: {e.Message}");
         }
     }
 
-    public int Insert(
+    public void Insert(
         int elementId,
+        string displayName,
+        string subCategory,
+        string description,
+        string iconPath,
+        int sizeX,
+        int sizeY,
+        string biome,
         bool dropables, 
         bool consumable, 
-        bool craftable, 
-        int max, 
-        float weight, 
-        string subCategory) {
-
-        int lastInsertedId = -1;
-
+        bool craftable,
+        string groupType
+    ) {
+        // int lastInsertedId = -1;
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, Dropables, Consumable, Craftable, Max, Weight, SubCategory) " +
-                "VALUES (@ElementID, @Dropables, @Consumable, @Craftable, @Max, @Weight, @SubCategory); " +
+            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, DisplayName, SubCategory, Description, IconPath, SizeX, SizeY, Biome, Dropable, Consumable, Craftable, GroupType) " +
+                "VALUES (@ElementID, @DisplayName, @SubCategory, @Description, @IconPath, @SizeX, @SizeY, @Biome, @Dropable, @Consumable, @Craftable, @GroupType); " +
                 "SELECT last_insert_rowid() AS new_id;";
             dbManager.AddParameter(dbcmd, "@ElementID", elementId);
-            dbManager.AddParameter(dbcmd, "@Dropables", dropables);
+            dbManager.AddParameter(dbcmd, "@DisplayName", displayName);
+            dbManager.AddParameter(dbcmd, "@SubCategory", subCategory);
+            dbManager.AddParameter(dbcmd, "@Description", description);
+            dbManager.AddParameter(dbcmd, "@IconPath", iconPath);
+            dbManager.AddParameter(dbcmd, "@SizeX", sizeX);
+            dbManager.AddParameter(dbcmd, "@SizeY", sizeY);
+            dbManager.AddParameter(dbcmd, "@Biome", biome);
+            dbManager.AddParameter(dbcmd, "@Dropable", dropables);
             dbManager.AddParameter(dbcmd, "@Consumable", consumable);
             dbManager.AddParameter(dbcmd, "@Craftable", craftable);
-            dbManager.AddParameter(dbcmd, "@Max", max);
-            dbManager.AddParameter(dbcmd, "@Weight", weight);
-            dbManager.AddParameter(dbcmd, "@SubCategory", subCategory);
-
-            /*dbcmd.ExecuteNonQuery();
-            Debug.Log($"{tableName} inserted successfully.");*/
-            using IDataReader reader = dbcmd.ExecuteReader();
+            dbManager.AddParameter(dbcmd, "@GroupType", groupType);
+            dbcmd.ExecuteNonQuery();
+            Debug.Log($"{tableName} inserted successfully.");
+            /*using IDataReader reader = dbcmd.ExecuteReader();
             if (reader.Read()) {
                 lastInsertedId = Convert.ToInt32(reader["new_id"]);
                 Debug.Log($"{tableName} inserted successfully. Last inserted ID: {lastInsertedId}");
-            }
+            }*/
         }
         catch (Exception e) {
             Debug.LogError($"Error inserting {tableName}: {e.Message}");
-            return lastInsertedId;
+            // return lastInsertedId;
         }
-        return lastInsertedId;
+        // return lastInsertedId;
     }
 
-    public Item GetItemById(int itemId) {
+    public List<Element> GetElementsByElementId(int id) {
+        List<Element> elements = new List<Element>();
+
+        using (IDbCommand dbcmd = dbconn.CreateCommand()) {
+            dbcmd.CommandText = $@"
+                SELECT *
+                FROM {tableName}
+                WHERE ElementID = @ElementID";
+            dbManager.AddParameter(dbcmd, "@ElementID", id);
+
+            try {
+                using IDataReader dbreader = dbcmd.ExecuteReader();
+                while (dbreader.Read()) {
+                    int elementID = dbreader.GetInt32(1);
+                    string displayName = dbreader.GetString(2);
+                    string subCategory = dbreader.GetString(3);
+                    string description = dbreader.GetString(4);
+                    string iconPath = dbreader.GetString(5);
+                    int sizeX = dbreader.GetInt32(6);
+                    int sizeY = dbreader.GetInt32(7);
+                    string biome = dbreader.GetString(8);
+                    // bool dropable = dbreader.GetBoolean(9);
+                    // bool consumable = dbreader.GetBoolean(10);
+                    // bool craftable = dbreader.GetBoolean(11);
+                    string groupType = dbreader.GetString(12);
+                    Element item = new Element(
+                        id,
+                        category,
+                        displayName, 
+                        subCategory, 
+                        description, 
+                        iconPath, 
+                        sizeX, 
+                        sizeY, 
+                        biome,
+                        groupType
+                    );
+                    elements.Add(item);
+                }
+            } catch (Exception e) {
+                Debug.LogError($"Error reading table: {e.Message}");
+            }
+        }
+        return elements;
+    }
+
+    public Item GetItemById(int id) {
         try {
             using (IDbCommand dbcmd = dbconn.CreateCommand()) {
-                dbcmd.CommandText = $"SELECT * FROM {tableName} WHERE id = @ItemId";
-                dbManager.AddParameter(dbcmd, "@ItemId", itemId);
+                dbcmd.CommandText = $"SELECT * FROM {tableName} WHERE id = @ElementID";
+                dbManager.AddParameter(dbcmd, "@ElementID", id);
 
                 using (IDataReader dbreader = dbcmd.ExecuteReader()) {
                     if (dbreader.Read()) {
-                        int id = dbreader.GetInt32(0);
-                        int elementId = dbreader.GetInt32(1);
-                        bool dropables = dbreader.GetBoolean(2);
-                        bool consumable = dbreader.GetBoolean(3);
-                        bool craftable = dbreader.GetBoolean(4);
-                        int max = dbreader.GetInt32(5);
-                        float weight = dbreader.GetFloat(6);
-                        string subCategory = dbreader.GetString(7);
-                        // TODO TOUT REFAIRE !!!
-                        return null;
-                        //return new Item(id, elementId, dropables, consumable, craftable, max, weight, sizeX, sizeY, icon, category, description);
+                        // int elementID = dbreader.GetInt32(1);
+                        string displayName = dbreader.GetString(2);
+                        string subCategory = dbreader.GetString(3);
+                        string description = dbreader.GetString(4);
+                        string iconPath = dbreader.GetString(5);
+                        int sizeX = dbreader.GetInt32(6);
+                        int sizeY = dbreader.GetInt32(7);
+                        string biome = dbreader.GetString(8);
+                        bool dropable = dbreader.GetBoolean(9);
+                        bool consumable = dbreader.GetBoolean(10);
+                        bool craftable = dbreader.GetBoolean(11);
+                        string groupType = dbreader.GetString(12);
+                        return new Item(
+                            id,
+                            category,
+                            displayName,
+                            subCategory,
+                            description,
+                            iconPath,
+                            sizeX,
+                            sizeY,
+                            biome,
+                            groupType,
+                            dropable, 
+                            consumable, 
+                            craftable
+                        );
                     }
                 }
             }
@@ -125,7 +205,6 @@ public class ItemTable {
         catch (Exception e) {
             Debug.LogError($"Error getting item by ID: {e.Message}");
         }
-
         return null;
     }
 

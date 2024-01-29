@@ -1,14 +1,40 @@
-﻿using System.Drawing;
-using UnityEngine;
+﻿public class Potion : Item {
 
-public class Potion : Item {
+    private int max;
 
-    protected PotionType potionType;
-    public Potion() {
-        SubCategory = ItemType.POTION.ToString();
+    public Potion(
+        int id, 
+        string category, 
+        string displayName, 
+        string subCategory, 
+        string description, 
+        string iconPath, 
+        int sizeX, 
+        int sizeY, 
+        string biome,
+        string groupType,
+        bool dropable, 
+        bool consumable, 
+        bool craftable,
+        int max
+    ): base(
+        id, 
+        category, 
+        displayName, 
+        subCategory, 
+        description, 
+        iconPath, 
+        sizeX, 
+        sizeY, 
+        biome,
+        groupType,
+        dropable,
+        consumable,
+        craftable
+    ) {
+        this.max = max;
     }
 
-    public override T GetSubCategoryType<T>() {
-        return (T)(object)ItemType.POTION;
-    }
+    public int GetMax() => max;
+    // public float GetWeight() => weight;
 }

@@ -41,7 +41,7 @@ public class CellGO: MonoBehaviour {
     }
 
     public void Setup(Element config) {
-        // todo revoir la façon de faire !!!
+        // todo revoir la façon de faire !!!!!!!!!!!!!!!!!!!!!!!!
         if (button == null || image == null) {
             button = GetComponent<Button>();
             button.onClick.AddListener(OnCellClick);
@@ -59,7 +59,7 @@ public class CellGO: MonoBehaviour {
             // Debug.LogError("CellGO config cannot be null");
         } else {
             this.config = config;
-            Sprite cellIcon = config.Sprite;
+            Sprite cellIcon = config.GetSprite();
             if (cellIcon) {
                 icon.sprite = cellIcon;
             } else {

@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 public class TabCellGO : MonoBehaviour {
 
-    public delegate void TabClickedEvent(ElementCategoryType type);
+    public delegate void TabClickedEvent(string type);
     public static event TabClickedEvent OnClick;
-    private ElementCategoryType tabType;
+    private string tabType;
 
     private void OnTabClick() {
         OnClick?.Invoke(tabType);
@@ -29,9 +29,9 @@ public class TabCellGO : MonoBehaviour {
         }
     }
 
-    public void Setup(bool isActive, Sprite sprite, ElementCategoryType ElementCategoryType) {
+    public void Setup(bool isActive, Sprite sprite, string elementCategoryType) {
 
-        tabType = ElementCategoryType;
+        tabType = elementCategoryType;
 
         if (button == null) {
             backgroundImage = backgroundGO.GetComponent<Image>();

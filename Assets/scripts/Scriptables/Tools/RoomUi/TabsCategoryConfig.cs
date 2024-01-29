@@ -9,17 +9,17 @@ public class TabsCategoryConfig: ScriptableObject {
     // [SerializeField] private Sprite equipment;
     [SerializeField] private Sprite pedestral;
 
-    public Sprite GetItemByCategory(ElementCategoryType type) {
+    public Sprite GetItemByCategory(string type) {
         switch (type) {
-            case ElementCategoryType.ITEM:
+            case "ITEM":
                 return item;
-            case ElementCategoryType.ENTITY:
+            case "ENTITY":
                 return entity;
-            case ElementCategoryType.BLOCK:
+            case "BLOCK":
                 return block;
-            case ElementCategoryType.PEDESTRAL:
+            case "PEDESTRAL":
                 return pedestral;
-            case ElementCategoryType.DECORATION:
+            case "DECORATION":
                 return decoration;
             default:
                 return null;

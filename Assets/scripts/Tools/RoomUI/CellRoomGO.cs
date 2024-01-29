@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using UnityEngine.Rendering;
-using System;
 using UnityEngine.EventSystems;
-using System.Runtime.InteropServices;
 
 public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
@@ -63,7 +60,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     private void SetComponentValues(Element config){
         this.config = config;
-        Sprite cellIcon = config.Sprite;
+        Sprite cellIcon = config.GetSprite();
         image.sprite = cellIcon;
     }
 
@@ -123,13 +120,16 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         float height;
         float rectWidth = rectTransform.sizeDelta.x;
         float rectHeight = rectTransform.sizeDelta.y;
-        if(config != null && (config.Size.x > 1 || config.Size.y > 1)) {
-            width = rectWidth  * config.Size.x + (config.Size.x - 1 * spacing.x);
-            height = rectHeight  * config.Size.y + (config.Size.y - 1 * spacing.y);
-        }else{
-            width = rectWidth;
-            height = rectHeight;
-        }
+        width = rectWidth;
+        height = rectHeight;
+        Vector2Int size;
+        if(config != null){
+            size = config.GetSize();
+            if(size.x > 1 || size.y > 1) {
+                width = rectWidth  * size.x + (size.x - 1 * spacing.x);
+                height = rectHeight  * size.y + (size.y - 1 * spacing.y);
+            }
+        }  
         childRectTransform.sizeDelta = new Vector2(width, height);
     }
 

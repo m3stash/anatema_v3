@@ -200,14 +200,15 @@ namespace RoomUI {
                 }
                 bool findExistingCell = false;
                 List<CellRoomGO> cellsToDeactivate = new List<CellRoomGO>();
-                bool bigCell = currenSelectedObject.Size.x > 1 || currenSelectedObject.Size.y > 1;
+                Vector2Int size = currenSelectedObject.GetSize();
+                bool bigCell =size.x > 1 || size.y > 1;
                 if(bigCell) {
                     Vector2Int position = cellRoomGO.GetPosition();
                     int x = position.x;
                     int y = position.y;
                     int gridSizeX = gridLayout.constraintCount;
-                    for (int yOffset = 0; yOffset < currenSelectedObject.Size.y; yOffset++) {
-                        for (int xOffset = 0; xOffset < currenSelectedObject.Size.x; xOffset++) {
+                    for (int yOffset = 0; yOffset < size.y; yOffset++) {
+                        for (int xOffset = 0; xOffset < size.x; xOffset++) {
                             int targetX = x + xOffset;
                             int targetY = y - yOffset;
                             int targetChildIndex = targetY * gridSizeX + targetX;
@@ -247,13 +248,14 @@ namespace RoomUI {
 
         private void DeleteCell(CellRoomGO cellRoomGO) {
             if(cellRoomGO.GetConfig() == null) return;
-            if(currenSelectedObject.Size.x > 1 || currenSelectedObject.Size.y > 1) {
+            Vector2Int size = currenSelectedObject.GetSize();
+            if(size.x > 1 || size.y > 1) {
                 Vector2Int position = cellRoomGO.GetPosition();
                 int x = position.x;
                 int y = position.y;
                 int gridSizeX = gridLayout.constraintCount;
-                for (int yOffset = 0; yOffset < currenSelectedObject.Size.y; yOffset++) {
-                    for (int xOffset = 0; xOffset < currenSelectedObject.Size.x; xOffset++) {
+                for (int yOffset = 0; yOffset < size.y; yOffset++) {
+                    for (int xOffset = 0; xOffset < size.x; xOffset++) {
                         int targetX = x + xOffset;
                         int targetY = y - yOffset;
                         int targetChildIndex = targetY * gridSizeX + targetX;

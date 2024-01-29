@@ -19,7 +19,6 @@ namespace RoomUI {
         private Image icon; 
 
         void Awake() {
-            Debug.Log("PanelItemInformationManager Awake");
             if(roomUIStateManager == null) {
                 roomUIStateManager = FindFirstObjectByType<RoomUIStateManager>();
             }
@@ -52,11 +51,11 @@ namespace RoomUI {
                 categoryText.text = "-";
                 return;
             }
-            objectNameText.text = selectedObject.DisplayName;
-            typeText.text = selectedObject.GetSubCategoryType<object>().ToString();
-            descriptionText.text = selectedObject.Description;
-            icon.sprite = selectedObject.Sprite;
-            categoryText.text = selectedObject.ElementCategoryType.ToString();
+            objectNameText.text = selectedObject.GetDisplayName();
+            typeText.text = selectedObject.GetSubCategory();
+            descriptionText.text = selectedObject.GetDescription();
+            icon.sprite = selectedObject.GetSprite();
+            categoryText.text = selectedObject.GetCategory();
         }
 
     }

@@ -22,7 +22,7 @@ namespace Database {
                 using IDbCommand dbcmd = dbconn.CreateCommand();
                 dbcmd.CommandText = sqlQuery;
                 dbcmd.ExecuteScalar();
-                Debug.Log($"{tableName} table creation attempted (if not exists).");
+                Debug.Log($"{tableName} Initialized successfully.");
             } catch (Exception e) {
                 Debug.LogError($"Error creating {tableName} table: {e.Message}");
             }

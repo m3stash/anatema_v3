@@ -1,9 +1,47 @@
-﻿public class Heal : Potion {
+﻿using UnityEngine;
 
-    public Heal() {
-        potionType = PotionType.HEAL;
+public class Heal : Potion {
+
+    private int amount;
+    private float duration;
+
+    public Heal (
+        int id, 
+        string category, 
+        string displayName, 
+        string subCategory, 
+        string description, 
+        string iconPath, 
+        int sizeX, 
+        int sizeY, 
+        string biome,
+        string groupType,
+        bool dropable, 
+        bool consumable, 
+        bool craftable, 
+        int max,
+        int amount,
+        float duration
+    ): base(
+        id, 
+        category, 
+        displayName, 
+        subCategory, 
+        description, 
+        iconPath, 
+        sizeX, 
+        sizeY, 
+        biome,
+        groupType,
+        dropable,
+        consumable,
+        craftable,
+        max
+    ) {
+        this.amount = amount;
+        this.duration = duration;
     }
     
-    public bool Amount { get; set; }
-    public float Duration { get; set; }
+    public int GetAmount() => amount;
+    public float GetDuration() => duration;
 }

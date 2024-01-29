@@ -21,7 +21,6 @@ public class PotionTable {
         string sqlQuery = $@"CREATE TABLE IF NOT EXISTS {tableName} (
             [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             [ItemID] INTEGER NOT NULL,
-            [SubCategoryType] TEXT NOT NULL,
             FOREIGN KEY (ItemID) REFERENCES {itemTableName}(id)
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
@@ -35,8 +34,7 @@ public class PotionTable {
             while (dbreader.Read()) {
                 int id = dbreader.GetInt32(0);
                 int itemId = dbreader.GetInt32(1);
-                string subCategoryType = dbreader.GetString(2);
-                Debug.Log($"ID: {id}, ItemID: {itemId}, SubCategoryType: {subCategoryType}");
+                Debug.Log($"ID: {id}, ItemID: {itemId}");
             }
             Debug.Log("Table read successfully.");
         }
@@ -45,13 +43,12 @@ public class PotionTable {
         }
     }
 
-    public void Insert(int itemId, string subCategoryType) {
+    public void Insert(int itemId) {
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (ItemID, SubCategoryType) " +
-                "VALUES (@ItemID, @SubCategory)";
+            dbcmd.CommandText = $"INSERT INTO {tableName} (ItemID) " +
+                "VALUES (@ItemID)";
             dbManager.AddParameter(dbcmd, "@ItemID", itemId);
-            dbManager.AddParameter(dbcmd, "@SubCategoryType", subCategoryType);
             dbcmd.ExecuteNonQuery();
             Debug.Log($"{tableName} inserted successfully.");
         }

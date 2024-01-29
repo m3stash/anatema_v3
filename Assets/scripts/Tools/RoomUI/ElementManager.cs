@@ -28,26 +28,31 @@ namespace RoomUI {
         private int cellTabSpacing = 1;
         private int constraintCount;
         private float gridWidth;
-        private ElementCategoryType selectedTab;
+        private string currentCategory;
         private RoomUIManager roomUIManager;
-        private Dictionary<ElementCategoryType, Dictionary<Type, Dictionary<Enum, List<Element>>>> ElementsDictionnary = new Dictionary<ElementCategoryType, Dictionary<Type, Dictionary<Enum, List<Element>>>>();
+        private Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>> ElementsDictionnary = new Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>>();
+        private ElementTable elementTable;
+        private ItemTable itemTable;
+
 
         void Awake() {
-            VerifySerialisables();
-            CreateListeners();
-            CreatePooling();
-            InitGrid();
-            CreateTabs();
-            InitGridTabs();
-            LoadObjects();
+            
         }
 
         void OnDestroy() {
             RemoveListeners();
         }
 
-        public void Setup(RoomUIManager roomUIManager) {
+        public void Setup(RoomUIManager roomUIManager, ElementTable elementTable, ItemTable itemTable) {
             this.roomUIManager = roomUIManager;
+            this.elementTable = elementTable;
+            this.itemTable = itemTable;
+            VerifySerialisables();
+            CreateListeners();
+            CreatePooling();
+            InitGrid();
+            CreateTabs();
+            InitGridTabs();
         }
 
         private void RemoveListeners() {
@@ -124,7 +129,7 @@ namespace RoomUI {
             }
         }
 
-        private void CreateTab(ElementCategoryType type, bool isFirst) {
+        private void CreateTab(string type, bool isFirst) {
             Sprite sprite = tabsCategoryConfig.GetItemByCategory(type);
             TabCellGO tab = tabCellPool.GetOne();
             usedTabCells.Add(tab);
@@ -135,9 +140,13 @@ namespace RoomUI {
             cellGo.SetActive(true);
         }
 
-        private void OnTabClickHandler(ElementCategoryType type) {
+        private void OnTabClickHandler(string category) {
+            if(currentCategory == category) {
+                return;
+            }
+            currentCategory = category;
             cellPool.ReleaseMany(usedCells);
-            CreateDictionnaryAndCellByElementCategoryType(type);
+            CreateDictionnaryAndCellByElementCategoryType(category);
         }
 
         private void OnCellClickHandler(Element config) {
@@ -145,89 +154,85 @@ namespace RoomUI {
         }
 
         private void CreateTabs() {
+            //
+            // TODO : remove this when all categories will be implemented with DATABASE !!!!
+            //
             bool isFirstElement = true;
-            foreach (ElementCategoryType type in Enum.GetValues(typeof(ElementCategoryType))) {
-                if(type != ElementCategoryType.EQUIPMENT) {
+            foreach (ElementCategoryType category in Enum.GetValues(typeof(ElementCategoryType))) {
+                string categoryString = category.ToString();
+                if(category != ElementCategoryType.EQUIPMENT) {
                     if (isFirstElement) {
-                        selectedTab = type;
-                        CreateTab(type, true);
+                        currentCategory = categoryString;
+                        CreateTab(categoryString, true);
                         isFirstElement = false;
+                        LoadElements(categoryString);
                     } else {
-                        CreateTab(type, false);
+                        CreateTab(categoryString, false);
                     }
                 }
             }
         }
 
-        void LoadObjects() {
-            foreach (ElementCategoryType type in Enum.GetValues(typeof(ElementCategoryType))) {
-                switch (type) {
-                    case ElementCategoryType.ITEM:
-                    case ElementCategoryType.ENTITY:
-                    case ElementCategoryType.BLOCK:
-                    case ElementCategoryType.PEDESTRAL:
-                    case ElementCategoryType.DECORATION:
-                        CreateDictionnaryAndCellByElementCategoryType(type);
-                        break;
-                    case ElementCategoryType.EQUIPMENT:
-                        break;
-                    default:
-                        Debug.LogError("LoadObjects: type not found: " + type);
-                        break;
-                }
-            };
-        }
-
-        private void CreateDictionnaryAndCellByElementCategoryType(ElementCategoryType type) {
-            string cat = type.ToString().ToLower();
-            if (!ElementsDictionnary.ContainsKey(type)) {
-                Element[] Elements = LoadElements(cat);
-                if(Elements == null) {
-                    // Debug.Log("Error: Elements is null !");
-                }else{
-                    BuildElementsDictionary(type, Elements);
-                }
-            }else{
-                CreateCellWithExistingDictionnary(type);
+        void LoadElements(string category) {
+            switch (category) {          
+                case "EQUIPMENT":
+                    break;
+                default:
+                    CreateDictionnaryAndCellByElementCategoryType(category);
+                    break;
             }
         }
 
-        private void CreateCellWithExistingDictionnary(ElementCategoryType type) {
-            foreach (var category in ElementsDictionnary[type].Keys) {
-                foreach (var categoryValue in ElementsDictionnary[type][category].Keys) {
-                    foreach (var config in ElementsDictionnary[type][category][categoryValue]) {
+        private void CreateDictionnaryAndCellByElementCategoryType(string category) {
+            if (!ElementsDictionnary.ContainsKey(category)) {
+                List<Element> elements = LoadElementsFromDB(category);
+                if(elements == null) {
+                    Debug.Log($"Error: No Element For This category {category} !");
+                }else{
+                    BuildElementsDictionary(category, elements);
+                }
+            }else{
+                CreateCellWithExistingDictionnary(category);
+            }
+        }
+
+        private void CreateCellWithExistingDictionnary(string category) {
+            foreach (var subCategory in ElementsDictionnary[category].Keys) {
+                foreach (var categoryValue in ElementsDictionnary[category][subCategory].Keys) {
+                    foreach (var config in ElementsDictionnary[category][subCategory][categoryValue]) {
                         CreateCell(config);
                     }
                 }
             }
         }
 
-        private Element[] LoadElements(string category) {
-            // toDo ICI
+        private List<Element> LoadElementsFromDB(string category) {
+            int elementId = elementTable.GetIdByType(category);
+            if (elementId != -1) {
+                return itemTable.GetElementsByElementId(elementId);
+            }
             return null;
-            // return Resources.LoadAll<Element>(GlobalConfig.Instance.ScriptablePath + category);
         }
 
-        private void BuildElementsDictionary(ElementCategoryType type, Element[] Elements) {
-            if (!ElementsDictionnary.ContainsKey(type)) {
-                ElementsDictionnary[type] = new Dictionary<Type, Dictionary<Enum, List<Element>>>();
+        private void BuildElementsDictionary(string category, List<Element> elements) {
+            if (!ElementsDictionnary.ContainsKey(category)) {
+                ElementsDictionnary[category] = new Dictionary<string, Dictionary<string, List<Element>>>();
             }
-            foreach (var config in Elements) {
-                Type category = config.GetSubCategory();
-                Enum categoryValue = config.GetSubCategoryType<Enum>();
-                EnsureNestedDictionariesExist(type, category, categoryValue);
-
-                ElementsDictionnary[type][category][categoryValue].Add(config);
-                CreateCell(config);
+            foreach (var element in elements) {
+                string subCategory = element.GetSubCategory();
+                string groupType = element.GetGroupType();
+                EnsureNestedDictionariesExist(category, subCategory, groupType);
+                ElementsDictionnary[category][subCategory][groupType].Add(element);
+                CreateCell(element);
             }
         }
 
-        private void EnsureNestedDictionariesExist(ElementCategoryType type, Type category, Enum categoryValue) {
-            if (!ElementsDictionnary[type].ContainsKey(category)) {
-                ElementsDictionnary[type][category] = new Dictionary<Enum, List<Element>>();
+        private void EnsureNestedDictionariesExist(string category, string subCategory, string groupType) {
+            if (!ElementsDictionnary[category].ContainsKey(category)) {
+                ElementsDictionnary[category][subCategory] = new Dictionary<string, List<Element>>();
             }
-            if (!ElementsDictionnary[type][category].ContainsKey(categoryValue)) {
-                ElementsDictionnary[type][category][categoryValue] = new List<Element>();
+            if (!ElementsDictionnary[category][subCategory].ContainsKey(groupType)) {
+                ElementsDictionnary[category][subCategory][groupType] = new List<Element>();
             }
         }
         public void CreateCell(Element config) {

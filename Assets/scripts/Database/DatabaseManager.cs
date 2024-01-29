@@ -21,13 +21,11 @@ public class DatabaseManager {
 
     public IDbConnection GetConnection() {
         string filepath = Application.persistentDataPath + "/" + dbName + ".s3db";
-        Debug.Log($"filepath={filepath}");
         string connString = "URI=file:" + filepath;
 
         try {
             IDbConnection dbconn = new SqliteConnection(connString);
             dbconn.Open();
-            Debug.Log("Database connection opened.");
             return dbconn;
         }
         catch (Exception e) {

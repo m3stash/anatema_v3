@@ -13,7 +13,7 @@ namespace RoomUI {
         private RoomUIStateManager roomUIStateManager;
         private DatabaseManager dbManager;
         private ItemTableManager itemTableManager;
-        private ElementTable ElementTable;
+        private ElementTable elementTable;
 
         public ObjectSlotGO GetObjectCell() {
             ObjectSlotGO slot = pool.GetOne();
@@ -27,10 +27,10 @@ namespace RoomUI {
         }
 
         private void Awake() {
+            InitDb();
             VerifySerialisables();
             CreatePooling();
             InitComponents();       
-            InitDb();
         }
 
         private ObjectPool CreatePooling() {
@@ -62,41 +62,26 @@ namespace RoomUI {
         private void InitComponents() {
             roomGridManager = roomGrid.GetComponent<RoomGridManager>();
             elementManager = itemGrid.GetComponent<ElementManager>();
-            elementManager.Setup(this);
+            elementManager.Setup(this, elementTable, itemTableManager.GetItemTable());
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
         }
 
         private void InitDb() {
             DatabaseManager dbManager = new DatabaseManager();
-            ElementTable elementTable = new ElementTable(dbManager);
-            ItemTableManager itemTableManager = new ItemTableManager(dbManager, elementTable.GetTableName());
-            // elementTable.GetElementsByType("ITEM");
-            // elementTable.GetElementsWithCategories();
-            
-            
-            
-            
-            
-            elementTable.GetAll();
-            elementTable.GetElementsFromCategory("ITEM");
-
-
-
-
-
+            elementTable = new ElementTable(dbManager);
+            itemTableManager = new ItemTableManager(dbManager, elementTable.GetTableName()); 
+            // int elementId = elementTable.GetIdByType("ITEM");
+            // ItemTable itemTable = itemTableManager.GetItemTable();
+            // itemTable.GetElementsByElementId(elementId);
             //MockDb();
-            // elementTable.Read();
-            // itemTableManager.GetItemTable().Read();
-            // int elementId = ElementTable.GetIdByType("ITEM");
-            // Debug.Log("elementId -- "+ elementId);
         }
 
         private void MockDb(){
             // ElementTable.Insert(ElementCategoryType.ITEM.ToString());
             // ElementTable.Insert(ElementCategoryType.BLOCK.ToString());
-            int elementId = ElementTable.GetIdByType("ITEM");
-            Debug.Log($"ID for type ITEM: {elementId}");
-            CreateItemMock(elementId);
+            // int elementId = ElementTable.GetIdByType("ITEM");
+            // Debug.Log($"ID for type ITEM: {elementId}");
+            // CreateItemMock(elementId);
         }
 
         private void CreateItemMock(int elementId){

@@ -2,20 +2,45 @@ using System;
 
 public class Item : Element {
 
-    public Item() {
-        ElementCategoryType = ElementCategoryType.ITEM;
+    private bool dropable;
+    private bool consumable;
+    private bool craftable;
+    private int max;
+    private float weight;
+
+    public Item(
+        int id, 
+        string category, 
+        string displayName, 
+        string subCategory, 
+        string description, 
+        string iconPath, 
+        int sizeX, 
+        int sizeY, 
+        string biome,
+        string groupType,
+        bool dropable, 
+        bool consumable, 
+        bool craftable
+    ): base(
+        id, 
+        category, 
+        displayName, 
+        subCategory, 
+        description, 
+        iconPath, 
+        sizeX, 
+        sizeY, 
+        biome,
+        groupType
+    ) {
+        this.dropable = dropable;
+        this.consumable = consumable;
+        this.craftable = craftable;
     }
 
-    public bool Dropable { get; set; }
-    public bool Consumable { get; set; }
-    public bool Craftable { get; set; }
-    public int Max { get; set; }
-    public float Weight { get; set; }
-
-    public string SubCategory { get; set; }
-
-    public override Type GetSubCategory() {
-        return typeof(ItemType);
-    }
+    public bool IsDropable() => dropable;
+    public bool IsConsumable() => consumable;
+    public bool IsCraftable() => craftable;
 
 }
