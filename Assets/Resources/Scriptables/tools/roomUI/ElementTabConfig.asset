@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 85cd0b93e8e4e47148127f0c707c6994, type: 3}
-  m_Name: ObjectsTabConfig
+  m_Name: ElementTabConfig
   m_EditorClassIdentifier: 
   item: {fileID: 21300000, guid: 4f852af1b181644c4905732c4c4f1dca, type: 3}
   entity: {fileID: 21300000, guid: e2b95708fbcc447c0ab44ad5f5b53da6, type: 3}

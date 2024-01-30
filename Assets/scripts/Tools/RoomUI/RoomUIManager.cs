@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace RoomUI {
     public class RoomUIManager : MonoBehaviour {
@@ -6,42 +7,20 @@ namespace RoomUI {
         [SerializeField] GameObject roomGrid;
         [SerializeField] GameObject itemGrid;
         [SerializeField] GameObject stateManager;
-        [SerializeField] GameObject itemPool;
-        private ObjectPool pool;
         private RoomGridManager roomGridManager;
         private ElementManager elementManager;
         private RoomUIStateManager roomUIStateManager;
         private DatabaseManager dbManager;
         private ItemTableManager itemTableManager;
         private ElementTable elementTable;
-
-        public ObjectSlotGO GetObjectCell() {
-            ObjectSlotGO slot = pool.GetOne();
-            GameObject cellGo = slot.gameObject;
-            cellGo.SetActive(true);
-            return slot;
-        }
-
-        public void ReleaseSlot(ObjectSlotGO slot) {
-            pool.ReleaseOne(slot);
-        }
+        private readonly string elementPath = "Sprites/elements/";
+        private Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
+        private SpriteLoader spriteLoader;
 
         private void Awake() {
-            InitDb();
             VerifySerialisables();
-            CreatePooling();
-            InitComponents();       
-        }
-
-        private ObjectPool CreatePooling() {
-            pool = itemPool.GetComponent<ObjectPool>();
-            PoolConfig config = pool.GetConfig();
-            if (!config) {
-                Debug.LogError("Error no config for cellPool on GridManager awake !");
-            } else {
-                pool.Setup(config.GetPrefab(), config.GetPoolSize());
-            }
-            return pool;
+            InitDb();
+            InitComponents(); 
         }
 
         private void VerifySerialisables() {
@@ -54,15 +33,13 @@ namespace RoomUI {
             if (stateManager == null) {
                 Debug.LogError("Error: SerializeField stateManager not Set !");
             }
-            if (itemPool == null) {
-                Debug.LogError("Error: SerializeField pool not Set !");
-            }
         }
 
         private void InitComponents() {
             roomGridManager = roomGrid.GetComponent<RoomGridManager>();
             elementManager = itemGrid.GetComponent<ElementManager>();
-            elementManager.Setup(this, elementTable, itemTableManager.GetItemTable());
+            spriteLoader = new SpriteLoader(elementPath);
+            elementManager.Setup(this, elementTable, itemTableManager.GetItemTable(), spriteLoader);
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
         }
 

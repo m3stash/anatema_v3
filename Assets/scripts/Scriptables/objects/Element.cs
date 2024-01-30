@@ -2,13 +2,15 @@
 
 public class Element {
 
+    private Sprite sprite;
+
     public Element(
         int id, 
         string category, 
         string displayName, 
         string subCategory, 
         string description, 
-        string iconPath, 
+        string spriteName, 
         int sizeX, 
         int sizeY, 
         string biome,
@@ -19,7 +21,7 @@ public class Element {
         this.displayName = displayName;
         this.subCategory = subCategory;
         this.description = description;
-        this.iconPath = iconPath;
+        this.spriteName = spriteName;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.biome = biome;
@@ -30,7 +32,7 @@ public class Element {
     private string displayName;
     private string category;
     private string subCategory;
-    private string iconPath;
+    private string spriteName;
     private string description;
     private int sizeX;
     private int sizeY;
@@ -50,8 +52,14 @@ public class Element {
 
     public Sprite GetSprite() {
         // toDO -> faire un cache pour les sprites
-        return Resources.Load<Sprite>(iconPath);
+        return sprite;
     }
+
+    public void SetSprite(Sprite sprite) {
+        this.sprite = sprite;
+    }
+
+    public string GetSpriteName() => spriteName;
 
     public Vector2Int GetSize() => new Vector2Int(sizeX, sizeY);
     public string GetGroupType() => groupType;

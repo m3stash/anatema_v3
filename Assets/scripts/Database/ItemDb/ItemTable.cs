@@ -30,7 +30,7 @@ public class ItemTable {
             [DisplayName] TEXT NOT NULL,
             [SubCategory] TEXT NOT NULL,
             [Description] TEXT NOT NULL,
-            [IconPath] TEXT NOT NULL,
+            [SpriteName] TEXT NOT NULL,
             [SizeX] INTEGER NOT NULL,
             [SizeY] INTEGER NOT NULL,
             [Biome] TEXT NOT NULL,
@@ -54,7 +54,7 @@ public class ItemTable {
                 string displayName = dbreader.GetString(2);
                 string subCategory = dbreader.GetString(3);
                 string description = dbreader.GetString(4);
-                string iconPath = dbreader.GetString(5);
+                string spriteName = dbreader.GetString(5);
                 int sizeX = dbreader.GetInt32(6);
                 int sizeY = dbreader.GetInt32(7);
                 string biome = dbreader.GetString(8);
@@ -75,7 +75,7 @@ public class ItemTable {
         string displayName,
         string subCategory,
         string description,
-        string iconPath,
+        string spriteName,
         int sizeX,
         int sizeY,
         string biome,
@@ -87,14 +87,14 @@ public class ItemTable {
         // int lastInsertedId = -1;
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, DisplayName, SubCategory, Description, IconPath, SizeX, SizeY, Biome, Dropable, Consumable, Craftable, GroupType) " +
-                "VALUES (@ElementID, @DisplayName, @SubCategory, @Description, @IconPath, @SizeX, @SizeY, @Biome, @Dropable, @Consumable, @Craftable, @GroupType); " +
+            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, DisplayName, SubCategory, Description, SpriteName, SizeX, SizeY, Biome, Dropable, Consumable, Craftable, GroupType) " +
+                "VALUES (@ElementID, @DisplayName, @SubCategory, @Description, @SpriteName, @SizeX, @SizeY, @Biome, @Dropable, @Consumable, @Craftable, @GroupType); " +
                 "SELECT last_insert_rowid() AS new_id;";
             dbManager.AddParameter(dbcmd, "@ElementID", elementId);
             dbManager.AddParameter(dbcmd, "@DisplayName", displayName);
             dbManager.AddParameter(dbcmd, "@SubCategory", subCategory);
             dbManager.AddParameter(dbcmd, "@Description", description);
-            dbManager.AddParameter(dbcmd, "@IconPath", iconPath);
+            dbManager.AddParameter(dbcmd, "@SpriteName", spriteName);
             dbManager.AddParameter(dbcmd, "@SizeX", sizeX);
             dbManager.AddParameter(dbcmd, "@SizeY", sizeY);
             dbManager.AddParameter(dbcmd, "@Biome", biome);
@@ -134,7 +134,7 @@ public class ItemTable {
                     string displayName = dbreader.GetString(2);
                     string subCategory = dbreader.GetString(3);
                     string description = dbreader.GetString(4);
-                    string iconPath = dbreader.GetString(5);
+                    string spriteName = dbreader.GetString(5);
                     int sizeX = dbreader.GetInt32(6);
                     int sizeY = dbreader.GetInt32(7);
                     string biome = dbreader.GetString(8);
@@ -148,7 +148,7 @@ public class ItemTable {
                         displayName, 
                         subCategory, 
                         description, 
-                        iconPath, 
+                        spriteName, 
                         sizeX, 
                         sizeY, 
                         biome,
@@ -175,7 +175,7 @@ public class ItemTable {
                         string displayName = dbreader.GetString(2);
                         string subCategory = dbreader.GetString(3);
                         string description = dbreader.GetString(4);
-                        string iconPath = dbreader.GetString(5);
+                        string spriteName = dbreader.GetString(5);
                         int sizeX = dbreader.GetInt32(6);
                         int sizeY = dbreader.GetInt32(7);
                         string biome = dbreader.GetString(8);
@@ -189,7 +189,7 @@ public class ItemTable {
                             displayName,
                             subCategory,
                             description,
-                            iconPath,
+                            spriteName,
                             sizeX,
                             sizeY,
                             biome,

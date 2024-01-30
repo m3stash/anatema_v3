@@ -33,6 +33,7 @@ namespace RoomUI {
         private Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>> ElementsDictionnary = new Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>>();
         private ElementTable elementTable;
         private ItemTable itemTable;
+        private SpriteLoader spriteLoader;
 
 
         void Awake() {
@@ -43,10 +44,11 @@ namespace RoomUI {
             RemoveListeners();
         }
 
-        public void Setup(RoomUIManager roomUIManager, ElementTable elementTable, ItemTable itemTable) {
+        public void Setup(RoomUIManager roomUIManager, ElementTable elementTable, ItemTable itemTable, SpriteLoader spriteLoader) {
             this.roomUIManager = roomUIManager;
             this.elementTable = elementTable;
             this.itemTable = itemTable;
+            this.spriteLoader = spriteLoader;
             VerifySerialisables();
             CreateListeners();
             CreatePooling();
@@ -178,6 +180,7 @@ namespace RoomUI {
                 case "EQUIPMENT":
                     break;
                 default:
+                    spriteLoader.LoadSprites(category);
                     CreateDictionnaryAndCellByElementCategoryType(category);
                     break;
             }
@@ -200,7 +203,7 @@ namespace RoomUI {
             foreach (var subCategory in ElementsDictionnary[category].Keys) {
                 foreach (var categoryValue in ElementsDictionnary[category][subCategory].Keys) {
                     foreach (var config in ElementsDictionnary[category][subCategory][categoryValue]) {
-                        CreateCell(config);
+                        CreateCell(config, category);
                     }
                 }
             }
@@ -223,7 +226,7 @@ namespace RoomUI {
                 string groupType = element.GetGroupType();
                 EnsureNestedDictionariesExist(category, subCategory, groupType);
                 ElementsDictionnary[category][subCategory][groupType].Add(element);
-                CreateCell(element);
+                CreateCell(element, category);
             }
         }
 
@@ -235,11 +238,13 @@ namespace RoomUI {
                 ElementsDictionnary[category][subCategory][groupType] = new List<Element>();
             }
         }
-        public void CreateCell(Element config) {
+        public void CreateCell(Element element, string category) {
+            Sprite sprite = spriteLoader.GetSprite(category, element.GetSpriteName());
+            element.SetSprite(sprite);
             CellGO cell = cellPool.GetOne();
             usedCells.Add(cell);
             cell.transform.SetParent(grid.transform);
-            cell.Setup(config);
+            cell.Setup(element);
             GameObject cellGo = cell.gameObject;
             cellGo.SetActive(true);
         }
