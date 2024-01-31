@@ -51,7 +51,6 @@ public class Element {
     public string GetBiome() => biome;
 
     public Sprite GetSprite() {
-        // toDO -> faire un cache pour les sprites
         return sprite;
     }
 

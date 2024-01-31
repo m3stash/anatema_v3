@@ -14,7 +14,6 @@ namespace RoomUI {
         private ItemTableManager itemTableManager;
         private ElementTable elementTable;
         private readonly string elementPath = "Sprites/elements/";
-        private Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
         private SpriteLoader spriteLoader;
 
         private void Awake() {

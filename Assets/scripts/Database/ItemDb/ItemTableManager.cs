@@ -25,7 +25,13 @@ public class ItemTableManager {
         string itemTableName = itemTable.GetTableName();
         if(itemTableName == null) {
             Debug.LogError("Item table name is not set.");
+        }else{
+            CreatePotionTable(dbManager, itemTableName);
         }
+        
+    }
+
+    private void CreatePotionTable(DatabaseManager dbManager, string itemTableName){
         potionTable = new PotionTable(dbManager);
         potionTable.CreateTable(itemTableName);
     }

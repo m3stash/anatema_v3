@@ -148,6 +148,7 @@ namespace RoomUI {
             }
             currentCategory = category;
             cellPool.ReleaseMany(usedCells);
+            LoadElements(currentCategory);
             CreateDictionnaryAndCellByElementCategoryType(category);
         }
 
@@ -212,6 +213,8 @@ namespace RoomUI {
         private List<Element> LoadElementsFromDB(string category) {
             int elementId = elementTable.GetIdByType(category);
             if (elementId != -1) {
+                // toDO -> trouver un moyen dynamique de récupérer la table en fonction du type d'élément
+                // VOIR à faire un switch par type qui retourne une liste d'elements !
                 return itemTable.GetElementsByElementId(elementId);
             }
             return null;

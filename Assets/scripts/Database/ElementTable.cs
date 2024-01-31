@@ -4,9 +4,6 @@ using UnityEngine;
 using System.Data;
 using System;
 using Database;
-using Dapper;
-using System.Linq;
-using System.Collections.Generic;
 public class ElementTable {
     private IDbConnection dbconn;
     private readonly string tableName = "element_table";

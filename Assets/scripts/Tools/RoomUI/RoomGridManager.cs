@@ -3,7 +3,6 @@ using RoomNs;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
-using UnityEngine.InputSystem;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour {
@@ -178,13 +177,13 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-            Element config = cellRoomGO.GetConfig();
+            Element element = cellRoomGO.GetConfig();
             switch(currentAction){
                 case RoomUIAction.COPY:
-                    CopyCell(config);
+                    CopyCell(element);
                 break;
                 case RoomUIAction.SELECT:
-                    CreateCell(config, cellRoomGO);
+                    CreateCell(element, cellRoomGO);
                 break;
                 case RoomUIAction.TRASH:
                     DeleteCell(cellRoomGO);
@@ -192,9 +191,9 @@ namespace RoomUI {
             }
         }
 
-        private void CreateCell(Element config, CellRoomGO cellRoomGO){
+        private void CreateCell(Element element, CellRoomGO cellRoomGO){
             if(currenSelectedObject == null) return;
-                if(config == currenSelectedObject){
+                if(element == currenSelectedObject){
                     cellRoomGO.ForbidenAction();
                     return;
                 }
@@ -238,10 +237,10 @@ namespace RoomUI {
                 }
         }
 
-        private void CopyCell(Element config){
+        private void CopyCell(Element element){
             // toDO : voir la taille de la cell pour empêcher de copier si il y a un voisin, tout doit être vide !!!!
-            if(config != null){
-                roomUIStateManager.OnSelectObject(config);
+            if(element != null){
+                roomUIStateManager.OnSelectObject(element);
                 OnSelectButtonClick();
             }
         }

@@ -36,5 +36,4 @@
     }
 
     public int GetMax() => max;
-    // public float GetWeight() => weight;
 }
