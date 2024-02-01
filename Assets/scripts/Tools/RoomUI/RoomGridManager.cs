@@ -193,7 +193,8 @@ namespace RoomUI {
 
         private void CreateCell(Element element, CellRoomGO cellRoomGO){
             if(currenSelectedObject == null) return;
-                if(element == currenSelectedObject){
+                if(element != null){
+                // if(element == currenSelectedObject){
                     cellRoomGO.ForbidenAction();
                     return;
                 }
