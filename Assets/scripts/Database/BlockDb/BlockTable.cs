@@ -9,9 +9,9 @@ using System.Collections.Generic;
 public class BlockTable {
     private IDbConnection dbconn;
     private readonly string tableName = "block_table";
+    private readonly string category = ElementCategoryType.BLOCK.ToString();
     private TableManager tableManager;
     private DatabaseManager dbManager;
-    private readonly string category = ElementCategoryType.ITEM.ToString();
 
     public BlockTable(DatabaseManager dbManager) {
         this.dbManager = dbManager;
@@ -148,7 +148,7 @@ public class BlockTable {
         return elements;
     }
 
-    public Block GetItemById(int id) {
+    public Block GetBlockById(int id) {
         try {
             using (IDbCommand dbcmd = dbconn.CreateCommand()) {
                 dbcmd.CommandText = $"SELECT * FROM {tableName} WHERE id = @ElementID";

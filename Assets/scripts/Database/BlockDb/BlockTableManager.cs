@@ -14,22 +14,22 @@ public class BlockTableManager {
         } else if(elementTableName == null){
             Debug.LogError("Element table name is not set.");
         } else {
-            SetupItemDb(dbManager, elementTableName);
+            SetupBlockDb(dbManager, elementTableName);
         }
     }
 
-    private void SetupItemDb(DatabaseManager dbManager, string elementTableName) {
+    private void SetupBlockDb(DatabaseManager dbManager, string elementTableName) {
         blockTable = new BlockTable(dbManager);
         blockTable.CreateTable(elementTableName);
         string blockTableName = blockTable.GetTableName();
         if(blockTable == null) {
-            Debug.LogError("Item table name is not set.");
+            Debug.LogError("Block table name is not set.");
         }else{
             //
         }
     }
 
-    public BlockTable GetItemTable() {
+    public BlockTable GetBlockTable() {
         return blockTable;
     }
 

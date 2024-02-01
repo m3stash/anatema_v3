@@ -20,7 +20,6 @@ public class SpriteLoader {
             Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
             Sprite[] loadedSprites = Resources.LoadAll<Sprite>(path + currentTab);
             foreach (Sprite sprite in loadedSprites) {
-                Debug.Log(sprite.name.Split('_')[0]);
                 // case of multiple sprite : toDO find a better way to do this !
                 string spriteName = sprite.name.Split('_')[0];
                 spriteDictionary.Add(spriteName, sprite);

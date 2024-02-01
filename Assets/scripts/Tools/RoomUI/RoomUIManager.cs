@@ -7,14 +7,11 @@ namespace RoomUI {
         [SerializeField] GameObject roomGrid;
         [SerializeField] GameObject itemGrid;
         [SerializeField] GameObject stateManager;
-        private RoomGridManager roomGridManager;
         private ElementManager elementManager;
-        private RoomUIStateManager roomUIStateManager;
-        private DatabaseManager dbManager;
-        private ItemTableManager itemTableManager;
-        private ElementTable elementTable;
         private readonly string elementPath = "Sprites/elements/";
         private SpriteLoader spriteLoader;
+
+        private ElementTableManager elementTableManager;
 
         private void Awake() {
             VerifySerialisables();
@@ -35,20 +32,14 @@ namespace RoomUI {
         }
 
         private void InitComponents() {
-            roomGridManager = roomGrid.GetComponent<RoomGridManager>();
             elementManager = itemGrid.GetComponent<ElementManager>();
             spriteLoader = new SpriteLoader(elementPath);
-            elementManager.Setup(this, elementTable, itemTableManager.GetItemTable(), spriteLoader);
-            roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
+            elementManager.Setup(elementTableManager, spriteLoader);
         }
 
         private void InitDb() {
             DatabaseManager dbManager = new DatabaseManager();
-            elementTable = new ElementTable(dbManager);
-            itemTableManager = new ItemTableManager(dbManager, elementTable.GetTableName()); 
-            // int elementId = elementTable.GetIdByType("ITEM");
-            // ItemTable itemTable = itemTableManager.GetItemTable();
-            // itemTable.GetElementsByElementId(elementId);
+            elementTableManager = new ElementTableManager(dbManager);
             //MockDb();
         }
 

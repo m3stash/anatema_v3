@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Data;
 using System;
 using Database;
+using System.Collections.Generic;
 public class ElementTable {
     private IDbConnection dbconn;
     private readonly string tableName = "element_table";
@@ -76,6 +77,23 @@ public class ElementTable {
         } catch (Exception e) {
             Debug.LogError($"Error getting ID by type: {e.Message}");
             return -1;
+        }
+    }
+
+    public List<string> GetCategories() {
+        try {
+            using IDbCommand dbcmd = dbconn.CreateCommand();
+            dbcmd.CommandText = $"SELECT Category FROM {tableName}";
+
+            using IDataReader dbreader = dbcmd.ExecuteReader();
+            List<string> categories = new List<string>();
+            while (dbreader.Read()) {
+                categories.Add(dbreader.GetString(0));
+            }
+            return categories;
+        } catch (Exception e) {
+            Debug.LogError($"Error getting categories: {e.Message}");
+            return null;
         }
     }
 

@@ -29,25 +29,16 @@ namespace RoomUI {
         private int constraintCount;
         private float gridWidth;
         private string currentCategory;
-        private RoomUIManager roomUIManager;
         private Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>> ElementsDictionnary = new Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>>();
-        private ElementTable elementTable;
-        private ItemTable itemTable;
+        private ElementTableManager elementTableManager;
         private SpriteLoader spriteLoader;
-
-
-        void Awake() {
-            
-        }
 
         void OnDestroy() {
             RemoveListeners();
         }
 
-        public void Setup(RoomUIManager roomUIManager, ElementTable elementTable, ItemTable itemTable, SpriteLoader spriteLoader) {
-            this.roomUIManager = roomUIManager;
-            this.elementTable = elementTable;
-            this.itemTable = itemTable;
+        public void Setup(ElementTableManager elementTableManager, SpriteLoader spriteLoader) {
+            this.elementTableManager = elementTableManager;
             this.spriteLoader = spriteLoader;
             VerifySerialisables();
             CreateListeners();
@@ -93,6 +84,7 @@ namespace RoomUI {
         }
 
         private void CreateTabCellPooling() {
+            // remove pooling for tabs is not necessary !
             tabCellPool = tabCellPoolGO.GetComponent<TabCellPool>();
             PoolConfig config = tabCellPool.GetConfig();
             if (!config) {
@@ -131,6 +123,37 @@ namespace RoomUI {
             }
         }
 
+        private void OnTabClickHandler(string category) {
+            if(currentCategory == category) {
+                return;
+            }
+            currentCategory = category;
+            cellPool.ReleaseMany(usedCells);
+            LoadElements(currentCategory);
+            // CreateDictionnaryAndCellByElementCategoryType(category);
+        }
+
+        private void OnCellClickHandler(Element config) {
+            roomUIStateManager.OnSelectObject(config);
+        }
+
+        private void CreateTabs() {
+            bool isFirstElement = true;
+            List<string> categories = elementTableManager.GetCategories();
+            foreach (string category in categories) {
+                if (category != ElementCategoryType.EQUIPMENT.ToString()) {
+                    if(isFirstElement) {
+                        currentCategory = category;
+                        CreateTab(category, true);
+                        isFirstElement = false;
+                        LoadElements(category);
+                    } else {
+                        CreateTab(category, false);
+                    }
+                }
+            }
+        }
+
         private void CreateTab(string type, bool isFirst) {
             Sprite sprite = tabsCategoryConfig.GetItemByCategory(type);
             TabCellGO tab = tabCellPool.GetOne();
@@ -140,40 +163,6 @@ namespace RoomUI {
             tab.Setup(isFirst, sprite, type);
             GameObject cellGo = tab.gameObject;
             cellGo.SetActive(true);
-        }
-
-        private void OnTabClickHandler(string category) {
-            if(currentCategory == category) {
-                return;
-            }
-            currentCategory = category;
-            cellPool.ReleaseMany(usedCells);
-            LoadElements(currentCategory);
-            CreateDictionnaryAndCellByElementCategoryType(category);
-        }
-
-        private void OnCellClickHandler(Element config) {
-            roomUIStateManager.OnSelectObject(config);
-        }
-
-        private void CreateTabs() {
-            //
-            // TODO : remove this when all categories will be implemented with DATABASE !!!!
-            //
-            bool isFirstElement = true;
-            foreach (ElementCategoryType category in Enum.GetValues(typeof(ElementCategoryType))) {
-                string categoryString = category.ToString();
-                if(category != ElementCategoryType.EQUIPMENT) {
-                    if (isFirstElement) {
-                        currentCategory = categoryString;
-                        CreateTab(categoryString, true);
-                        isFirstElement = false;
-                        LoadElements(categoryString);
-                    } else {
-                        CreateTab(categoryString, false);
-                    }
-                }
-            }
         }
 
         void LoadElements(string category) {
@@ -189,7 +178,7 @@ namespace RoomUI {
 
         private void CreateDictionnaryAndCellByElementCategoryType(string category) {
             if (!ElementsDictionnary.ContainsKey(category)) {
-                List<Element> elements = LoadElementsFromDB(category);
+                List<Element> elements = elementTableManager.GetElementsByCategory(category);
                 if(elements == null) {
                     Debug.Log($"Error: No Element For This category {category} !");
                 }else{
@@ -210,20 +199,8 @@ namespace RoomUI {
             }
         }
 
-        private List<Element> LoadElementsFromDB(string category) {
-            int elementId = elementTable.GetIdByType(category);
-            if (elementId != -1) {
-                // toDO -> trouver un moyen dynamique de récupérer la table en fonction du type d'élément
-                // VOIR à faire un switch par type qui retourne une liste d'elements !
-                return itemTable.GetElementsByElementId(elementId);
-            }
-            return null;
-        }
-
         private void BuildElementsDictionary(string category, List<Element> elements) {
-            if (!ElementsDictionnary.ContainsKey(category)) {
-                ElementsDictionnary[category] = new Dictionary<string, Dictionary<string, List<Element>>>();
-            }
+            ElementsDictionnary[category] = new Dictionary<string, Dictionary<string, List<Element>>>();
             foreach (var element in elements) {
                 string subCategory = element.GetSubCategory();
                 string groupType = element.GetGroupType();
@@ -234,7 +211,7 @@ namespace RoomUI {
         }
 
         private void EnsureNestedDictionariesExist(string category, string subCategory, string groupType) {
-            if (!ElementsDictionnary[category].ContainsKey(category)) {
+            if (!ElementsDictionnary[category].ContainsKey(subCategory)) {
                 ElementsDictionnary[category][subCategory] = new Dictionary<string, List<Element>>();
             }
             if (!ElementsDictionnary[category][subCategory].ContainsKey(groupType)) {
