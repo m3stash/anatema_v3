@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace RoomUI {
-    public class ElementManager : MonoBehaviour {
+    public class TabGridManager : MonoBehaviour {
         [SerializeField] private RoomUIStateManager roomUIStateManager;
         [SerializeField] private GameObject cellPoolGO;
         [SerializeField] private GameObject tabCellPoolGO;

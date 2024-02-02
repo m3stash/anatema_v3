@@ -155,6 +155,13 @@ namespace RoomUI {
                         break;
                 }    
             }
+            if(currenSelectedObject != null){
+                
+            }
+        }
+
+        private void CreateElementPreview(){
+            
         }
 
         private void OnTrashButtonClick() {

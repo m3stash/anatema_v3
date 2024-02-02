@@ -455,7 +455,7 @@ GameObject:
   - component: {fileID: 60921548}
   - component: {fileID: 60921551}
   m_Layer: 5
-  m_Name: Scroll View Grid
+  m_Name: ScrollView TabGrid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4085,7 +4085,7 @@ GameObject:
   - component: {fileID: 770838200}
   - component: {fileID: 770838201}
   m_Layer: 5
-  m_Name: Element Grid Container
+  m_Name: TabGrid Container
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4122,7 +4122,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 770838199}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3e8fb983e42f94941bf0bb15f3ceca5e, type: 3}
+  m_Script: {fileID: 11500000, guid: 4c884ec660f5f409eb411c27e8ad6ea1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   roomUIStateManager: {fileID: 1045058813}
@@ -6629,7 +6629,7 @@ GameObject:
   - component: {fileID: 1248016668}
   - component: {fileID: 1248016669}
   m_Layer: 5
-  m_Name: Content Element Hub Grid
+  m_Name: Grid Elements
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9602,7 +9602,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1681987309}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1927bb20c2d134bef9aa5171068b999a, type: 3}
+  m_Script: {fileID: 11500000, guid: 3291bb65589be4a998bdb4890e06b3da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   roomUIStateManager: {fileID: 1045058813}
@@ -10429,7 +10429,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1032033694}
-  - {fileID: 1944471417}
+  - {fileID: 1986150375}
   - {fileID: 1332164415}
   - {fileID: 411396538}
   - {fileID: 770838200}
@@ -10461,7 +10461,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roomGrid: {fileID: 1681987309}
-  itemGrid: {fileID: 770838199}
+  tabGrid: {fileID: 770838199}
   stateManager: {fileID: 1045058811}
 --- !u!1001 &1927589557
 PrefabInstance:
@@ -10569,7 +10569,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1944471416}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -10577,7 +10577,7 @@ RectTransform:
   - {fileID: 1416982528}
   - {fileID: 1313887279}
   - {fileID: 1878571130}
-  m_Father: {fileID: 1918637370}
+  m_Father: {fileID: 1986150375}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -10938,6 +10938,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1985817868}
   m_CullTransparentMesh: 1
+--- !u!1 &1986150374
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1986150375}
+  m_Layer: 5
+  m_Name: RoomGridContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1986150375
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986150374}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1944471417}
+  m_Father: {fileID: 1918637370}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 755, y: -440}
+  m_SizeDelta: {x: 1510, y: 880}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2005402107
 GameObject:
   m_ObjectHideFlags: 0

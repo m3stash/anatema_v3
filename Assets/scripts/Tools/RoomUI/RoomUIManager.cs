@@ -5,9 +5,9 @@ namespace RoomUI {
     public class RoomUIManager : MonoBehaviour {
 
         [SerializeField] GameObject roomGrid;
-        [SerializeField] GameObject itemGrid;
+        [SerializeField] GameObject tabGrid;
         [SerializeField] GameObject stateManager;
-        private ElementManager elementManager;
+        private TabGridManager tabGridManager;
         private readonly string elementPath = "Sprites/elements/";
         private SpriteLoader spriteLoader;
 
@@ -23,7 +23,7 @@ namespace RoomUI {
             if (roomGrid == null) {
                 Debug.LogError("Error: SerializeField roomGrid not Set !");
             }
-            if (itemGrid == null) {
+            if (tabGrid == null) {
                 Debug.LogError("Error: SerializeField itemGridManager not Set !");
             }
             if (stateManager == null) {
@@ -32,9 +32,9 @@ namespace RoomUI {
         }
 
         private void InitComponents() {
-            elementManager = itemGrid.GetComponent<ElementManager>();
+            tabGridManager = tabGrid.GetComponent<TabGridManager>();
             spriteLoader = new SpriteLoader(elementPath);
-            elementManager.Setup(elementTableManager, spriteLoader);
+            tabGridManager.Setup(elementTableManager, spriteLoader);
         }
 
         private void InitDb() {

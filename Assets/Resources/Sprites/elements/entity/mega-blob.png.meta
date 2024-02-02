@@ -130,7 +130,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      mega-blob_0: 1516463566826079464
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
