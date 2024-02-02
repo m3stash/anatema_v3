@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ItemTableManager {
 
-    private ItemTable itemTable;
+    private ItemTable table;
     private PotionTable potionTable;
 
     public ItemTableManager(DatabaseManager dbManager, string elementTableName) {
@@ -20,15 +20,14 @@ public class ItemTableManager {
     }
 
     private void SetupItemDb(DatabaseManager dbManager, string elementTableName) {
-        itemTable = new ItemTable(dbManager);
-        itemTable.CreateTable(elementTableName);
-        string itemTableName = itemTable.GetTableName();
-        if(itemTableName == null) {
+        table = new ItemTable(dbManager);
+        table.CreateTable(elementTableName);
+        string tableName = table.GetTableName();
+        if(tableName == null) {
             Debug.LogError("Item table name is not set.");
         }else{
-            CreatePotionTable(dbManager, itemTableName);
+            CreatePotionTable(dbManager, tableName);
         }
-        
     }
 
     private void CreatePotionTable(DatabaseManager dbManager, string itemTableName){
@@ -37,7 +36,7 @@ public class ItemTableManager {
     }
 
     public ItemTable GetItemTable() {
-        return itemTable;
+        return table;
     }
 
     public PotionTable GetPotionTable() {

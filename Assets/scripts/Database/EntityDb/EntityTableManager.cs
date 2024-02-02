@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class BlockTableManager {
+public class EntityTableManager {
 
-    private BlockTable table;
+    private EntityTable table;
 
-    public BlockTableManager(DatabaseManager dbManager, string elementTableName) {
+    public EntityTableManager(DatabaseManager dbManager, string elementTableName) {
         Setup(dbManager, elementTableName);
     }
 
@@ -19,7 +19,7 @@ public class BlockTableManager {
     }
 
     private void SetupBlockDb(DatabaseManager dbManager, string elementTableName) {
-        table = new BlockTable(dbManager);
+        table = new EntityTable(dbManager);
         table.CreateTable(elementTableName);
         string tableName = table.GetTableName();
         if(tableName == null) {
@@ -29,7 +29,7 @@ public class BlockTableManager {
         }
     }
 
-    public BlockTable GetBlockTable() {
+    public EntityTable GetBlockTable() {
         return table;
     }
 
