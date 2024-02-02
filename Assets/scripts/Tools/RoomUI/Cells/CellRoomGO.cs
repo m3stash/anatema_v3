@@ -10,6 +10,8 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     private RectTransform rectTransform;
     private RectTransform childRectTransform;
 
+    private bool isDoorOrWall;
+
     private Image image;
     private Button button;
     private Color defaultColor;
@@ -56,6 +58,14 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     public Element GetConfig() {
         return config;
+    }
+
+    public bool IsDoorOrWall() {
+        return isDoorOrWall;
+    }
+
+    public void SetIsDoorOrWall(bool isDoorOrWall) {
+        this.isDoorOrWall = isDoorOrWall;
     }
 
     private void SetComponentValues(Element config){

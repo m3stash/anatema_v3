@@ -46,7 +46,7 @@ namespace RoomUI {
                     GameObject cellRoomGo = cell.gameObject;
                     cellRoomGo.SetActive(true);
                     cell.Setup(null, Vector2.zero, new Vector2Int(col, row));
-                    ManageCells(col, row, cell);
+                    CreateDoorOrWall(col, row, cell);
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace RoomUI {
             return new Vector2Int(sectionCol, sectionRow);
         }
 
-        private void ManageCells(int col, int row, CellRoomGO cell) {
+        private void CreateDoorOrWall(int col, int row, CellRoomGO cell) {
             Vector2Int currentSection = GetCurrentSection(col, row);
 
             if (!FindedSection(currentSection)) {
@@ -122,6 +122,7 @@ namespace RoomUI {
                 Vector2Int TR = new Vector2Int(currentSection.x + 1, currentSection.y + 1);
                 if (TR.x < roomSize.x && TR.y < roomSize.y) {
                     if (!FindedSection(TR)) {
+                        cell.SetIsDoorOrWall(true);
                         cell.AddWall();
                         return;
                     }
@@ -129,6 +130,7 @@ namespace RoomUI {
                 Vector2Int BL = new Vector2Int(currentSection.x - 1, currentSection.y - 1);
                 if (BL.x >= 0 && BL.y >= 0) {
                     if (!FindedSection(BL)) {
+                        cell.SetIsDoorOrWall(true);
                         cell.AddWall();
                         return;
                     }
@@ -136,6 +138,7 @@ namespace RoomUI {
                 Vector2Int BR = new Vector2Int(currentSection.x + 1, currentSection.y - 1);
                 if (BR.x < roomSize.x && BR.y >= 0) {
                     if (!FindedSection(BR)) {
+                        cell.SetIsDoorOrWall(true);
                         cell.AddWall();
                         return;
                     }
@@ -143,6 +146,7 @@ namespace RoomUI {
                 Vector2Int TL = new Vector2Int(currentSection.x - 1, currentSection.y + 1);
                 if (TL.x >= 0 && TL.y < roomSize.y) {
                     if (!FindedSection(TL)) {
+                        cell.SetIsDoorOrWall(true);
                         cell.AddWall();
                         return;
                     }
@@ -155,10 +159,12 @@ namespace RoomUI {
             Vector2Int position = cell.GetPosition();
             if ((pos + middleSection) % sectionSize == 0) {
                 cell.AddDoor();
+                cell.SetIsDoorOrWall(true);
                 roomGridPlane[position.x, position.y] = doorId;
                 return;
             }
             cell.AddWall();
+            cell.SetIsDoorOrWall(true);
             roomGridPlane[position.x, position.y] = wallId;
             return;
         }

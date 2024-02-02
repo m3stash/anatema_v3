@@ -161,7 +161,7 @@ namespace RoomUI {
         }
 
         private void CreateElementPreview(){
-            
+
         }
 
         private void OnTrashButtonClick() {
@@ -221,7 +221,7 @@ namespace RoomUI {
                             int targetChildIndex = targetY * gridSizeX + targetX;
                             if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
                                 CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
-                                if(targetCell.GetConfig() != null){
+                                if(targetCell.GetConfig() != null || targetCell.IsDoorOrWall()){
                                     findExistingCell = true;
                                     break;
                                 }
