@@ -3,11 +3,13 @@ using RoomNs;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 namespace RoomUI {
-    public class RoomGridManager : MonoBehaviour {
+    public class RoomGridManager : MonoBehaviour, IPointerExitHandler {
         [SerializeField] private RoomUIStateManager roomUIStateManager;
         [SerializeField] private GameObject cellPool;
+        [SerializeField] private GameObject cellPreviewGO;
         [SerializeField] private Button gridZoomMinus;
         [SerializeField] private Button gridZoomPlus;
         [SerializeField] private Button selectButton;
@@ -36,6 +38,8 @@ namespace RoomUI {
 
         private string[,] roomGridPlane;
 
+        private CellPreview cellPreview;
+
         private void Awake() {
             VerifySerialisables();
             CreateListeners();
@@ -43,6 +47,10 @@ namespace RoomUI {
             CreatePooling();
             InitGrid();
             CreateRoomInstance();
+        }
+
+        public void OnPointerExit(PointerEventData eventData) {
+            cellPreview.HideCellPreview();
         }
 
         private void InitButtonPanel() {
@@ -65,6 +73,7 @@ namespace RoomUI {
         }
 
         private void InitGrid() {
+            cellPreview = cellPreviewGO.GetComponent<CellPreview>();
             gridLayout = gameObject.GetComponent<GridLayoutGroup>();
             gridLayout.cellSize = new Vector2(cellSize, cellSize);
             gridLayout.spacing = new Vector2(cellSpacing, cellSpacing);
@@ -86,7 +95,11 @@ namespace RoomUI {
                 { "roomUIStateManager", roomUIStateManager },
                 { "cellPool", cellPool },
                 { "gridZoomMinus", gridZoomMinus },
-                { "gridZoomPlus", gridZoomPlus }
+                { "gridZoomPlus", gridZoomPlus },
+                { "selectButton", selectButton },
+                { "copyButton", copyButton },
+                { "trashButton", trashButton },
+                { "cellPreviewGO", cellPreviewGO }
             };
             foreach (var field in serializableFields) {
                 if (field.Value == null) {
@@ -96,6 +109,8 @@ namespace RoomUI {
         }
 
         private void OnDestroy() {
+            CellRoomGO.OnPointerEnterEvent -= OnCellPointerEnterHandler;
+            CellRoomGO.OnPointerExitEvent -= OnCellPointerExitHandler;
             CellRoomGO.OnClick -= OnCellClickHandler;
             roomUIStateManager.OnShapeChange -= DropdownValueChanged;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
@@ -138,49 +153,150 @@ namespace RoomUI {
         }
 
         private void OnCellPointerExitHandler(CellRoomGO cellRoomGO) {
-            /*if(cellRoomGO.GetConfig() != null){
-                cellRoomGO.SetDefaultColor();
-            }*/
+            cellPreview.ResetCell();
         }
 
         private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
-            if(cellRoomGO.GetConfig() != null){
-                switch(currentAction){
-                    case RoomUIAction.COPY:
-                    break;
-                    case RoomUIAction.SELECT:
-                        cellRoomGO.ForbidenAction();
-                    break;
-                    default:
-                        break;
-                }    
+            if(cellRoomGO.IsDoorOrWall()){
+                cellPreview.HideCellPreview();
+                return;
             }
-            if(currenSelectedObject != null){
-                
+            bool voidCell = cellRoomGO?.GetConfig() == null && !cellRoomGO.IsDesactivatedCell();
+            Debug.Log("voidCell: "+voidCell);
+            // Vector2Int elementSize = currenSelectedObject?.GetSize() ?? new Vector2Int(1, 1);
+            Vector2 cellSize = cellRoomGO.GetCellSize(); // ex: 28 x 28
+            Vector2 defaultSizeVector = new Vector2(1, 1);
+            Vector3 cellRoomGOPosition = cellRoomGO.transform.position;
+            switch(currentAction){
+                case RoomUIAction.SELECT:
+                    if(voidCell && currenSelectedObject == null){
+                        Vector2 previewSize = CalculateCellPreviewSize(defaultSizeVector, cellSize);
+                        Vector3 position = CalculateCellPreviewPosition(previewSize, cellRoomGOPosition, defaultSizeVector, cellSize);
+                        cellPreview.SetSize(previewSize);
+                        cellPreview.SetPosition(position);
+                        cellPreview.HoverCell();
+                        return;
+                    }
+                    if(currenSelectedObject != null){
+                        Vector2 elementSize = currenSelectedObject.GetSize();
+                        Vector2 previewSize = CalculateCellPreviewSize(elementSize, cellSize);
+                        cellPreview.SetSize(previewSize);
+                        Vector3 position = CalculateCellPreviewPosition(previewSize, cellRoomGOPosition, elementSize, cellSize);
+                        cellPreview.SetPosition(position);
+                        bool usedCell = HaveExistingCellAtPosition(currenSelectedObject, cellRoomGO);
+                        if (usedCell) {
+                            cellPreview.ForbiddenAction();
+                        } else {
+                            cellPreview.SetSprite(currenSelectedObject.GetSprite());
+                        }
+                    }
+                    /*Vector2Int elementSize = currenSelectedObject.GetSize();
+                    // ManageCellPreview(currenSelectedObject, cellRoomGO);
+                    if(currenSelectedObject != null){
+                        Vector3 position = CalculateCellPreviewPosition(elementSize, cellRoomGO);
+                        bool noPlaceAtPosition = HaveExistingCellAtPosition(currenSelectedObject, cellRoomGO);
+                        if (noPlaceAtPosition) {
+                            cellPreview.ForbiddenAction();
+                        } else {
+                            cellPreview.SetSprite(currenSelectedObject.GetSprite());
+                        }
+                    }*/
+                    // cellPreview.HoverCell();
+                    // cellPreview.ResetCell();
+                break;
+                case RoomUIAction.TRASH:
+                    if(cellRoomGO?.GetConfig() == null){
+                        // ManageCellPreview(null, cellRoomGO);
+                        cellPreview.HoverCell();
+                        return;
+                    }
+                    // ManageCellPreview(null, cellRoomGO);
+                    if(cellRoomGO.GetConfig() != null){
+                        cellPreview.TrashAction();
+                    }
+                break;
+                default:
+                    cellPreview.ResetCell();
+                    break;
             }
         }
 
-        private void CreateElementPreview(){
+        private bool HaveExistingCellAtPosition(Element element, CellRoomGO cellRoomGO){
+            Vector2Int size = currenSelectedObject.GetSize();
+            if(size.x > 1 || size.y > 1) {
+                Vector2Int position = cellRoomGO.GetPosition();
+                int x = position.x;
+                int y = position.y;
+                int gridSizeX = gridLayout.constraintCount;
+                for (int yOffset = 0; yOffset < size.y; yOffset++) {
+                    for (int xOffset = 0; xOffset < size.x; xOffset++) {
+                        int targetX = x + xOffset;
+                        int targetY = y - yOffset;
+                        int targetChildIndex = targetY * gridSizeX + targetX;
+                        if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
+                            CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
+                            if(targetCell.GetConfig() != null || targetCell.IsDoorOrWall() || targetCell.IsDesactivatedCell()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            } else if(cellRoomGO?.GetConfig() != null || cellRoomGO.IsDoorOrWall() || cellRoomGO.IsDesactivatedCell()){
+                return true;
+            }
+            return false;
+        }
 
+        private Vector2 CalculateCellPreviewSize(Vector2 elementSize, Vector2 cellSize){
+            return new Vector2(cellSize.x * elementSize.x, cellSize.y * elementSize.y);
+        }
+
+        private Vector3 CalculateCellPreviewPosition(Vector2 size, Vector3 position, Vector2 elementSize, Vector2 cellSize) {
+            /*Vector3 position = cellRoomGO.transform.position;
+            Vector3 newPosition = new Vector3(position.x - cellRoomGO.GetCellSize().x, position.y - cellRoomGO.GetCellSize().y, position.z);
+            Vector2 size = new Vector2(cellRoomGO.GetCellSize().x, cellRoomGO.GetCellSize().y);
+            if(element != null){
+                // select case
+                if(cellRoomGO != null){
+                    size = new Vector2(cellRoomGO.GetCellSize().x * element.GetSize().x, cellRoomGO.GetCellSize().y * element.GetSize().y);
+                }else{
+                    size = new Vector2(cellRoomGO.GetCellSize().x * cellRoomGO.GetConfig().GetSize().x, cellRoomGO.GetCellSize().y * cellRoomGO.GetConfig().GetSize().y);
+                }
+                cellPreview.SetSize(size);
+                cellPreview.SetPosition(newPosition);
+            } else if(cellRoomGO != null && cellRoomGO?.GetConfig() != null) {
+                // trash case
+                size = new Vector2(cellRoomGO.GetCellSize().x * cellRoomGO.GetConfig().GetSize().x, cellRoomGO.GetCellSize().y * cellRoomGO.GetConfig().GetSize().y);
+                cellPreview.SetSize(size);
+                cellPreview.SetPosition(newPosition);
+            } else {
+                cellPreview.SetSize(size);
+                cellPreview.SetPosition(newPosition);
+            }*/
+            if(elementSize.x > 1 || elementSize.y > 1) {
+                return new Vector3(position.x + size.x - cellSize.x, position.y + size.y - cellSize.y, position.z);
+            }
+            // Vector2 size = new Vector2(cellRoomGO.GetCellSize().x, cellRoomGO.GetCellSize().y);
+            return new Vector3(position.x, position.y, position.z);
         }
 
         private void OnTrashButtonClick() {
-            currentAction = RoomUIAction.TRASH;
-            ResetButtonsColor();
-            ChangeButtonColor(trashButton, selectedButtonColor);
+            SetButtonConfiguration(RoomUIAction.TRASH, trashButton);
         }
 
         private void OnCopyButtonClick() {
-            currentAction = RoomUIAction.COPY;
-            ResetButtonsColor();
-            ChangeButtonColor(copyButton, selectedButtonColor);
-            // roomUIStateManager.OnSelectObject(null);
+            SetButtonConfiguration(RoomUIAction.COPY, copyButton);
         }
 
         private void OnSelectButtonClick() {
-            currentAction = RoomUIAction.SELECT;
+            SetButtonConfiguration(RoomUIAction.SELECT, selectButton);
+        }
+
+        private void SetButtonConfiguration(RoomUIAction action, Button button) {
+            cellPreview.HideCellPreview();
+            currentAction = action;
             ResetButtonsColor();
-            ChangeButtonColor(selectButton, selectedButtonColor);
+            ChangeButtonColor(button, selectedButtonColor);
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
@@ -200,49 +316,55 @@ namespace RoomUI {
 
         private void CreateCell(Element element, CellRoomGO cellRoomGO){
             if(currenSelectedObject == null) return;
-                if(element != null){
-                // if(element == currenSelectedObject){
-                    cellRoomGO.ForbidenAction();
-                    return;
-                }
-                bool findExistingCell = false;
-                List<CellRoomGO> cellsToDeactivate = new List<CellRoomGO>();
-                Vector2Int size = currenSelectedObject.GetSize();
-                bool bigCell =size.x > 1 || size.y > 1;
-                if(bigCell) {
-                    Vector2Int position = cellRoomGO.GetPosition();
-                    int x = position.x;
-                    int y = position.y;
-                    int gridSizeX = gridLayout.constraintCount;
-                    for (int yOffset = 0; yOffset < size.y; yOffset++) {
-                        for (int xOffset = 0; xOffset < size.x; xOffset++) {
-                            int targetX = x + xOffset;
-                            int targetY = y - yOffset;
-                            int targetChildIndex = targetY * gridSizeX + targetX;
-                            if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
-                                CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
-                                if(targetCell.GetConfig() != null || targetCell.IsDoorOrWall()){
-                                    findExistingCell = true;
-                                    break;
-                                }
-                                // roomGridPlane[targetX, targetY] = currenSelectedObject.GetId();
-                                // toDo -> ajouter une tableau [,] CellRoom ou Int ??? afin de vérifier si les cells adjacentes sont bonnes ou pas
-                                // ne pas oublier de gérer le fait de taper sur des cell de type wall ou autre pour l'interdir aussi
-                                cellsToDeactivate.Add(targetCell);
+            if(element != null){
+                cellPreview.ForbiddenAction();
+                return;
+            }
+            bool findExistingCell = false;
+            List<CellRoomGO> cellsToDeactivate = new List<CellRoomGO>();
+            Vector2Int size = currenSelectedObject.GetSize();
+            bool bigCell = size.x > 1 || size.y > 1;
+            if(bigCell) {
+                Vector2Int position = cellRoomGO.GetPosition();
+                int x = position.x;
+                int y = position.y;
+                int gridSizeX = gridLayout.constraintCount;
+                for (int yOffset = 0; yOffset < size.y; yOffset++) {
+                    for (int xOffset = 0; xOffset < size.x; xOffset++) {
+                        int targetX = x + xOffset;
+                        int targetY = y - yOffset;
+                        int targetChildIndex = targetY * gridSizeX + targetX;
+                        if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
+                            CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
+                            if(targetCell.GetConfig() != null || targetCell.IsDoorOrWall() || targetCell.IsDesactivatedCell()){
+                                findExistingCell = true;
+                                break;
                             }
+                            // set Sprite on top left for big cell to prevent issue with z-index position
+                            if(xOffset == 0 && yOffset == size.y - 1){
+                                targetCell.isRootCell = true;
+                            }
+                            cellsToDeactivate.Add(targetCell);
                         }
                     }
                 }
-                if(!findExistingCell){
-                    if(bigCell){
-                        foreach (CellRoomGO cell in cellsToDeactivate) {
-                            cell.DesactivateCell();
+            }
+            if(!findExistingCell) {
+                if(bigCell) {
+                    foreach (CellRoomGO cell in cellsToDeactivate) {
+                        cell.DesactivateCell();
+                        if(cell.isRootCell){
+                            cell.isRootCell = false;
+                            cell.Setup(currenSelectedObject, gridLayout.spacing, cell.GetPosition());
                         }
-                    }   
+                    }
+                } else {
                     cellRoomGO.Setup(currenSelectedObject, gridLayout.spacing, cellRoomGO.GetPosition());
-                }else{
-                    cellRoomGO.ForbidenAction();
                 }
+                cellPreview.ForbiddenAction();
+            } else {
+                cellPreview.ForbiddenAction();
+            }
         }
 
         private void CopyCell(Element element){

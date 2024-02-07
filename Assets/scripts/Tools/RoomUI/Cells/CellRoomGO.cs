@@ -2,27 +2,28 @@
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.EventSystems;
+using UnityEngine.AI;
 
 public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
     [SerializeField] private GameObject cell;
+    [SerializeField] private GameObject background;
     [SerializeField] private Sprite defaultIcon;
     private RectTransform rectTransform;
     private RectTransform childRectTransform;
+    private RectTransform backgroundTransform;
 
     private bool isDoorOrWall;
 
     private Image image;
     private Button button;
-    private Color defaultColor;
-    private ColorBlock defaultButtonColor;
     private Element config;
     private float lastWith = 0;
     private float ratioCellSize = 1f;
     private Vector2 spacing;
     private Vector2Int position;
-    private bool buttonColorHasCHanged;
-
+    private Vector2 cellSize;
+    private bool isDesactivatedCell;
 
     public delegate void CellClickEvent(CellRoomGO cellRoomGO);
     public static event CellClickEvent OnClick;
@@ -31,25 +32,29 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     public static event CellRoomGOEvent OnPointerEnterEvent;
     public static event CellRoomGOEvent OnPointerExitEvent;
 
+    public bool isRootCell;
+
     public void OnPointerEnter(PointerEventData eventData) {
         OnPointerEnterEvent?.Invoke(this);
     }
 
     public void OnPointerExit(PointerEventData eventData) {
-        if(buttonColorHasCHanged){
-            button.colors = defaultButtonColor;
-        }
         OnPointerExitEvent?.Invoke(this);
     }
 
     void Awake() {
         button = cell.GetComponent<Button>();
         button.onClick.AddListener(OnCellClick);
-        defaultButtonColor = button.colors;
         image = cell.GetComponent<Image>();
-        defaultColor = image.color;
+        defaultIcon = image.sprite;
         rectTransform = GetComponent<RectTransform>();
         childRectTransform = cell.GetComponent<RectTransform>();
+        backgroundTransform = background.GetComponent<RectTransform>();
+    }
+
+
+    public bool IsDesactivatedCell() {
+        return isDesactivatedCell;
     }
 
     private void OnCellClick() {
@@ -79,14 +84,19 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     }
 
     public void DesactivateCell() {
-        image.enabled = false;
+        isDesactivatedCell = true;
+        // image.enabled = false;
+        image.sprite = defaultIcon;
         button.interactable = false;
+        background.SetActive(false);
         ResetCell();
     }
 
     public void ActivateCell() {
-        image.enabled = true;
+        isDesactivatedCell = false;
+        // image.enabled = true;
         button.interactable = true;
+        background.SetActive(true);
         ResetCell();
     }
 
@@ -94,42 +104,34 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         image.color = Color.gray;
         button.interactable = false;
         image.sprite = null;
+        background.SetActive(false);
     }
 
-    public void ForbidenAction() {
+    public void ForbiddenAction() {
         button.interactable = false;
         button.interactable = true;
-        SetHighlightedColor(Color.red);
-    }
-
-    private void SetHighlightedColor(Color highlightColor) {
-        ColorBlock colors = button.colors;
-        colors.highlightedColor = highlightColor;
-        button.colors = colors;
     }
 
     public void AddDoor() {
         image.color = Color.yellow;
         button.interactable = false;
         image.sprite = null;
+        background.SetActive(false);
     }
 
     public void ResetCell(){
         config = null;
-        image.sprite = null;
+        // image.sprite = null;
         image.color = Color.white;
         ResizeCellSize();
     }
-
-    /*public void SetDefaultColor(){
-        button.colors = defaultButtonColor;
-    }*/
 
     private void ResizeCellSize() {
         float width;
         float height;
         float rectWidth = rectTransform.sizeDelta.x;
         float rectHeight = rectTransform.sizeDelta.y;
+        cellSize = new Vector2(rectWidth, rectHeight);
         width = rectWidth;
         height = rectHeight;
         Vector2Int size;
@@ -139,8 +141,24 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
                 width = rectWidth  * size.x + (size.x - 1 * spacing.x);
                 height = rectHeight  * size.y + (size.y - 1 * spacing.y);
             }
-        }  
-        childRectTransform.sizeDelta = new Vector2(width, height);
+            ChangeSpriteYPosition(size.y, height);
+        }
+        Vector2 vSize = new Vector2(width, height);
+        childRectTransform.sizeDelta = vSize;
+        backgroundTransform.sizeDelta = vSize;
+    }
+
+    private void ChangeSpriteYPosition(int posY, float height){
+        if(posY > 1){
+            Vector2 currentPosition = childRectTransform.anchoredPosition;
+            currentPosition.y = -(height - cellSize.y);
+            childRectTransform.anchoredPosition = currentPosition;
+            backgroundTransform.anchoredPosition = currentPosition;
+        }
+    }
+
+    public Vector2 GetCellSize(){
+        return cellSize;
     }
 
     public Vector2Int GetPosition() {
@@ -154,19 +172,14 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         DefaultCellConfiguration();
         if (config != null) {
             SetComponentValues(config);
-            // remove current selected param : for issue with selected white color > than highlight color
-            button.interactable = false;
-            button.interactable = true;
-            SetHighlightedColor(Color.red);
-            buttonColorHasCHanged = true;
         }
     }
 
     private void DefaultCellConfiguration(){
+        background.SetActive(true);
+        //image.enabled = true;
         cell.SetActive(true);
-        image.enabled = true;
         button.interactable = true;
-        image.color = defaultColor;
     }
 
     public void ResizeCellZiseAfterZoom(){
