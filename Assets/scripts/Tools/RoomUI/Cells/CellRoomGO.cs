@@ -2,44 +2,33 @@
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.EventSystems;
-using UnityEngine.AI;
 
-public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
+public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
 
     [SerializeField] private GameObject cell;
     [SerializeField] private GameObject background;
     [SerializeField] private Sprite defaultIcon;
     private RectTransform rectTransform;
-    private RectTransform childRectTransform;
+    private RectTransform cellTransform;
     private RectTransform backgroundTransform;
-
     private bool isDoorOrWall;
-
     private Image image;
     private Button button;
     private Element config;
-    private float lastWith = 0;
-    private float ratioCellSize = 1f;
     private Vector2 spacing;
     private Vector2Int position;
     private Vector2 cellSize;
     private bool isDesactivatedCell;
+    private CellRoomGO rootCellRoomGO;
 
     public delegate void CellClickEvent(CellRoomGO cellRoomGO);
     public static event CellClickEvent OnClick;
 
     public delegate void CellRoomGOEvent(CellRoomGO cellRoomGO);
     public static event CellRoomGOEvent OnPointerEnterEvent;
-    public static event CellRoomGOEvent OnPointerExitEvent;
-
-    public bool isRootCell;
 
     public void OnPointerEnter(PointerEventData eventData) {
         OnPointerEnterEvent?.Invoke(this);
-    }
-
-    public void OnPointerExit(PointerEventData eventData) {
-        OnPointerExitEvent?.Invoke(this);
     }
 
     void Awake() {
@@ -48,8 +37,12 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         image = cell.GetComponent<Image>();
         defaultIcon = image.sprite;
         rectTransform = GetComponent<RectTransform>();
-        childRectTransform = cell.GetComponent<RectTransform>();
+        cellTransform = cell.GetComponent<RectTransform>();
         backgroundTransform = background.GetComponent<RectTransform>();
+    }
+
+    public Transform GetCellTransform() {
+        return cellTransform.transform;
     }
 
 
@@ -83,21 +76,40 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         button.onClick.RemoveListener(OnCellClick);
     }
 
-    public void DesactivateCell() {
+    public void DesactivateDisplay(){
         isDesactivatedCell = true;
-        // image.enabled = false;
-        image.sprite = defaultIcon;
-        button.interactable = false;
         background.SetActive(false);
+    }
+
+    public void ActivateDisplay(){
+        isDesactivatedCell = false;
+        background.SetActive(true);
+    }
+
+    public void DesactivateCell() {
+        DesactivateDisplay();
         ResetCell();
     }
 
     public void ActivateCell() {
-        isDesactivatedCell = false;
-        // image.enabled = true;
-        button.interactable = true;
-        background.SetActive(true);
+        ActivateDisplay();
         ResetCell();
+    }
+
+    public void ResetCell(){
+        ActivateDisplay();
+        rootCellRoomGO = null;
+        config = null;
+        image.sprite = defaultIcon;
+        image.color = Color.white;
+        backgroundTransform.anchoredPosition = Vector2.zero;
+        cellTransform.anchoredPosition = Vector2.zero;
+        ResizeCellSize();
+    }
+
+    public void ForbiddenAction() {
+        button.interactable = false;
+        button.interactable = true;
     }
 
     public void AddWall() {
@@ -107,23 +119,11 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         background.SetActive(false);
     }
 
-    public void ForbiddenAction() {
-        button.interactable = false;
-        button.interactable = true;
-    }
-
     public void AddDoor() {
         image.color = Color.yellow;
         button.interactable = false;
         image.sprite = null;
         background.SetActive(false);
-    }
-
-    public void ResetCell(){
-        config = null;
-        // image.sprite = null;
-        image.color = Color.white;
-        ResizeCellSize();
     }
 
     private void ResizeCellSize() {
@@ -144,15 +144,15 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             ChangeSpriteYPosition(size.y, height);
         }
         Vector2 vSize = new Vector2(width, height);
-        childRectTransform.sizeDelta = vSize;
+        cellTransform.sizeDelta = vSize;
         backgroundTransform.sizeDelta = vSize;
     }
 
-    private void ChangeSpriteYPosition(int posY, float height){
-        if(posY > 1){
-            Vector2 currentPosition = childRectTransform.anchoredPosition;
+    private void ChangeSpriteYPosition(int sizeY, float height){
+        if(sizeY > 1){
+            Vector2 currentPosition = cellTransform.anchoredPosition;
             currentPosition.y = -(height - cellSize.y);
-            childRectTransform.anchoredPosition = currentPosition;
+            cellTransform.anchoredPosition = currentPosition;
             backgroundTransform.anchoredPosition = currentPosition;
         }
     }
@@ -169,17 +169,23 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         this.position = position;
         this.spacing = spacing;
         StartCoroutine(AdjustSizeAfterFrame());
-        DefaultCellConfiguration();
+        ActivateDisplay();
         if (config != null) {
             SetComponentValues(config);
         }
     }
 
-    private void DefaultCellConfiguration(){
-        background.SetActive(true);
-        //image.enabled = true;
-        cell.SetActive(true);
-        button.interactable = true;
+    public CellRoomGO GetRootCellRoomGO() {
+        if(rootCellRoomGO == null){
+            return this;
+        }
+        return rootCellRoomGO;
+    }
+
+    public void SetupDesactivatedCell(CellRoomGO rootCellRoomGO, Element config) {
+        this.rootCellRoomGO = rootCellRoomGO;
+        this.config = config;
+        DesactivateDisplay();
     }
 
     public void ResizeCellZiseAfterZoom(){

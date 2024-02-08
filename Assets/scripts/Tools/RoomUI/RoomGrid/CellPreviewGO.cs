@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-public class CellPreview : MonoBehaviour {
+public class CellPreviewGO : MonoBehaviour {
     private Image image;
     private Sprite defaultSprite;
     private RectTransform rectTransform;
