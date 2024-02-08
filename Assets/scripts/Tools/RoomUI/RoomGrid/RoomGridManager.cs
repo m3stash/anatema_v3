@@ -162,47 +162,26 @@ namespace RoomUI {
                 return;
             }
             bool voidCell = cellRoomGO?.GetConfig() == null && !cellRoomGO.IsDesactivatedCell();
-            Debug.Log("voidCell: "+voidCell);
-            // Vector2Int elementSize = currenSelectedObject?.GetSize() ?? new Vector2Int(1, 1);
             Vector2 cellSize = cellRoomGO.GetCellSize(); // ex: 28 x 28
-            Vector2 defaultSizeVector = new Vector2(1, 1);
             Vector3 cellRoomGOPosition = cellRoomGO.transform.position;
             switch(currentAction){
                 case RoomUIAction.SELECT:
+                    // simple hover for void cell and no selected Object
                     if(voidCell && currenSelectedObject == null){
-                        Vector2 previewSize = CalculateCellPreviewSize(defaultSizeVector, cellSize);
-                        Vector3 position = CalculateCellPreviewPosition(previewSize, cellRoomGOPosition, defaultSizeVector, cellSize);
-                        cellPreview.SetSize(previewSize);
-                        cellPreview.SetPosition(position);
+                        ManagePreview(cellRoomGOPosition, new Vector2(1, 1), cellSize);
                         cellPreview.HoverCell();
-                        return;
+                        break;
                     }
                     if(currenSelectedObject != null){
-                        Vector2 elementSize = currenSelectedObject.GetSize();
-                        Vector2 previewSize = CalculateCellPreviewSize(elementSize, cellSize);
-                        cellPreview.SetSize(previewSize);
-                        Vector3 position = CalculateCellPreviewPosition(previewSize, cellRoomGOPosition, elementSize, cellSize);
-                        cellPreview.SetPosition(position);
-                        bool usedCell = HaveExistingCellAtPosition(currenSelectedObject, cellRoomGO);
+                        Vector2 selectedElementSize = currenSelectedObject.GetSize();
+                        ManagePreview(cellRoomGOPosition, selectedElementSize, cellSize);
+                        bool usedCell = HaveExistingCellAtPosition(cellRoomGO, selectedElementSize);
                         if (usedCell) {
                             cellPreview.ForbiddenAction();
                         } else {
                             cellPreview.SetSprite(currenSelectedObject.GetSprite());
                         }
                     }
-                    /*Vector2Int elementSize = currenSelectedObject.GetSize();
-                    // ManageCellPreview(currenSelectedObject, cellRoomGO);
-                    if(currenSelectedObject != null){
-                        Vector3 position = CalculateCellPreviewPosition(elementSize, cellRoomGO);
-                        bool noPlaceAtPosition = HaveExistingCellAtPosition(currenSelectedObject, cellRoomGO);
-                        if (noPlaceAtPosition) {
-                            cellPreview.ForbiddenAction();
-                        } else {
-                            cellPreview.SetSprite(currenSelectedObject.GetSprite());
-                        }
-                    }*/
-                    // cellPreview.HoverCell();
-                    // cellPreview.ResetCell();
                 break;
                 case RoomUIAction.TRASH:
                     if(cellRoomGO?.GetConfig() == null){
@@ -221,15 +200,24 @@ namespace RoomUI {
             }
         }
 
-        private bool HaveExistingCellAtPosition(Element element, CellRoomGO cellRoomGO){
-            Vector2Int size = currenSelectedObject.GetSize();
-            if(size.x > 1 || size.y > 1) {
+        private void ManagePreview(Vector3 position, Vector2 elementSize, Vector2 cellSize){
+            Vector2 previewSize = new Vector2(cellSize.x * elementSize.x, cellSize.y * elementSize.y);
+            Vector3 previewPosition = position;
+            if(elementSize.x > 1 || elementSize.y > 1) {
+                previewPosition =  new Vector3(position.x + previewSize.x - cellSize.x, position.y + previewSize.y - cellSize.y, position.z);
+            }
+            cellPreview.SetSize(previewSize);
+            cellPreview.SetPosition(previewPosition);
+        }
+
+        private bool HaveExistingCellAtPosition(CellRoomGO cellRoomGO, Vector2 selectedElementSize){
+            if(selectedElementSize.x > 1 || selectedElementSize.y > 1) {
                 Vector2Int position = cellRoomGO.GetPosition();
                 int x = position.x;
                 int y = position.y;
                 int gridSizeX = gridLayout.constraintCount;
-                for (int yOffset = 0; yOffset < size.y; yOffset++) {
-                    for (int xOffset = 0; xOffset < size.x; xOffset++) {
+                for (int yOffset = 0; yOffset < selectedElementSize.y; yOffset++) {
+                    for (int xOffset = 0; xOffset < selectedElementSize.x; xOffset++) {
                         int targetX = x + xOffset;
                         int targetY = y - yOffset;
                         int targetChildIndex = targetY * gridSizeX + targetX;
@@ -241,43 +229,12 @@ namespace RoomUI {
                         }
                     }
                 }
-            } else if(cellRoomGO?.GetConfig() != null || cellRoomGO.IsDoorOrWall() || cellRoomGO.IsDesactivatedCell()){
-                return true;
+            }else{
+                if(cellRoomGO.GetConfig() != null || cellRoomGO.IsDoorOrWall() || cellRoomGO.IsDesactivatedCell()){
+                    return true;
+                }
             }
             return false;
-        }
-
-        private Vector2 CalculateCellPreviewSize(Vector2 elementSize, Vector2 cellSize){
-            return new Vector2(cellSize.x * elementSize.x, cellSize.y * elementSize.y);
-        }
-
-        private Vector3 CalculateCellPreviewPosition(Vector2 size, Vector3 position, Vector2 elementSize, Vector2 cellSize) {
-            /*Vector3 position = cellRoomGO.transform.position;
-            Vector3 newPosition = new Vector3(position.x - cellRoomGO.GetCellSize().x, position.y - cellRoomGO.GetCellSize().y, position.z);
-            Vector2 size = new Vector2(cellRoomGO.GetCellSize().x, cellRoomGO.GetCellSize().y);
-            if(element != null){
-                // select case
-                if(cellRoomGO != null){
-                    size = new Vector2(cellRoomGO.GetCellSize().x * element.GetSize().x, cellRoomGO.GetCellSize().y * element.GetSize().y);
-                }else{
-                    size = new Vector2(cellRoomGO.GetCellSize().x * cellRoomGO.GetConfig().GetSize().x, cellRoomGO.GetCellSize().y * cellRoomGO.GetConfig().GetSize().y);
-                }
-                cellPreview.SetSize(size);
-                cellPreview.SetPosition(newPosition);
-            } else if(cellRoomGO != null && cellRoomGO?.GetConfig() != null) {
-                // trash case
-                size = new Vector2(cellRoomGO.GetCellSize().x * cellRoomGO.GetConfig().GetSize().x, cellRoomGO.GetCellSize().y * cellRoomGO.GetConfig().GetSize().y);
-                cellPreview.SetSize(size);
-                cellPreview.SetPosition(newPosition);
-            } else {
-                cellPreview.SetSize(size);
-                cellPreview.SetPosition(newPosition);
-            }*/
-            if(elementSize.x > 1 || elementSize.y > 1) {
-                return new Vector3(position.x + size.x - cellSize.x, position.y + size.y - cellSize.y, position.z);
-            }
-            // Vector2 size = new Vector2(cellRoomGO.GetCellSize().x, cellRoomGO.GetCellSize().y);
-            return new Vector3(position.x, position.y, position.z);
         }
 
         private void OnTrashButtonClick() {
