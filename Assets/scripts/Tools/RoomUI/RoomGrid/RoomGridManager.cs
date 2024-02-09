@@ -55,20 +55,38 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-            Element elementConfig = cellRoomGO.GetConfig();
+            Element cellConfig = cellRoomGO.GetConfig();
             switch(currentAction){
                 case RoomUIAction.COPY:
-                    CopyCell(elementConfig);
+                    CopyCell(cellConfig);
                 break;
                 case RoomUIAction.SELECT:
-                    bool isExistingCell = roomGridService.CreateCell(elementConfig, cellRoomGO, currenSelectedObject);
-                    if(isExistingCell){
-                        cellPreviewManager.Forbidden();
-                    }
+                    SelectCell(cellConfig, cellRoomGO);
                 break;
                 case RoomUIAction.TRASH:
-                    roomGridService.DeleteCell(cellRoomGO);
+                    DeleteCell(cellRoomGO);
                 break;
+            }
+        }
+
+        private void DeleteCell(CellRoomGO cellRoomGO){
+            if(!IsVoidCell(cellRoomGO)){
+                roomGridService.DeleteCell(cellRoomGO);
+                cellPreviewManager.OnClickTrashAction(cellRoomGO);
+            }
+        }
+
+        private void SelectCell(Element cellConfig, CellRoomGO cellRoomGO){
+            bool isExistingCell = roomGridService.CreateCell(cellConfig, cellRoomGO, currenSelectedObject);
+            if(isExistingCell){
+                cellPreviewManager.Forbidden();
+            }
+        }
+
+        private void CopyCell(Element cellConfig){
+            if(cellConfig != null){
+                roomUIStateManager.OnSelectObject(cellConfig);
+                OnSelectButtonClick();
             }
         }
 
@@ -217,13 +235,6 @@ namespace RoomUI {
             currentAction = action;
             ResetButtonsColor();
             ChangeButtonColor(button, selectedButtonColor);
-        }
-
-        private void CopyCell(Element element){
-            if(element != null){
-                roomUIStateManager.OnSelectObject(element);
-                OnSelectButtonClick();
-            }
         }
 
         private void OnObjectSelectedHandler(Element selectedObject) {

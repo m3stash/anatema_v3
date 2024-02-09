@@ -83,6 +83,12 @@ namespace RoomUI {
             SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO().transform.position, cellRoomGO.GetConfig().GetSize(), cellSize);
         }
 
+        public void OnClickTrashAction(CellRoomGO cellRoomGO){
+            Vector2 cellSize = cellRoomGO.GetCellSize();
+            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO().transform.position, new Vector2(1,1), cellSize);
+            Hover();
+        }
+
         public void OnHoverCopyAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition){
             if(cellRoomGO.GetConfig() == null){
                 SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
