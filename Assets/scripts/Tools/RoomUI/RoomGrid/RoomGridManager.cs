@@ -27,14 +27,10 @@ namespace RoomUI {
         private int defaultHeight;
         private float currentZoom = 1;
         private float zoomIncrement = 0.5f;
-        private bool initGrid = true;
         private Color selectedButtonColor = Color.yellow;
         private Color defaultButtonColor;
-
         private RoomUIAction currentAction;
-
         private Element currenSelectedObject;
-
         private string[,] roomGridPlane;
         private CellPreviewManager cellPreviewManager;
         private RoomGridService roomGridService;
@@ -47,6 +43,7 @@ namespace RoomUI {
             GridLayoutGroup grid = InitGrid();
             roomGridService = new RoomGridService(grid);
             cellPreviewManager = new CellPreviewManager(cellPreviewGO, roomGridService);
+            currentGrid = new CreateRoomGrid(pool);
             CreateRoomInstance();
         }
 
@@ -173,7 +170,8 @@ namespace RoomUI {
         private void OnDestroy() {
             CellRoomGO.OnPointerEnterEvent -= OnCellPointerEnterHandler;
             CellRoomGO.OnClick -= OnCellClickHandler;
-            roomUIStateManager.OnShapeChange -= DropdownValueChanged;
+            roomUIStateManager.OnShapeChange -= OnShapeChange;
+            roomUIStateManager.OnBiomeChange -= OnBiomeChange;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
             gridZoomMinus.onClick.RemoveListener(OnGridZoomMinusClick);
             gridZoomPlus.onClick.RemoveListener(OnGridZoomPlusClick);
@@ -182,7 +180,8 @@ namespace RoomUI {
         private void CreateListeners() {
             CellRoomGO.OnPointerEnterEvent += OnCellPointerEnterHandler;
             CellRoomGO.OnClick += OnCellClickHandler;
-            roomUIStateManager.OnShapeChange += DropdownValueChanged;
+            roomUIStateManager.OnShapeChange += OnShapeChange;
+            roomUIStateManager.OnBiomeChange += OnBiomeChange;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
 
             if (gridZoomMinus != null) {
@@ -242,6 +241,28 @@ namespace RoomUI {
             OnSelectButtonClick();
         }
 
+        private void CreateGridView(){
+            string currentBiome = roomUIStateManager.CurrentBiome;
+            string currentShape = roomUIStateManager.CurrentShape;
+            RoomShapeEnum? newShape = Utilities.GetEnumValueFromDropdown<RoomShapeEnum>(currentShape);
+            BiomeEnum? newBiome = Utilities.GetEnumValueFromDropdown<BiomeEnum>(currentBiome);
+            if(newShape.HasValue && newBiome.HasValue) {
+                GenerateGrid(newShape.Value);
+                currentZoom = 1;
+                Zoom(currentZoom);
+            }else{
+                currentGrid.ResetGrid();
+            }
+        }
+
+        private void OnShapeChange(string shape) {
+            CreateGridView();
+        }
+
+        private void OnBiomeChange(string biome){
+            CreateGridView();
+        }
+
         private void OnGridZoomMinusClick() {
             currentZoom = currentZoom == 1 ? 1 : currentZoom - zoomIncrement;
             Zoom(currentZoom);
@@ -264,22 +285,7 @@ namespace RoomUI {
             }
         }
 
-        private void DropdownValueChanged(string shape) {
-            currentZoom = 1;
-            Zoom(currentZoom);
-            RoomShapeEnum? newShape = Utilities.GetEnumValueFromDropdown<RoomShapeEnum>(shape);
-            if(newShape.HasValue) {
-                GenerateGrid(newShape.Value);
-            } else {
-                currentGrid.ResetPool();
-            }
-        }
-
         private void GenerateGrid(RoomShapeEnum shape) {
-            if (!initGrid) {
-                currentGrid.ResetPool();
-            }
-            initGrid = false;
             if (roomByShape.ContainsKey(shape)) {
                 Room room = roomByShape[shape];
                 Vector2Int[] roomSections = room.GetSections(Vector2Int.zero);
@@ -287,12 +293,11 @@ namespace RoomUI {
                 int cols = roomSize.x * (int)RoomSizeEnum.WIDTH;
                 int rows = roomSize.y * (int)RoomSizeEnum.HEIGHT;
                 gridLayout.constraintCount = cols;
-                currentGrid = new CreateRoomGrid(pool, roomSections, roomSize, rows, cols);
+                currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
                 roomGridPlane = currentGrid.RoomGridPlane;
-                currentGrid.GenerateGrid(transform);
                 ModifyGridLayoutRectTransform(cols, rows);
             } else {
-                Debug.Log("GridManager Start, error: "+ shape);
+                Debug.Log("GridManager Start, error: "+ shape + " Not Exist...");
             }
         }
 
@@ -304,6 +309,7 @@ namespace RoomUI {
             rectTransform.sizeDelta = new Vector2(width, height);
         }
 
+        // used to create true Room by shape and get all function and properties like sections etc.
         private void CreateRoomInstance() {
             foreach (RoomShapeEnum shape in Enum.GetValues(typeof(RoomShapeEnum))) {
                 Room room = RoomFactory.GetInstance().InstantiateRoomImpl(shape);

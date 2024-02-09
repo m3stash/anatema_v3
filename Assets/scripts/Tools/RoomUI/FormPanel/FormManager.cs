@@ -28,6 +28,7 @@ namespace RoomUI {
 
         private void CreateDropdownList<T>(TMP_Dropdown dropdown) where T : struct, Enum {
             List<string> options = new List<string>(Enum.GetNames(typeof(T)));
+            options.Remove("ALL");
             dropdown.AddOptions(options);
         }
 

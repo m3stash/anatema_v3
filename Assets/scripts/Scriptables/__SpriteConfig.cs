@@ -69,8 +69,8 @@ public class SpriteConfig : ScriptableObject {
 
     private List<BiomeEnum> GetExistingBiomes() {
         return Enum.GetValues(typeof(BiomeEnum))
-                   .Cast<BiomeEnum>()
-                   .ToList();
+            .Cast<BiomeEnum>()
+            .ToList();
     }
 
     private void Initialize() {

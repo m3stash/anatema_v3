@@ -2,7 +2,6 @@
 using UnityEngine;
 namespace RoomUI {
     public class CreateRoomGrid {
-
         private CellRoomPool pool;
         private int rows; // Height
         private int cols; // Width
@@ -19,8 +18,27 @@ namespace RoomUI {
 
         public string[,] RoomGridPlane { get => roomGridPlane; }
 
-        public CreateRoomGrid(CellRoomPool pool, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
+        public CreateRoomGrid(CellRoomPool pool) {
             this.pool = pool;
+        }
+
+        public void ResetGrid(){
+            ResetPool();
+        }
+
+        public void ResetPool() {
+            if(usedCells.Count > 0){
+                usedCells.ForEach(cell => {
+                    cell.ResetPoolCell();
+                });
+                pool.ReleaseMany(usedCells);
+                usedCells = new List<CellRoomGO>();
+                Debug.Log(usedCells.Count);
+            }
+        }
+
+        public void GenerateGrid(Transform transform, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
+            ResetPool();
             this.roomSections = roomSections;
             this.roomSize = roomSize;
             this.rows = rows;
@@ -28,16 +46,6 @@ namespace RoomUI {
             sectionWidth = cols / roomSize.x;
             sectionHeight = rows / roomSize.y;
             roomGridPlane = new string[cols, rows];
-        }
-
-        public void ResetPool() {
-            usedCells.ForEach(cell => {
-                cell.DesactivateCell();
-            });
-            pool.ReleaseMany(usedCells);
-        }
-
-        public void GenerateGrid(Transform transform) {
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {
                     CellRoomGO cell = pool.GetOne();

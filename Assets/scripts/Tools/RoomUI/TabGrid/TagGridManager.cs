@@ -115,7 +115,7 @@ namespace RoomUI {
             int nbItems = 10;
             if (newBiome.HasValue) {
                 int nbrRows = (int)Math.Ceiling((decimal)nbItems / constraintCount);
-                int height = nbrRows * (cellSize + (cellSpacing * 2)) + (padding.bottom + padding.top);
+                int height = nbrRows * (cellSize + (cellSpacing * 2)) + padding.bottom + padding.top;
                 rectTransform.sizeDelta = new Vector2(gridWidth, height);
             } else {
                 //ResetPool();

@@ -96,14 +96,21 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         ResetCell();
     }
 
-    public void ResetCell(){
-        ActivateDisplay();
+    public void ResetPoolCell() {
+        background.SetActive(true);
+        button.interactable = true;
+        isDoorOrWall = false;
+        isDesactivatedCell = false;
         rootCellRoomGO = null;
         config = null;
         image.sprite = defaultIcon;
         image.color = Color.white;
         backgroundTransform.anchoredPosition = Vector2.zero;
         cellTransform.anchoredPosition = Vector2.zero;
+    }
+
+    public void ResetCell(){
+        ResetPoolCell();
         ResizeCellSize();
     }
 

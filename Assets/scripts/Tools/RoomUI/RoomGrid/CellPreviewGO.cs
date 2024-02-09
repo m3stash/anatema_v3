@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 public class CellPreviewGO : MonoBehaviour {
     private Image image;
-    private Sprite defaultSprite;
     private RectTransform rectTransform;
     [SerializeField] private Sprite forbidden;
     [SerializeField] private Sprite trash;
@@ -10,7 +9,6 @@ public class CellPreviewGO : MonoBehaviour {
 
     private void Awake() {
         image = GetComponent<Image>();
-        defaultSprite = image.sprite;
         rectTransform = GetComponent<RectTransform>();
     }
 

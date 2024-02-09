@@ -50,8 +50,8 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
             var pooledObjectTransform = obj.transform;
             pooledObjectTransform.SetParent(transform);
             pooledObjectTransform.localPosition = Vector3.zero;
+            //(obj as MonoBehaviour)?.StopAllCoroutines();
             obj.gameObject.SetActive(false);
-
         }
     }
 
