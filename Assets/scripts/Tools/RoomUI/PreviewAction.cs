@@ -4,4 +4,5 @@ public enum PreviewAction {
     FORBIDDEN,
     TRASH,
     SHOW_SPRITE,
+    COPY,
 }

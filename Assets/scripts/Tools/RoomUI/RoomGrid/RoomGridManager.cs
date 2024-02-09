@@ -4,7 +4,6 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using System.ComponentModel;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour, IPointerExitHandler {
@@ -20,7 +19,7 @@ namespace RoomUI {
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
-        private RoomGrid currentGrid;
+        private CreateRoomGrid currentGrid;
         private RectTransform rectTransform;
         private int cellSize = 28;
         private int cellSpacing = 1;
@@ -37,20 +36,65 @@ namespace RoomUI {
         private Element currenSelectedObject;
 
         private string[,] roomGridPlane;
-
         private CellPreviewManager cellPreviewManager;
+        private RoomGridService roomGridService;
 
         private void Awake() {
             VerifySerialisables();
             CreateListeners();
             InitButtonPanel();
             CreatePooling();
-            InitGrid();
+            GridLayoutGroup grid = InitGrid();
+            roomGridService = new RoomGridService(grid);
+            cellPreviewManager = new CellPreviewManager(cellPreviewGO, roomGridService);
             CreateRoomInstance();
         }
 
         public void OnPointerExit(PointerEventData eventData) {
             cellPreviewManager.Hide();
+        }
+
+        private void OnCellClickHandler(CellRoomGO cellRoomGO) {
+            Element elementConfig = cellRoomGO.GetConfig();
+            switch(currentAction){
+                case RoomUIAction.COPY:
+                    CopyCell(elementConfig);
+                break;
+                case RoomUIAction.SELECT:
+                    bool isExistingCell = roomGridService.CreateCell(elementConfig, cellRoomGO, currenSelectedObject);
+                    if(isExistingCell){
+                        cellPreviewManager.Forbidden();
+                    }
+                break;
+                case RoomUIAction.TRASH:
+                    roomGridService.DeleteCell(cellRoomGO);
+                break;
+            }
+        }
+
+        private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
+            cellPreviewManager.Reset();
+            if(cellRoomGO.IsDoorOrWall()){
+                cellPreviewManager.Hide();
+                return;
+            }
+            bool isVoidCell = IsVoidCell(cellRoomGO);
+            Vector2 cellSize = cellRoomGO.GetCellSize(); // ex: 28 x 28
+            Vector3 cellRoomGOPosition = cellRoomGO.transform.position;
+            switch(currentAction){
+                case RoomUIAction.SELECT:
+                    cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject);
+                    break;
+                case RoomUIAction.TRASH:
+                    cellPreviewManager.OnHoverTrashAction(cellRoomGO, cellSize, cellRoomGOPosition);
+                    break;
+                case RoomUIAction.COPY:
+                    cellPreviewManager.OnHoverCopyAction(cellRoomGO, cellSize, cellRoomGOPosition);
+                    break;
+                default:
+                    cellPreviewManager.Reset();
+                    break;
+            }
         }
 
         private void InitButtonPanel() {
@@ -72,12 +116,12 @@ namespace RoomUI {
             ChangeButtonColor(trashButton, defaultButtonColor);
         }
 
-        private void InitGrid() {
-            cellPreviewManager = new CellPreviewManager(cellPreviewGO);
+        private GridLayoutGroup InitGrid() {
             gridLayout = gameObject.GetComponent<GridLayoutGroup>();
             gridLayout.cellSize = new Vector2(cellSize, cellSize);
             gridLayout.spacing = new Vector2(cellSpacing, cellSpacing);
             rectTransform = gridLayout.GetComponent<RectTransform>();
+            return gridLayout;
         }
 
         private void CreatePooling() {
@@ -157,78 +201,6 @@ namespace RoomUI {
             return false;
         }
 
-        private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
-            cellPreviewManager.Reset();
-            if(cellRoomGO.IsDoorOrWall()){
-                cellPreviewManager.Hide();
-                return;
-            }
-            bool isVoidCell = IsVoidCell(cellRoomGO);
-            Vector2 cellSize = cellRoomGO.GetCellSize(); // ex: 28 x 28
-            Vector3 cellRoomGOPosition = cellRoomGO.transform.position;
-            switch(currentAction){
-                case RoomUIAction.SELECT:
-                    OnHoverSelectAction(isVoidCell, cellRoomGO, cellSize, cellRoomGOPosition);
-                break;
-                case RoomUIAction.TRASH:
-                    OnHoverTrashAction(cellRoomGO, cellSize, cellRoomGOPosition);
-                break;
-                default:
-                    cellPreviewManager.Reset();
-                    break;
-            }
-        }
-
-        private void OnHoverTrashAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition) {
-            if(cellRoomGO.GetConfig() == null){
-                cellPreviewManager.SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
-                return;
-            }
-            cellPreviewManager.SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO().transform.position, cellRoomGO.GetConfig().GetSize(), cellSize);
-        }
-
-        private void OnHoverSelectAction(bool isVoidCell, CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition) {
-            // simple hover for void cell and no selected Object
-            if(isVoidCell && currenSelectedObject == null){
-                cellPreviewManager.SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
-                return;
-            }
-            if(currenSelectedObject != null){
-                Vector2Int selectedElementSize = currenSelectedObject.GetSize();
-                List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, selectedElementSize);
-                if(cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())){
-                    cellPreviewManager.SetPreviewByActionType(PreviewAction.FORBIDDEN, cellRoomGOPosition, selectedElementSize, cellSize);
-                } else {
-                    cellPreviewManager.SetPreviewByActionType(PreviewAction.SHOW_SPRITE, cellRoomGOPosition, selectedElementSize, cellSize, currenSelectedObject.GetSprite());
-                }
-            }
-        }
-
-        private List<CellRoomGO> GetCellsAtPosition(CellRoomGO cellRoomGO, Vector2Int selectedElementSize){
-            List<CellRoomGO> cells = new List<CellRoomGO>();
-            Vector2Int size = selectedElementSize;
-            if(IsBigCell(selectedElementSize)) {
-                Vector2Int position = cellRoomGO.GetPosition();
-                int x = position.x;
-                int y = position.y;
-                int gridSizeX = gridLayout.constraintCount;
-                for (int yOffset = 0; yOffset < size.y; yOffset++) {
-                    for (int xOffset = 0; xOffset < size.x; xOffset++) {
-                        int targetX = x + xOffset;
-                        int targetY = y - yOffset;
-                        int targetChildIndex = targetY * gridSizeX + targetX;
-                        if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
-                            CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
-                            cells.Add(targetCell);
-                        }
-                    }
-                }
-                return cells;
-            }
-            cells.Add(cellRoomGO);
-            return cells;
-        }  
-
         private void OnTrashButtonClick() {
             SetButtonConfiguration(RoomUIAction.TRASH, trashButton);
         }
@@ -242,79 +214,16 @@ namespace RoomUI {
         }
 
         private void SetButtonConfiguration(RoomUIAction action, Button button) {
-            // cellPreviewManager.Hide();
             currentAction = action;
             ResetButtonsColor();
             ChangeButtonColor(button, selectedButtonColor);
         }
 
-        private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-            Element elementConfig = cellRoomGO.GetConfig();
-            switch(currentAction){
-                case RoomUIAction.COPY:
-                    CopyCell(elementConfig);
-                break;
-                case RoomUIAction.SELECT:
-                    CreateCell(elementConfig, cellRoomGO);
-                break;
-                case RoomUIAction.TRASH:
-                    DeleteCell(cellRoomGO);
-                break;
-            }
-        }
-
-        private bool IsBigCell(Vector2Int size){
-            return size.x > 1 || size.y > 1;
-        }
-
-        private void CreateCell(Element elementConfig, CellRoomGO cellRoomGO){
-            if(currenSelectedObject == null || elementConfig != null) return;
-            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, currenSelectedObject.GetSize());
-            if(cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())){
-                cellPreviewManager.Forbidden();
-            } else {
-                if(IsBigCell(currenSelectedObject.GetSize())){
-                    SetupBigCell(cells, cellRoomGO);
-                } else {
-                    cellRoomGO.Setup(currenSelectedObject, gridLayout.spacing, cellRoomGO.GetPosition());
-                }
-                cellPreviewManager.Forbidden();
-            }
-        }
-
-        private void SetupBigCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO){
-            CellRoomGO topLeftCell = null;
-            cells.ForEach(cell => {
-                /*
-                * Creates the sprite in the top-left cell.
-                * Unity manages its rows in such a way that each row below has a higher z'index than the one above.
-                * Otherwise, the image passes over the other cells and, when hovering, if it's at the bottom left, you can no longer select the cells above.
-                *
-                */
-                if (topLeftCell == null || cell.GetPosition().x < topLeftCell.GetPosition().x || cell.GetPosition().y < topLeftCell.GetPosition().y) {
-                    topLeftCell = cell;
-                }
-                cell.SetupDesactivatedCell(cellRoomGO, currenSelectedObject);
-            });
-            topLeftCell.Setup(currenSelectedObject, gridLayout.spacing, topLeftCell.GetPosition());
-        }
-
         private void CopyCell(Element element){
-            // toDO : voir la taille de la cell pour empêcher de copier si il y a un voisin, tout doit être vide !!!!
             if(element != null){
                 roomUIStateManager.OnSelectObject(element);
                 OnSelectButtonClick();
             }
-        }
-
-        private void DeleteCell(CellRoomGO cellRoomGO) {
-            Element config = cellRoomGO.GetConfig();
-            if(config == null && !cellRoomGO.IsDesactivatedCell()) return;
-            Vector2Int size = config.GetSize();
-            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(), config.GetSize());
-            cells.ForEach(cell => {
-                cell.ResetCell();
-            });
         }
 
         private void OnObjectSelectedHandler(Element selectedObject) {
@@ -367,7 +276,7 @@ namespace RoomUI {
                 int cols = roomSize.x * (int)RoomSizeEnum.WIDTH;
                 int rows = roomSize.y * (int)RoomSizeEnum.HEIGHT;
                 gridLayout.constraintCount = cols;
-                currentGrid = new RoomGrid(pool, roomSections, roomSize, rows, cols);
+                currentGrid = new CreateRoomGrid(pool, roomSections, roomSize, rows, cols);
                 roomGridPlane = currentGrid.RoomGridPlane;
                 currentGrid.GenerateGrid(transform);
                 ModifyGridLayoutRectTransform(cols, rows);

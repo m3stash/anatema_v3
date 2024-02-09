@@ -6,6 +6,7 @@ public class CellPreviewGO : MonoBehaviour {
     private RectTransform rectTransform;
     [SerializeField] private Sprite forbidden;
     [SerializeField] private Sprite trash;
+    [SerializeField] private Sprite copy;
 
     private void Awake() {
         image = GetComponent<Image>();
@@ -26,14 +27,19 @@ public class CellPreviewGO : MonoBehaviour {
     }
 
     public void ForbiddenAction(){
-        image.sprite = forbidden;
-        Color currentColor = image.color;
-        currentColor.a = 0.7f;
-        image.color = currentColor;
+        SetImage(forbidden);
     }
 
     public void TrashAction(){
-        image.sprite = trash;
+        SetImage(trash);
+    }
+
+    public void CopyAction(){
+        SetImage(copy);
+    }
+
+    private void SetImage(Sprite sprite){
+        image.sprite = sprite;
         Color currentColor = image.color;
         currentColor.a = 0.7f;
         image.color = currentColor;

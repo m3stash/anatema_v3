@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 namespace RoomUI {
-    public class RoomGrid {
+    public class CreateRoomGrid {
 
         private CellRoomPool pool;
         private int rows; // Height
@@ -19,7 +19,7 @@ namespace RoomUI {
 
         public string[,] RoomGridPlane { get => roomGridPlane; }
 
-        public RoomGrid(CellRoomPool pool, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
+        public CreateRoomGrid(CellRoomPool pool, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
             this.pool = pool;
             this.roomSections = roomSections;
             this.roomSize = roomSize;
