@@ -2,17 +2,27 @@ using UnityEngine;
 using UnityEngine.UI;
 public class CellPreviewGO : MonoBehaviour {
     private Image image;
-    private RectTransform rectTransform;
+    private RectTransform rectTransformImage;
+    private RectTransform rectTransformHover;
+    [SerializeField] private GameObject imageGO;
+    [SerializeField] private GameObject hoverGO;
     [SerializeField] private Sprite forbidden;
     [SerializeField] private Sprite trash;
     [SerializeField] private Sprite copy;
 
     private void Awake() {
-        image = GetComponent<Image>();
-        rectTransform = GetComponent<RectTransform>();
+        if(imageGO != null || hoverGO != null){
+            image = imageGO.GetComponent<Image>();
+            rectTransformImage = imageGO.GetComponent<RectTransform>();
+            rectTransformHover = hoverGO.GetComponent<RectTransform>();
+            SetPosition(new Vector3(-10000, -10000, 0));
+        }else{
+            Debug.LogError("CellPreviewGO: imageGO or hoverGO is not set");
+        }
     }
 
     public void SetSprite(Sprite sprite) {
+        hoverGO.SetActive(true);
         image.sprite = sprite;
     }
 
@@ -21,7 +31,8 @@ public class CellPreviewGO : MonoBehaviour {
     }
 
     public void SetSize(Vector2 size) {
-        rectTransform.sizeDelta = size;
+        rectTransformImage.sizeDelta = size;
+        rectTransformHover.sizeDelta = size;
     }
 
     public void ForbiddenAction(){
@@ -37,9 +48,10 @@ public class CellPreviewGO : MonoBehaviour {
     }
 
     private void SetImage(Sprite sprite){
+        hoverGO.SetActive(true);
         image.sprite = sprite;
         Color currentColor = image.color;
-        currentColor.a = 0.7f;
+        currentColor.a = 0.85f;
         image.color = currentColor;
     }
 

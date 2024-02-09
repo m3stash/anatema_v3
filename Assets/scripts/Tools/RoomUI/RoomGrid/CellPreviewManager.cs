@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace RoomUI {
     public class CellPreviewManager {
-
         private CellPreviewGO cellPreview;
         private RoomGridService roomGridService;
 
@@ -112,5 +111,6 @@ namespace RoomUI {
                 }
             }
         }
+
     }
 }

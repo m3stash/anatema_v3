@@ -16,6 +16,8 @@ namespace RoomUI {
         [SerializeField] private Button copyButton;
         [SerializeField] private Button trashButton;
         [SerializeField] private Camera mainCamera;
+
+        [SerializeField] private Sprite cursorSprite;
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
@@ -45,6 +47,11 @@ namespace RoomUI {
             cellPreviewManager = new CellPreviewManager(cellPreviewGO, roomGridService);
             currentGrid = new CreateRoomGrid(pool);
             CreateRoomInstance();
+            ChangeCursor();
+        }
+
+        private void ChangeCursor(){
+            Cursor.SetCursor(cursorSprite.texture, Vector2.zero, CursorMode.Auto);
         }
 
         public void OnPointerExit(PointerEventData eventData) {

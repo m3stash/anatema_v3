@@ -9627,6 +9627,7 @@ MonoBehaviour:
   copyButton: {fileID: 1129705527}
   trashButton: {fileID: 228598003}
   mainCamera: {fileID: 1013379675}
+  cursorSprite: {fileID: 21300000, guid: 017ab27861d324947bf57d5ddedb55b5, type: 3}
 --- !u!114 &1681987313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11837,6 +11838,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1986150375}
     m_Modifications:
+    - target: {fileID: 1453098694783276200, guid: c16e8239774c74940930cdef8c1dadf3,
+        type: 3}
+      propertyPath: m_Type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1453098694783276200, guid: c16e8239774c74940930cdef8c1dadf3,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
     - target: {fileID: 2263460570607970826, guid: c16e8239774c74940930cdef8c1dadf3,
         type: 3}
       propertyPath: m_Name
