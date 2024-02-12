@@ -143,6 +143,7 @@ public class ItemTable {
                     // bool craftable = dbreader.GetBoolean(11);
                     string groupType = dbreader.GetString(12);
                     Element elt = new Element(
+                        elementID,
                         id,
                         category,
                         displayName, 
@@ -171,7 +172,7 @@ public class ItemTable {
 
                 using (IDataReader dbreader = dbcmd.ExecuteReader()) {
                     if (dbreader.Read()) {
-                        // int elementID = dbreader.GetInt32(1);
+                        int elementID = dbreader.GetInt32(1);
                         string displayName = dbreader.GetString(2);
                         string subCategory = dbreader.GetString(3);
                         string description = dbreader.GetString(4);
@@ -184,6 +185,7 @@ public class ItemTable {
                         bool craftable = dbreader.GetBoolean(11);
                         string groupType = dbreader.GetString(12);
                         return new Item(
+                            elementID,
                             id,
                             category,
                             displayName,
@@ -207,6 +209,5 @@ public class ItemTable {
         }
         return null;
     }
-
 
 }

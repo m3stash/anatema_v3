@@ -50,7 +50,7 @@ namespace RoomUI {
             ChangeCursor();
         }
 
-        private void ChangeCursor(){
+        private void ChangeCursor() {
             Cursor.SetCursor(cursorSprite.texture, Vector2.zero, CursorMode.Auto);
         }
 
@@ -60,35 +60,35 @@ namespace RoomUI {
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
             Element cellConfig = cellRoomGO.GetConfig();
-            switch(currentAction){
+            switch (currentAction) {
                 case RoomUIAction.COPY:
                     CopyCell(cellConfig);
-                break;
+                    break;
                 case RoomUIAction.SELECT:
                     SelectCell(cellConfig, cellRoomGO);
-                break;
+                    break;
                 case RoomUIAction.TRASH:
                     DeleteCell(cellRoomGO);
-                break;
+                    break;
             }
         }
 
-        private void DeleteCell(CellRoomGO cellRoomGO){
-            if(!IsVoidCell(cellRoomGO)){
+        private void DeleteCell(CellRoomGO cellRoomGO) {
+            if (!IsVoidCell(cellRoomGO)) {
                 roomGridService.DeleteCell(cellRoomGO);
                 cellPreviewManager.OnClickTrashAction(cellRoomGO);
             }
         }
 
-        private void SelectCell(Element cellConfig, CellRoomGO cellRoomGO){
+        private void SelectCell(Element cellConfig, CellRoomGO cellRoomGO) {
             bool isExistingCell = roomGridService.CreateCell(cellConfig, cellRoomGO, currenSelectedObject);
-            if(isExistingCell){
+            if (isExistingCell) {
                 cellPreviewManager.Forbidden();
             }
         }
 
-        private void CopyCell(Element cellConfig){
-            if(cellConfig != null){
+        private void CopyCell(Element cellConfig) {
+            if (cellConfig != null) {
                 roomUIStateManager.OnSelectObject(cellConfig);
                 OnSelectButtonClick();
             }
@@ -96,14 +96,14 @@ namespace RoomUI {
 
         private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
             cellPreviewManager.Reset();
-            if(cellRoomGO.IsDoorOrWall()){
+            if (cellRoomGO.IsDoorOrWall()) {
                 cellPreviewManager.Hide();
                 return;
             }
             bool isVoidCell = IsVoidCell(cellRoomGO);
             Vector2 cellSize = cellRoomGO.GetCellSize(); // ex: 28 x 28
             Vector3 cellRoomGOPosition = cellRoomGO.transform.position;
-            switch(currentAction){
+            switch (currentAction) {
                 case RoomUIAction.SELECT:
                     cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject);
                     break;
@@ -151,7 +151,8 @@ namespace RoomUI {
             PoolConfig config = pool.GetConfig();
             if (!config) {
                 Debug.LogError("Error no config for cellPool on GridManager awake !");
-            } else {
+            }
+            else {
                 pool.Setup(config.GetPrefab(), config.GetPoolSize());
             }
         }
@@ -177,6 +178,7 @@ namespace RoomUI {
         private void OnDestroy() {
             CellRoomGO.OnPointerEnterEvent -= OnCellPointerEnterHandler;
             CellRoomGO.OnClick -= OnCellClickHandler;
+            roomUIStateManager.OnSave -= SaveRoom;
             roomUIStateManager.OnShapeChange -= OnShapeChange;
             roomUIStateManager.OnBiomeChange -= OnBiomeChange;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
@@ -187,39 +189,52 @@ namespace RoomUI {
         private void CreateListeners() {
             CellRoomGO.OnPointerEnterEvent += OnCellPointerEnterHandler;
             CellRoomGO.OnClick += OnCellClickHandler;
+            roomUIStateManager.OnSave += SaveRoom;
             roomUIStateManager.OnShapeChange += OnShapeChange;
             roomUIStateManager.OnBiomeChange += OnBiomeChange;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
-            }else{
+            }
+            else {
                 Debug.LogError("gridZoomMinus is null");
             }
             if (gridZoomPlus != null) {
                 gridZoomPlus.onClick.AddListener(OnGridZoomPlusClick);
-            }else{
+            }
+            else {
                 Debug.LogError("gridZoomPlus is null");
             }
             if (selectButton != null) {
                 selectButton.onClick.AddListener(OnSelectButtonClick);
-            }else{
+            }
+            else {
                 Debug.LogError("selectButton is null");
             }
             if (copyButton != null) {
                 copyButton.onClick.AddListener(OnCopyButtonClick);
-            }else{
+            }
+            else {
                 Debug.LogError("copyButton is null");
             }
             if (trashButton != null) {
                 trashButton.onClick.AddListener(OnTrashButtonClick);
-            }else{
+            }
+            else {
                 Debug.LogError("trashButton is null");
             }
         }
 
+        private void SaveRoom(RoomUIFormValues formValues) {
+            if (formValues != null) {
+                GridElementModel[,] plane = roomGridService.GetGridPlane();
+                Debug.Log(plane);
+            }
+        }
+
         private bool IsVoidCell(CellRoomGO cellRoomGO) {
-            if(cellRoomGO?.GetConfig() == null && !cellRoomGO.IsDesactivatedCell()){
+            if (cellRoomGO?.GetConfig() == null && !cellRoomGO.IsDesactivatedCell()) {
                 return true;
             }
             return false;
@@ -248,16 +263,17 @@ namespace RoomUI {
             OnSelectButtonClick();
         }
 
-        private void CreateGridView(){
+        private void CreateGridView() {
             string currentBiome = roomUIStateManager.CurrentBiome;
             string currentShape = roomUIStateManager.CurrentShape;
             RoomShapeEnum? newShape = Utilities.GetEnumValueFromDropdown<RoomShapeEnum>(currentShape);
             BiomeEnum? newBiome = Utilities.GetEnumValueFromDropdown<BiomeEnum>(currentBiome);
-            if(newShape.HasValue && newBiome.HasValue) {
+            if (newShape.HasValue && newBiome.HasValue) {
                 GenerateGrid(newShape.Value);
                 currentZoom = 1;
                 Zoom(currentZoom);
-            }else{
+            }
+            else {
                 currentGrid.ResetGrid();
             }
         }
@@ -266,7 +282,7 @@ namespace RoomUI {
             CreateGridView();
         }
 
-        private void OnBiomeChange(string biome){
+        private void OnBiomeChange(string biome) {
             CreateGridView();
         }
 
@@ -285,7 +301,7 @@ namespace RoomUI {
             float newHeight = currentZoom * defaultHeight;
             gridLayout.cellSize = new Vector2(cellSize * currentZoom, cellSize * currentZoom);
             rectTransform.sizeDelta = new Vector2(newWidth, newHeight);
-            if(currentGrid != null){
+            if (currentGrid != null) {
                 currentGrid.UsedCells.ForEach(cell => {
                     cell.ResizeCellZiseAfterZoom();
                 });
@@ -301,10 +317,11 @@ namespace RoomUI {
                 int rows = roomSize.y * (int)RoomSizeEnum.HEIGHT;
                 gridLayout.constraintCount = cols;
                 currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
-                roomGridPlane = currentGrid.RoomGridPlane;
+                roomGridService.SetGridPlane(currentGrid.RoomGridPlane());
                 ModifyGridLayoutRectTransform(cols, rows);
-            } else {
-                Debug.Log("GridManager Start, error: "+ shape + " Not Exist...");
+            }
+            else {
+                Debug.Log("GridManager Start, error: " + shape + " Not Exist...");
             }
         }
 

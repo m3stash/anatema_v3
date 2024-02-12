@@ -3,6 +3,7 @@
     private int max;
 
     public Potion(
+        int elementId,
         int id, 
         string category, 
         string displayName, 
@@ -18,6 +19,7 @@
         bool craftable,
         int max
     ): base(
+        elementId,
         id, 
         category, 
         displayName, 

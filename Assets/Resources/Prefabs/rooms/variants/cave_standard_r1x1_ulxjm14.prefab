@@ -66,7 +66,7 @@ PrefabInstance:
     - target: {fileID: 1850838221190362002, guid: 38142f793e076f441bdf7c4bed20ae00,
         type: 3}
       propertyPath: m_Name
-      value: cave_easy_standard_r1x1_ulxjm14
+      value: cave_standard_r1x1_ulxjm14
       objectReference: {fileID: 0}
     - target: {fileID: 1850838221252806944, guid: 38142f793e076f441bdf7c4bed20ae00,
         type: 3}
@@ -1678,6 +1678,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Tiles.Array.data[35].second.m_TileObjectToInstantiateIndex
       value: 65535
+      objectReference: {fileID: 0}
+    - target: {fileID: 6854899345718564008, guid: 38142f793e076f441bdf7c4bed20ae00,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

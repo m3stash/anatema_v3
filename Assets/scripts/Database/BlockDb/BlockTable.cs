@@ -128,6 +128,7 @@ public class BlockTable {
                     string biome = dbreader.GetString(8);
                     string groupType = dbreader.GetString(9);
                     Element item = new Element(
+                        elementID,
                         id,
                         category,
                         displayName, 
@@ -156,7 +157,7 @@ public class BlockTable {
 
                 using (IDataReader dbreader = dbcmd.ExecuteReader()) {
                     if (dbreader.Read()) {
-                        // int elementID = dbreader.GetInt32(1);
+                        int elementID = dbreader.GetInt32(1);
                         string displayName = dbreader.GetString(2);
                         string subCategory = dbreader.GetString(3);
                         string description = dbreader.GetString(4);
@@ -166,6 +167,7 @@ public class BlockTable {
                         string biome = dbreader.GetString(8);
                         string groupType = dbreader.GetString(9);
                         return new Block(
+                            elementID,
                             id,
                             category,
                             displayName,

@@ -61,6 +61,7 @@ namespace RoomNs {
 
         private static void SaveJson(RoomConfigDictionary config) {
             string jsonPath = Application.dataPath + GlobalConfig.Instance.ResourcesPath + $"{GlobalConfig.Instance.PrefabsRoomConfigJsonFile}.json";
+            Debug.Log(jsonPath);
             var toJson = JsonConvert.SerializeObject(config);
             File.WriteAllText(jsonPath, toJson);
         }

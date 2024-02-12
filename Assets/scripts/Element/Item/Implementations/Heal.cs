@@ -6,6 +6,7 @@ public class Heal : Potion {
     private float duration;
 
     public Heal (
+        int elementId,
         int id, 
         string category, 
         string displayName, 
@@ -23,6 +24,7 @@ public class Heal : Potion {
         int amount,
         float duration
     ): base(
+        elementId,
         id, 
         category, 
         displayName, 

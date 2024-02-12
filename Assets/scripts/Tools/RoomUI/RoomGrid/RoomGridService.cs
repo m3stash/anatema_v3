@@ -5,15 +5,16 @@ namespace RoomUI {
     public class RoomGridService {
 
         private GridLayoutGroup gridLayout;
+        private GridElementModel[,] roomGridPlane;
 
-        public RoomGridService(GridLayoutGroup gridLayout){
+        public RoomGridService(GridLayoutGroup gridLayout) {
             this.gridLayout = gridLayout;
         }
 
-        public List<CellRoomGO> GetCellsAtPosition(CellRoomGO cellRoomGO, Vector2Int selectedElementSize){
+        public List<CellRoomGO> GetCellsAtPosition(CellRoomGO cellRoomGO, Vector2Int selectedElementSize) {
             List<CellRoomGO> cells = new List<CellRoomGO>();
             Vector2Int size = selectedElementSize;
-            if(IsBigCell(selectedElementSize)) {
+            if (IsBigCell(selectedElementSize)) {
                 Vector2Int position = cellRoomGO.GetPosition();
                 int x = position.x;
                 int y = position.y;
@@ -33,28 +34,32 @@ namespace RoomUI {
             }
             cells.Add(cellRoomGO);
             return cells;
-        }  
+        }
 
-        public bool IsBigCell(Vector2Int size){
+        public bool IsBigCell(Vector2Int size) {
             return size.x > 1 || size.y > 1;
         }
 
-        public bool CreateCell(Element cellConfig, CellRoomGO cellRoomGO, Element selectedElement){
-            if(selectedElement == null || cellConfig != null) return false;
+        public bool CreateCell(Element cellConfig, CellRoomGO cellRoomGO, Element selectedElement) {
+            if (selectedElement == null || cellConfig != null) return false;
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, selectedElement.GetSize());
-            if(cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())){
+            if (cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
                 return true;
-            } else {
-                if(IsBigCell(selectedElement.GetSize())){
+            }
+            else {
+                if (IsBigCell(selectedElement.GetSize())) {
                     SetupBigCell(cells, cellRoomGO, selectedElement);
-                } else {
+                }
+                else {
+                    Vector2Int position = cellRoomGO.GetPosition();
+                    roomGridPlane[position.x, position.y] = new GridElementModel(selectedElement.GetId(), selectedElement.GeElementId());
                     cellRoomGO.Setup(selectedElement, gridLayout.spacing, cellRoomGO.GetPosition());
                 }
                 return true;
             }
         }
 
-        public void SetupBigCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement){
+        public void SetupBigCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement) {
             CellRoomGO topLeftCell = null;
             cells.ForEach(cell => {
                 /*
@@ -73,12 +78,20 @@ namespace RoomUI {
 
         public void DeleteCell(CellRoomGO cellRoomGO) {
             Element config = cellRoomGO.GetConfig();
-            if(config == null && !cellRoomGO.IsDesactivatedCell()) return;
+            if (config == null && !cellRoomGO.IsDesactivatedCell()) return;
             Vector2Int size = config.GetSize();
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(), config.GetSize());
             cells.ForEach(cell => {
                 cell.ResetCell();
             });
+        }
+
+        public void SetGridPlane(GridElementModel[,] roomGridPlane) {
+            this.roomGridPlane = roomGridPlane;
+        }
+
+        public GridElementModel[,] GetGridPlane() {
+            return roomGridPlane;
         }
 
     }

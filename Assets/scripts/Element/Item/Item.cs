@@ -9,6 +9,7 @@ public class Item : Element {
     private float weight;
 
     public Item(
+        int elementId,
         int id, 
         string category, 
         string displayName, 
@@ -23,6 +24,7 @@ public class Item : Element {
         bool consumable, 
         bool craftable
     ): base(
+        elementId,
         id, 
         category, 
         displayName, 

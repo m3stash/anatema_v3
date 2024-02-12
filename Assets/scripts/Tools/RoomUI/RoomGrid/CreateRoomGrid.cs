@@ -10,24 +10,24 @@ namespace RoomUI {
         private Vector2Int[] roomSections;
         private Vector2Int roomSize;
         private List<CellRoomGO> usedCells = new List<CellRoomGO>();
-        private string[,] roomGridPlane;
+        private GridElementModel[,] roomGridPlane;
         private string doorId = "D";
         private string wallId = "W";
 
         public List<CellRoomGO> UsedCells { get => usedCells; }
 
-        public string[,] RoomGridPlane { get => roomGridPlane; }
+        public GridElementModel[,] RoomGridPlane() => roomGridPlane;
 
         public CreateRoomGrid(CellRoomPool pool) {
             this.pool = pool;
         }
 
-        public void ResetGrid(){
+        public void ResetGrid() {
             ResetPool();
         }
 
         public void ResetPool() {
-            if(usedCells.Count > 0){
+            if (usedCells.Count > 0) {
                 usedCells.ForEach(cell => {
                     cell.ResetPoolCell();
                 });
@@ -45,7 +45,7 @@ namespace RoomUI {
             this.cols = cols;
             sectionWidth = cols / roomSize.x;
             sectionHeight = rows / roomSize.y;
-            roomGridPlane = new string[cols, rows];
+            roomGridPlane = new GridElementModel[cols, rows];
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {
                     CellRoomGO cell = pool.GetOne();
@@ -92,15 +92,18 @@ namespace RoomUI {
             if (row == 0) {
                 AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
                 // BOTTOM
-            } else if (row == rows - 1) {
+            }
+            else if (row == rows - 1) {
                 AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
                 // Neighboor Section
-            } else if (isSectionBoundaryY) {
+            }
+            else if (isSectionBoundaryY) {
                 // NS Top
                 if (currentSection.y + 1 < roomSize.y && !FindedSection(new Vector2Int(currentSection.x, currentSection.y + 1))) {
                     AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
                     // NS Bottom
-                } else if (currentSection.y - 1 >= 0 && !FindedSection(new Vector2Int(currentSection.x, currentSection.y - 1))) {
+                }
+                else if (currentSection.y - 1 >= 0 && !FindedSection(new Vector2Int(currentSection.x, currentSection.y - 1))) {
                     AddDoorOrWall(col, middleSectionWidth, sectionWidth, cell);
                 }
             }
@@ -112,15 +115,18 @@ namespace RoomUI {
             if (col == 0) {
                 AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
                 // RIGHT
-            } else if (col == cols - 1) {
+            }
+            else if (col == cols - 1) {
                 AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
                 // Neighboor Section
-            } else if (isSectionBoundaryX) {
+            }
+            else if (isSectionBoundaryX) {
                 // NS Right
                 if (currentSection.x + 1 < roomSize.x && !FindedSection(new Vector2Int(currentSection.x + 1, currentSection.y))) {
                     AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
                     // NS Left
-                } else if (currentSection.x - 1 >= 0 && !FindedSection(new Vector2Int(currentSection.x - 1, currentSection.y))) {
+                }
+                else if (currentSection.x - 1 >= 0 && !FindedSection(new Vector2Int(currentSection.x - 1, currentSection.y))) {
                     AddDoorOrWall(row, middleSectionHeight, sectionHeight, cell);
                 }
             }
@@ -168,12 +174,12 @@ namespace RoomUI {
             if ((pos + middleSection) % sectionSize == 0) {
                 cell.AddDoor();
                 cell.SetIsDoorOrWall(true);
-                roomGridPlane[position.x, position.y] = doorId;
+                // roomGridPlane[position.x, position.y] = doorId;
                 return;
             }
             cell.AddWall();
             cell.SetIsDoorOrWall(true);
-            roomGridPlane[position.x, position.y] = wallId;
+            // roomGridPlane[position.x, position.y] = wallId;
             return;
         }
 

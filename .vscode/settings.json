@@ -1,5 +1,4 @@
 {
-  "dotnet.preferCSharpExtension": true,
   "files.exclude": {
     "**/*.asset": true,
     "**/*.meta": true,

@@ -7,7 +7,7 @@ using System;
 namespace RoomNs {
     public abstract class Room {
 
-        private readonly Vector2Int roomSize = new Vector2Int((int)RoomSizeEnum.WIDTH, (int)RoomSizeEnum.HEIGHT);
+        private readonly Vector2Int roomSize = new Vector2Int(61, 31); // toDO change this !!!
 
         private Vector2Int worldPosition;
         protected Vector2Int position;

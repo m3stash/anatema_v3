@@ -3,6 +3,7 @@ using System;
 public class Entity : Element {
 
     public Entity(
+        int elementID,
         int id, 
         string category, 
         string displayName, 
@@ -14,6 +15,7 @@ public class Entity : Element {
         string biome,
         string groupType
     ): base(
+        elementID,
         id, 
         category, 
         displayName, 

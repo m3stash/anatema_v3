@@ -2,10 +2,22 @@
 
 public class Element {
 
+    private int id;
+    private int elementId;
+    private string displayName;
+    private string category;
+    private string subCategory;
+    private string spriteName;
+    private string description;
+    private int sizeX;
+    private int sizeY;
+    private string biome;
+    private string groupType;
     private Sprite sprite;
 
     public Element(
-        int id, 
+        int elementId,
+        int id,
         string category, 
         string displayName, 
         string subCategory, 
@@ -16,6 +28,7 @@ public class Element {
         string biome,
         string groupType
     ) {
+        this.elementId = elementId;
         this.id = id;
         this.category = category;
         this.displayName = displayName;
@@ -28,39 +41,20 @@ public class Element {
         this.groupType = groupType;
     }
 
-    private int id;
-    private string displayName;
-    private string category;
-    private string subCategory;
-    private string spriteName;
-    private string description;
-    private int sizeX;
-    private int sizeY;
-    private string biome;
-
-    private string groupType;
-
-    public int GetId() {
-        return id;
-    }
-
+    public int GetId() => id;
+    public int GeElementId() => elementId;
     public string GetDisplayName() => displayName;
     public string GetCategory() => category;
     public string GetSubCategory() => subCategory;  
     public string GetDescription() => description;
     public string GetBiome() => biome;
-
-    public Sprite GetSprite() {
-        return sprite;
-    }
+    public Sprite GetSprite()=> sprite;
+    public string GetSpriteName() => spriteName;
+    public Vector2Int GetSize() => new Vector2Int(sizeX, sizeY);
+    public string GetGroupType() => groupType;
 
     public void SetSprite(Sprite sprite) {
         this.sprite = sprite;
     }
 
-    public string GetSpriteName() => spriteName;
-
-    public Vector2Int GetSize() => new Vector2Int(sizeX, sizeY);
-    public string GetGroupType() => groupType;
-    
 }

@@ -3,6 +3,7 @@ using System;
 public class Block : Element {
 
     public Block(
+        int elementID,
         int id, 
         string category, 
         string displayName, 
@@ -14,6 +15,7 @@ public class Block : Element {
         string biome,
         string groupType
     ): base(
+        elementID,
         id, 
         category, 
         displayName, 

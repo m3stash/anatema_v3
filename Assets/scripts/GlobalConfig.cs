@@ -13,7 +13,7 @@ public class GlobalConfig {
     private readonly string scriptablePath;
 
     private GlobalConfig() {
-        prefabRoomsPath = "Prefabs/Rooms/";
+        prefabRoomsPath = "Prefabs/rooms/";
         prefabRoomsVariantsPath = prefabRoomsPath + "Variants/";
         prefabObjectPath = "Prefabs/object/";
         resourcesPath = "/Resources/";
