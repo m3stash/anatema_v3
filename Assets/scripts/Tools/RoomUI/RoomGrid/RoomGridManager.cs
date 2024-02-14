@@ -16,8 +16,8 @@ namespace RoomUI {
         [SerializeField] private Button copyButton;
         [SerializeField] private Button trashButton;
         [SerializeField] private Camera mainCamera;
-
         [SerializeField] private Sprite cursorSprite;
+
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
@@ -42,12 +42,23 @@ namespace RoomUI {
             CreateListeners();
             InitButtonPanel();
             CreatePooling();
-            GridLayoutGroup grid = InitGrid();
-            roomGridService = new RoomGridService(grid);
-            cellPreviewManager = new CellPreviewManager(cellPreviewGO, roomGridService);
-            currentGrid = new CreateRoomGrid(pool);
+            InitGrid();
             CreateRoomInstance();
             ChangeCursor();
+        }
+
+        private void InitGrid() {
+            gridLayout = gameObject.GetComponent<GridLayoutGroup>();
+            gridLayout.cellSize = new Vector2(cellSize, cellSize);
+            gridLayout.spacing = new Vector2(cellSpacing, cellSpacing);
+            rectTransform = gridLayout.GetComponent<RectTransform>();
+            roomGridService = new RoomGridService(gridLayout);
+            cellPreviewManager = new CellPreviewManager(cellPreviewGO, roomGridService);
+            currentGrid = new CreateRoomGrid(pool);
+        }
+
+        public (List<GridElementModel>, List<GridElementModel>) GetLayers() {
+            return (roomGridService.GetTopLayer(), roomGridService.GetGroundLayer());
         }
 
         private void ChangeCursor() {
@@ -138,14 +149,6 @@ namespace RoomUI {
             ChangeButtonColor(trashButton, defaultButtonColor);
         }
 
-        private GridLayoutGroup InitGrid() {
-            gridLayout = gameObject.GetComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(cellSize, cellSize);
-            gridLayout.spacing = new Vector2(cellSpacing, cellSpacing);
-            rectTransform = gridLayout.GetComponent<RectTransform>();
-            return gridLayout;
-        }
-
         private void CreatePooling() {
             pool = cellPool.GetComponent<CellRoomPool>();
             PoolConfig config = pool.GetConfig();
@@ -178,7 +181,6 @@ namespace RoomUI {
         private void OnDestroy() {
             CellRoomGO.OnPointerEnterEvent -= OnCellPointerEnterHandler;
             CellRoomGO.OnClick -= OnCellClickHandler;
-            roomUIStateManager.OnSave -= SaveRoom;
             roomUIStateManager.OnShapeChange -= OnShapeChange;
             roomUIStateManager.OnBiomeChange -= OnBiomeChange;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
@@ -189,7 +191,6 @@ namespace RoomUI {
         private void CreateListeners() {
             CellRoomGO.OnPointerEnterEvent += OnCellPointerEnterHandler;
             CellRoomGO.OnClick += OnCellClickHandler;
-            roomUIStateManager.OnSave += SaveRoom;
             roomUIStateManager.OnShapeChange += OnShapeChange;
             roomUIStateManager.OnBiomeChange += OnBiomeChange;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
@@ -223,13 +224,6 @@ namespace RoomUI {
             }
             else {
                 Debug.LogError("trashButton is null");
-            }
-        }
-
-        private void SaveRoom(RoomUIFormValues formValues) {
-            if (formValues != null) {
-                GridElementModel[,] plane = roomGridService.GetGridPlane();
-                Debug.Log(plane);
             }
         }
 
@@ -317,7 +311,6 @@ namespace RoomUI {
                 int rows = roomSize.y * (int)RoomSizeEnum.HEIGHT;
                 gridLayout.constraintCount = cols;
                 currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
-                roomGridService.SetGridPlane(currentGrid.RoomGridPlane());
                 ModifyGridLayoutRectTransform(cols, rows);
             }
             else {

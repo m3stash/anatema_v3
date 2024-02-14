@@ -21,12 +21,21 @@ namespace RoomUI {
         private string biome;
         private string difficulty;
         private string shape;
+        private int id = -1;
 
         private void Awake() {
             VerifySerialisables();
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
             CreateDropdownList();
             CreateListeners();
+        }
+
+        public RoomUIFormValues GetFormValues() {
+            return roomUIFormValues;
+        }
+
+        public void SetRoomId(int newRoomId) {
+            id = newRoomId;
         }
 
         private void VerifySerialisables() {
@@ -36,11 +45,11 @@ namespace RoomUI {
                 { "shapeDropdown", shapeDropdown },
                 { "difficultyDropdown", difficultyDropdown },
                 { "biomeDropdown", biomeDropdown },
-                { "stateManager", stateManager }
+                { "stateManager", stateManager },
             };
             foreach (var field in serializableFields) {
                 if (field.Value == null) {
-                    Debug.LogError($"FormManager SerializeField {field.Key} not set !");
+                    Debug.LogError($"FormManager script:  SerializeField {field.Key} not set !");
                 }
             }
         }
@@ -53,7 +62,7 @@ namespace RoomUI {
 
         private void CreateDropdownList<T>(TMP_Dropdown dropdown) where T : struct, Enum {
             List<string> options = new List<string>(Enum.GetNames(typeof(T)));
-            options.Remove("ALL");
+            options.Remove("ALL"); // toDo remove this when we have a better solution
             dropdown.AddOptions(options);
         }
 
@@ -68,7 +77,7 @@ namespace RoomUI {
                 roomUIStateManager.OnChangeShape(value);
             });
             difficultyDropdown.onValueChanged.AddListener(newValue => {
-                string value = shapeDropdown.options[newValue].text;
+                string value = difficultyDropdown.options[newValue].text;
                 difficulty = value;
                 roomUIStateManager.OnChangeDifficulty(value);
             });
@@ -82,12 +91,11 @@ namespace RoomUI {
         private void OnSaveClick() {
             string name = displayName.text;
             if (name != null && shape != null && difficulty != null && biome != null) {
-                roomUIFormValues = new RoomUIFormValues(displayName.text, shape, difficulty, biome);
-                roomUIStateManager.OnClickSave(roomUIFormValues);
+                roomUIFormValues = new RoomUIFormValues(displayName.text, shape, difficulty, biome, id);
+                roomUIStateManager.OnClickSave();
             }
             else {
                 Debug.LogError("FormManager: Some fields are empty");
-                roomUIStateManager.OnClickSave(null);
             }
         }
 
@@ -96,7 +104,7 @@ namespace RoomUI {
         }
 
         private void OnDeleteClick() {
-
+            id = -1;
         }
 
         void OnDestroy() {

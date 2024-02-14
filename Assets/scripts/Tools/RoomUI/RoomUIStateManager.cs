@@ -12,7 +12,7 @@ namespace RoomUI {
         public event Action<string> OnBiomeChange;
         public event Action<string> OnDifficultyChange;
         public event Action<Element> OnObjectSelected;
-        public event Action<RoomUIFormValues> OnSave;
+        public event Action OnSaveClick;
         public string CurrentShape => shape;
         public string CurrentDifficulty => difficulty;
         public string CurrentBiome => biome;
@@ -36,8 +36,8 @@ namespace RoomUI {
             OnDifficultyChange?.Invoke(difficulty);
         }
 
-        public void OnClickSave(RoomUIFormValues formValues) {
-            OnSave?.Invoke(formValues);
+        public void OnClickSave() {
+            OnSaveClick?.Invoke();
         }
 
     }

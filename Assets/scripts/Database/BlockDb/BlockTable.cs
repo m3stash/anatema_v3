@@ -131,18 +131,19 @@ public class BlockTable {
                         elementID,
                         id,
                         category,
-                        displayName, 
-                        subCategory, 
-                        description, 
-                        spriteName, 
-                        sizeX, 
-                        sizeY, 
+                        displayName,
+                        subCategory,
+                        description,
+                        spriteName,
+                        sizeX,
+                        sizeY,
                         biome,
                         groupType
                     );
                     elements.Add(item);
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Debug.LogError($"Error reading table: {e.Message}");
             }
         }

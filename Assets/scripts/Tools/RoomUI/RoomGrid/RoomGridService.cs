@@ -5,10 +5,19 @@ namespace RoomUI {
     public class RoomGridService {
 
         private GridLayoutGroup gridLayout;
-        private GridElementModel[,] roomGridPlane;
+        private List<GridElementModel> topLayer = new List<GridElementModel>();
+        private List<GridElementModel> groundLayer = new List<GridElementModel>();
 
         public RoomGridService(GridLayoutGroup gridLayout) {
             this.gridLayout = gridLayout;
+        }
+
+        public List<GridElementModel> GetGroundLayer() {
+            return groundLayer;
+        }
+
+        public List<GridElementModel> GetTopLayer() {
+            return topLayer;
         }
 
         public List<CellRoomGO> GetCellsAtPosition(CellRoomGO cellRoomGO, Vector2Int selectedElementSize) {
@@ -47,19 +56,17 @@ namespace RoomUI {
                 return true;
             }
             else {
+                CellRoomGO cell = cellRoomGO;
                 if (IsBigCell(selectedElement.GetSize())) {
-                    SetupBigCell(cells, cellRoomGO, selectedElement);
+                    cell = SetupBigCell(cells, cellRoomGO, selectedElement);
                 }
-                else {
-                    Vector2Int position = cellRoomGO.GetPosition();
-                    roomGridPlane[position.x, position.y] = new GridElementModel(selectedElement.GetId(), selectedElement.GeElementId());
-                    cellRoomGO.Setup(selectedElement, gridLayout.spacing, cellRoomGO.GetPosition());
-                }
+                AddCellInUsedCell(selectedElement, cell.GetPosition());
+                cell.Setup(selectedElement, gridLayout.spacing, cell.GetPosition());
                 return true;
             }
         }
 
-        public void SetupBigCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement) {
+        public CellRoomGO SetupBigCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement) {
             CellRoomGO topLeftCell = null;
             cells.ForEach(cell => {
                 /*
@@ -73,12 +80,17 @@ namespace RoomUI {
                 }
                 cell.SetupDesactivatedCell(cellRoomGO, selectedElement);
             });
-            topLeftCell.Setup(selectedElement, gridLayout.spacing, topLeftCell.GetPosition());
+            return topLeftCell;
+        }
+
+        public void AddCellInUsedCell(Element element, Vector2Int position) {
+            topLayer.Add(new GridElementModel(element.GetId(), element.GeElementId(), position));
         }
 
         public void DeleteCell(CellRoomGO cellRoomGO) {
             Element config = cellRoomGO.GetConfig();
             if (config == null && !cellRoomGO.IsDesactivatedCell()) return;
+            RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO());
             Vector2Int size = config.GetSize();
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(), config.GetSize());
             cells.ForEach(cell => {
@@ -86,12 +98,15 @@ namespace RoomUI {
             });
         }
 
-        public void SetGridPlane(GridElementModel[,] roomGridPlane) {
-            this.roomGridPlane = roomGridPlane;
+        private void RemoveCellInUsedCell(CellRoomGO cellRoomGO) {
+            topLayer.RemoveAt(topLayer.FindIndex(cellConfig =>
+                cellConfig.GetId() == cellRoomGO.GetConfig().GetId() &&
+                cellConfig.GetElementId() == cellRoomGO.GetConfig().GeElementId() &&
+                cellConfig.GetPosition() == cellRoomGO.GetPosition()));
         }
 
-        public GridElementModel[,] GetGridPlane() {
-            return roomGridPlane;
+        public List<GridElementModel> GetUsedCells() {
+            return topLayer;
         }
 
     }

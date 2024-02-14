@@ -9975,6 +9975,9 @@ MonoBehaviour:
   roomGrid: {fileID: 1681987309}
   tabGrid: {fileID: 770838199}
   stateManager: {fileID: 1045058811}
+  roomGridManagerGO: {fileID: 1681987309}
+  formManagerGO: {fileID: 234276781}
+  roomUIStateManager: {fileID: 1045058813}
 --- !u!1001 &1927589557
 PrefabInstance:
   m_ObjectHideFlags: 0
