@@ -44,7 +44,7 @@ namespace RoomUI {
             CreatePooling();
             InitGrid();
             CreateRoomInstance();
-            ChangeCursor();
+            // ChangeCursor();
         }
 
         private void InitGrid() {
