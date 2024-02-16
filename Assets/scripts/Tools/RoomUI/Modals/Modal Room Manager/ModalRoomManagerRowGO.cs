@@ -13,14 +13,13 @@ namespace RoomUI {
         [SerializeField] private Button delete;
         [SerializeField] private Button copy;
         [SerializeField] private Button edit;
-
-        public delegate void CellClickEvent(RoomUIModel room, string action);
-        public static event CellClickEvent OnClick;
+        public delegate void ButtonClickEvent(RoomUIModel room, string action, ModalRoomManagerRowGO modalRoomManagerRowGO);
+        public static event ButtonClickEvent OnButtonClick;
 
         private RoomUIModel roomUIModel;
 
-        private void OnCellClick(string action) {
-            OnClick?.Invoke(roomUIModel, action);
+        private void OnClick(string action) {
+            OnButtonClick?.Invoke(roomUIModel, action, this);
         }
 
         public void Setup(RoomUIModel roomUIModel) {
@@ -32,9 +31,9 @@ namespace RoomUI {
         }
 
         private void CreateListeners() {
-            delete.onClick.AddListener(() => OnCellClick("delete"));
-            copy.onClick.AddListener(() => OnCellClick("copy"));
-            edit.onClick.AddListener(() => OnCellClick("edit"));
+            delete.onClick.AddListener(() => OnClick("delete"));
+            copy.onClick.AddListener(() => OnClick("copy"));
+            edit.onClick.AddListener(() => OnClick("edit"));
         }
 
         private void SetValue() {
@@ -47,9 +46,9 @@ namespace RoomUI {
         }
 
         private void RemoveListeners() {
-            delete.onClick.RemoveListener(() => OnCellClick("delete"));
-            copy.onClick.RemoveListener(() => OnCellClick("copy"));
-            edit.onClick.RemoveListener(() => OnCellClick("edit"));
+            delete.onClick.RemoveListener(() => OnClick("delete"));
+            copy.onClick.RemoveListener(() => OnClick("copy"));
+            edit.onClick.RemoveListener(() => OnClick("edit"));
         }
 
         private void OnDestroy() {

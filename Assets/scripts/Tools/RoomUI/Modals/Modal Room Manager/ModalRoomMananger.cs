@@ -19,13 +19,11 @@ namespace RoomUI {
         private GridLayoutGroup gridLayoutGroupComponent;
         private Button buttonClose;
         private Button buttonSearch;
-
         private RoomUiTable roomUiTable;
         private List<RoomUIModel> roomUIModels;
         private ModalRoomManageRowPool pool;
-
         private List<ModalRoomManagerRowGO> usedRows = new List<ModalRoomManagerRowGO>();
-
+        private RoomUIService roomUIService;
 
         void Awake() {
             VerifySerialisables();
@@ -34,7 +32,10 @@ namespace RoomUI {
             InitDropdowns();
         }
 
-        public void Setup(RoomUiTable table, ModalRoomManageRowPool pool) {
+        public void Setup(RoomUiTable table, ModalRoomManageRowPool pool, RoomUIService roomUIService) {
+            if (table == null || pool == null || roomUIService == null)
+                throw new ArgumentNullException("ModalRoomMananger Setup, table, pool or roomUIService is null !");
+            this.roomUIService = roomUIService;
             this.pool = pool;
             roomUiTable = table;
         }
@@ -73,6 +74,7 @@ namespace RoomUI {
         }
 
         private void CreateListeners() {
+            ModalRoomManagerRowGO.OnButtonClick += OnActionButtonClick;
             buttonClose.onClick.AddListener(() => {
                 Close();
             });
@@ -132,6 +134,29 @@ namespace RoomUI {
             dropdown.AddOptions(options);
         }
 
+        private void OnActionButtonClick(RoomUIModel room, string action, ModalRoomManagerRowGO modalRoomManagerRowGO) {
+            switch (action) {
+                case "delete":
+                    bool roomHasBeenDelete = roomUIService.DeleteRoom(room.Id);
+                    if (roomHasBeenDelete) {
+                        pool.ReleaseOne(modalRoomManagerRowGO);
+                    }
+                    else {
+                        Debug.LogError("ModalRoomMananger: OnActionButtonClick, room not deleted !");
+                    }
+                    break;
+                case "copy":
+                    // roomUiTable.Copy(room);
+                    break;
+                case "edit":
+                    // toDo : ouvrir une modal pour éditer la room
+                    break;
+                default:
+                    Debug.LogError("ModalRoomMananger: OnActionButtonClick, action not found !");
+                    break;
+            }
+        }
+
         private void Close() {
             Destroy(gameObject);
         }
@@ -139,6 +164,7 @@ namespace RoomUI {
         void OnDestroy() {
             buttonClose.onClick.RemoveAllListeners();
             buttonSearch.onClick.RemoveAllListeners();
+            ModalRoomManagerRowGO.OnButtonClick -= OnActionButtonClick;
             ResetPool();
         }
     }

@@ -29,7 +29,7 @@ namespace RoomUI {
             }
             ModalRoomMananger modalComponent = InstanciateRoomManagerModal(transform);
             if (modalComponent != null) {
-                modalComponent.Setup(roomUiTable, pool);
+                modalComponent.Setup(roomUiTable, pool, this);
             }
         }
 
@@ -45,6 +45,11 @@ namespace RoomUI {
             }
             Debug.LogError("RoomUIService(OpenRoomManager), no prefab at this path : " + prefabPathModalRoomManager);
             return null;
+        }
+
+        public bool DeleteRoom(int id) {
+            // faire apparaitre une modale YES / NO
+            return roomUiTable.Delete(id);
         }
 
     }

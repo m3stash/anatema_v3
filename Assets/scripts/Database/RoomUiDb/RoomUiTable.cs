@@ -138,6 +138,21 @@ namespace RoomUI {
             return results;
         }
 
+        public bool Delete(int id) {
+            try {
+                using IDbCommand dbcmd = dbconn.CreateCommand();
+                dbcmd.CommandText = $"DELETE FROM {tableName} WHERE id = @Id;";
+                dbManager.AddParameter(dbcmd, "@Id", id);
+                dbcmd.ExecuteNonQuery();
+                Debug.Log($"Room with ID {id} deleted successfully.");
+                return true;
+            }
+            catch (Exception e) {
+                Debug.LogError($"Error deleting room with ID {id}: {e.Message}");
+                return false;
+            }
+        }
+
 
     }
 }
