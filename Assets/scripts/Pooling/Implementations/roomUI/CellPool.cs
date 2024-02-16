@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TreeEditor;
+using UnityEngine;
 
 public class CellPool : Pool<CellGO> {
 
@@ -13,7 +14,7 @@ public class CellPool : Pool<CellGO> {
     }
 
     public void Setup(GameObject prefab, int poolSize) {
-        GameObject obj = Instantiate(prefab);
+        GameObject obj = Instantiate(prefab, transform);
         CellGO cellGO = obj.GetComponent<CellGO>();
         obj.SetActive(false);
         base.Setup(cellGO, poolSize);

@@ -71,8 +71,8 @@ namespace RoomUI {
 
         private void CreateListeners() {
             save.onClick.AddListener(OnSaveClick);
-            delete.onClick.AddListener(OnOpenClick);
-            open.onClick.AddListener(OnDeleteClick);
+            delete.onClick.AddListener(OnDeleteClick);
+            open.onClick.AddListener(OnOpenClick);
 
             shapeDropdown.onValueChanged.AddListener(newValue => {
                 string value = shapeDropdown.options[newValue].text;
@@ -103,7 +103,7 @@ namespace RoomUI {
         }
 
         private void OnOpenClick() {
-
+            roomUIStateManager.OnClickOpen();
         }
 
         private void OnDeleteClick() {

@@ -31,7 +31,6 @@ namespace RoomUI {
                 });
                 pool.ReleaseMany(usedCells);
                 usedCells = new List<CellRoomGO>();
-                Debug.Log(usedCells.Count);
             }
         }
 

@@ -10,6 +10,7 @@ namespace RoomUI {
         [SerializeField] private GameObject roomGridManagerGO;
         [SerializeField] private GameObject formManagerGO;
         [SerializeField] private RoomUIStateManager roomUIStateManager;
+        [SerializeField] private GameObject modalRoomManageRowPoolGO;
 
         private TabGridManager tabGridManager;
         private readonly string elementPath = "Sprites/elements/";
@@ -19,21 +20,37 @@ namespace RoomUI {
         private RoomUIService roomUIService;
         private RoomGridManager roomGridManager;
         private FormManager formManager;
+        private ModalRoomManageRowPool modalRoomManageRowPool;
 
 
         private void Awake() {
             VerifySerialisables();
+            roomUIService = gameObject.GetComponent<RoomUIService>();
             InitDb();
             InitComponents();
             CreateListeners();
+            InitPool();
+        }
+
+        private void InitPool() {
+            PoolConfig config = modalRoomManageRowPool.GetConfig();
+            if (config != null) {
+                modalRoomManageRowPool.Setup(config.GetPrefab(), config.GetPoolSize());
+            }
+            else {
+                Debug.LogError("RoomUIManager: PoolConfig not set !");
+            }
+
         }
 
         private void CreateListeners() {
             roomUIStateManager.OnSaveClick += SaveRoom;
+            roomUIStateManager.OnOpenClick += OpenRoomManager;
         }
 
         private void OnDestroy() {
             roomUIStateManager.OnSaveClick -= SaveRoom;
+            roomUIStateManager.OnOpenClick -= OpenRoomManager;
         }
 
         private void SaveRoom() {
@@ -50,6 +67,10 @@ namespace RoomUI {
             }
         }
 
+        private void OpenRoomManager() {
+            roomUIService.OpenRoomManager(transform, modalRoomManageRowPool);
+        }
+
         private void VerifySerialisables() {
             Dictionary<string, object> serializableFields = new Dictionary<string, object> {
                 { "roomGrid", roomGrid },
@@ -57,7 +78,8 @@ namespace RoomUI {
                 { "stateManager", stateManager },
                 { "roomGridManagerGO", roomGridManagerGO },
                 { "formManagerGO", formManagerGO },
-                { "roomUIStateManager", roomUIStateManager}
+                { "roomUIStateManager", roomUIStateManager},
+                { "modalRoomManageRowPoolGO", modalRoomManageRowPoolGO }
             };
             foreach (var field in serializableFields) {
                 if (field.Value == null) {
@@ -73,6 +95,7 @@ namespace RoomUI {
             tabGridManager.Setup(elementTableManager, spriteLoader);
             roomGridManager = roomGridManagerGO.GetComponent<RoomGridManager>();
             formManager = formManagerGO.GetComponent<FormManager>();
+            modalRoomManageRowPool = modalRoomManageRowPoolGO.GetComponent<ModalRoomManageRowPool>();
         }
 
         private void InitDb() {
@@ -80,7 +103,7 @@ namespace RoomUI {
             elementTableManager = new ElementTableManager(dbManager);
             roomUiTable = new RoomUiTable(dbManager);
             roomUiTable.CreateTableRoom();
-            roomUIService = new RoomUIService(dbManager);
+            roomUIService.Setup(dbManager);
             //MockDb();
         }
 

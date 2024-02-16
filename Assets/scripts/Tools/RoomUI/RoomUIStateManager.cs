@@ -13,6 +13,7 @@ namespace RoomUI {
         public event Action<string> OnDifficultyChange;
         public event Action<Element> OnObjectSelected;
         public event Action OnSaveClick;
+        public event Action OnOpenClick;
         public string CurrentShape => shape;
         public string CurrentDifficulty => difficulty;
         public string CurrentBiome => biome;
@@ -38,6 +39,10 @@ namespace RoomUI {
 
         public void OnClickSave() {
             OnSaveClick?.Invoke();
+        }
+
+        public void OnClickOpen() {
+            OnOpenClick?.Invoke();
         }
 
     }

@@ -11,6 +11,7 @@ public class GlobalConfig {
     private readonly string prefabsRoomConfigJsonFile;
     private readonly string directoryResourceFolder;
     private readonly string scriptablePath;
+    private readonly string prefabRoomsUIPath = "Prefabs/tools/roomUI";
 
     private GlobalConfig() {
         prefabRoomsPath = "Prefabs/rooms/";
@@ -43,6 +44,12 @@ public class GlobalConfig {
     public string PrefabRoomsVariantsPath {
         get {
             return prefabRoomsVariantsPath;
+        }
+    }
+
+    public string PrefabRoomUI {
+        get {
+            return prefabRoomsUIPath;
         }
     }
 

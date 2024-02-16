@@ -9,7 +9,7 @@ public class TabCellPool : Pool<TabCellGO> {
     }
 
     public void Setup(GameObject prefab, int poolSize) {
-        GameObject obj = Instantiate(prefab);
+        GameObject obj = Instantiate(prefab, transform);
         TabCellGO tabcellGO = obj.GetComponent<TabCellGO>();
         obj.SetActive(false);
         base.Setup(tabcellGO, poolSize);

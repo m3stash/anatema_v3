@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using Database;
 using Newtonsoft.Json;
@@ -85,6 +86,56 @@ namespace RoomUI {
                 Debug.LogError($"Error updating room with ID {roomUi.Id}: {e.Message}");
                 return -1;
             }
+        }
+
+        public List<RoomUIModel> SearchRoomsByParams(int? id = null, string name = null, string shape = null, string difficulty = null, string biome = null) {
+            List<RoomUIModel> results = new List<RoomUIModel>();
+
+            try {
+                using (IDbCommand dbcmd = dbconn.CreateCommand()) {
+                    string sqlQuery = "SELECT * FROM " + tableName;
+
+                    // Construire la clause WHERE dynamiquement en fonction des paramètres fournis
+                    List<string> conditions = new List<string>();
+                    if (id.HasValue) conditions.Add("id = @Id");
+                    if (!string.IsNullOrEmpty(name)) conditions.Add("name = @Name");
+                    if (!string.IsNullOrEmpty(shape)) conditions.Add("shape = @Shape");
+                    if (!string.IsNullOrEmpty(difficulty)) conditions.Add("difficulty = @Difficulty");
+                    if (!string.IsNullOrEmpty(biome)) conditions.Add("biome = @Biome");
+
+                    if (conditions.Count > 0) {
+                        sqlQuery += " WHERE " + string.Join(" AND ", conditions.ToArray());
+                    }
+
+                    dbcmd.CommandText = sqlQuery;
+
+                    if (id.HasValue) dbManager.AddParameter(dbcmd, "@Id", id.Value);
+                    if (!string.IsNullOrEmpty(name)) dbManager.AddParameter(dbcmd, "@Name", name);
+                    if (!string.IsNullOrEmpty(shape)) dbManager.AddParameter(dbcmd, "@Shape", shape);
+                    if (!string.IsNullOrEmpty(difficulty)) dbManager.AddParameter(dbcmd, "@Difficulty", difficulty);
+                    if (!string.IsNullOrEmpty(biome)) dbManager.AddParameter(dbcmd, "@Biome", biome);
+
+                    using IDataReader reader = dbcmd.ExecuteReader();
+                    while (reader.Read()) {
+                        // Créer un objet RoomUIModel à partir des données de la ligne
+                        RoomUIModel room = new RoomUIModel(
+                            reader.GetString(reader.GetOrdinal("name")),
+                            reader.GetString(reader.GetOrdinal("shape")),
+                            reader.GetString(reader.GetOrdinal("biome")),
+                            reader.GetString(reader.GetOrdinal("difficulty")),
+                            reader.GetInt32(reader.GetOrdinal("id")),
+                            null,
+                            null
+                        );
+                        results.Add(room);
+                    }
+                }
+            }
+            catch (Exception e) {
+                Debug.LogError($"Error searching rooms: {e.Message}");
+            }
+
+            return results;
         }
 
 
