@@ -24,10 +24,14 @@ namespace RoomUI {
         private int id = -1;
 
         private void Awake() {
+            InitComponents();
             VerifySerialisables();
-            roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
             CreateDropdownList();
             CreateListeners();
+        }
+
+        private void InitComponents() {
+            roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
         }
 
         public RoomUIFormValues GetFormValues() {
@@ -40,7 +44,6 @@ namespace RoomUI {
 
         private void VerifySerialisables() {
             Dictionary<string, object> serializableFields = new Dictionary<string, object> {
-                { "roomUIStateManager", roomUIStateManager },
                 { "displayName", displayName },
                 { "shapeDropdown", shapeDropdown },
                 { "difficultyDropdown", difficultyDropdown },
