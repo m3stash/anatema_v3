@@ -117,7 +117,7 @@ public class ItemTable {
         // return lastInsertedId;
     }
 
-    public List<Element> GetElementsByElementId(int id) {
+    public List<Element> GetElementsByElementId(int idElement) {
         List<Element> elements = new List<Element>();
 
         using (IDbCommand dbcmd = dbconn.CreateCommand()) {
@@ -125,11 +125,12 @@ public class ItemTable {
                 SELECT *
                 FROM {tableName}
                 WHERE ElementID = @ElementID";
-            dbManager.AddParameter(dbcmd, "@ElementID", id);
+            dbManager.AddParameter(dbcmd, "@ElementID", idElement);
 
             try {
                 using IDataReader dbreader = dbcmd.ExecuteReader();
                 while (dbreader.Read()) {
+                    int id = dbreader.GetInt32(0);
                     int elementID = dbreader.GetInt32(1);
                     string displayName = dbreader.GetString(2);
                     string subCategory = dbreader.GetString(3);
@@ -165,14 +166,15 @@ public class ItemTable {
         return elements;
     }
 
-    public Item GetItemById(int id) {
+    public Item GetItemById(int idElement) {
         try {
             using (IDbCommand dbcmd = dbconn.CreateCommand()) {
                 dbcmd.CommandText = $"SELECT * FROM {tableName} WHERE id = @ElementID";
-                dbManager.AddParameter(dbcmd, "@ElementID", id);
+                dbManager.AddParameter(dbcmd, "@ElementID", idElement);
 
                 using (IDataReader dbreader = dbcmd.ExecuteReader()) {
                     if (dbreader.Read()) {
+                        int id = dbreader.GetInt32(0);
                         int elementID = dbreader.GetInt32(1);
                         string displayName = dbreader.GetString(2);
                         string subCategory = dbreader.GetString(3);

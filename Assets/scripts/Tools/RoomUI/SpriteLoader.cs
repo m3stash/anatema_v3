@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class SpriteLoader {
@@ -11,27 +13,29 @@ public class SpriteLoader {
 
     private Dictionary<string, Dictionary<string, Sprite>> dictionnary = new Dictionary<string, Dictionary<string, Sprite>>();
 
-    public void LoadSprites(string currentTab) {
-        if(path == null) {
+    public async Task LoadSpritesAsync(string category) {
+        if (path == null) {
             Debug.LogError("Resource Path is not set.");
             return;
         }
-        if (!dictionnary.ContainsKey(currentTab)) {
+
+        if (!dictionnary.ContainsKey(category)) {
             Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
-            Sprite[] loadedSprites = Resources.LoadAll<Sprite>(path + currentTab);
+            Sprite[] loadedSprites = Resources.LoadAll<Sprite>(path + category);
             foreach (Sprite sprite in loadedSprites) {
-                // case of multiple sprite : toDO find a better way to do this !
                 string spriteName = sprite.name.Split('_')[0];
                 spriteDictionary.Add(spriteName, sprite);
             }
-            dictionnary.Add(currentTab, spriteDictionary);
+            dictionnary.Add(category, spriteDictionary);
         }
+        await Task.FromResult(0);
     }
 
     public Sprite GetSprite(string category, string name) {
         if (dictionnary[category].ContainsKey(name)) {
             return dictionnary[category][name];
-        } else {
+        }
+        else {
             Debug.LogError($"Sprite {name} not found in dictionary in category {category}.");
             return null;
         }

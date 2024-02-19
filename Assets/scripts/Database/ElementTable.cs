@@ -108,7 +108,7 @@ public class ElementTable {
             string itemTableName = itemTableManager.GetItemTable().GetTableName();
             string blockTableName = blockTableManager.GetBlockTable().GetTableName();
             string entityTableName = entityTableManager.GetEntityTable().GetTableName();
-            string paramNames = string.Join(",", idsList.Select((tuple, index) => $"@elementId{index}, @itemId{index}"));
+            // string paramNames = string.Join(",", idsList.Select((tuple, index) => $"@elementId{index}, @itemId{index}"));
 
             dbcmd.CommandText = $@"
             SELECT 
@@ -117,17 +117,22 @@ public class ElementTable {
                 {blockTableName}.*,
                 {entityTableName}.*
             FROM {tableName}
-            LEFT JOIN {itemTableName} ON {tableName}.id = {itemTableName}.ElementID AND {itemTableName}.id IN (@id0, @id1, @id2, @id3)
-            LEFT JOIN {blockTableName} ON {tableName}.id = {blockTableName}.ElementID AND {blockTableName}.id IN (@id0, @id1, @id2, @id3)
-            LEFT JOIN {entityTableName} ON {tableName}.id = {entityTableName}.ElementID AND {entityTableName}.id IN (@id0, @id1, @id2, @id3)
-            WHERE {tableName}.id IN (@elementId0, @elementId1, @elementId2, @elementId3)";
+            LEFT JOIN {itemTableName} ON {tableName}.id = {itemTableName}.ElementID
+            LEFT JOIN {blockTableName} ON {tableName}.id = {blockTableName}.ElementID
+            LEFT JOIN {entityTableName} ON {tableName}.id = {entityTableName}.ElementID
+            WHERE ";
 
             for (int i = 0; i < idsList.Count; i++) {
+                if (i > 0) {
+                    dbcmd.CommandText += " OR ";
+                }
                 var tuple = idsList[i];
                 int elementId = tuple.Item1;
-                int itemId = tuple.Item2;
+                int id = tuple.Item2;
+                // dbcmd.CommandText += $"((element_table.id = @elementId{i} AND {itemTableName}.id = @id{i} AND {itemTableName}.elementId = @elementId{i}) OR (element_table.id = @elementId{i} AND {blockTableName}.id = @id{i} AND {blockTableName}.elementId = @elementId{i}) OR (element_table.id = @elementId{i} AND {entityTableName}.id = @id{i} AND {entityTableName}.elementId = @elementId{i}))";
+                dbcmd.CommandText += $"((element_table.id = @id{i} AND {itemTableName}.ElementID = @elementId{i}) OR (element_table.id = @id{i} AND {blockTableName}.ElementID = @elementId{i}) OR (element_table.id = @id{i} AND {entityTableName}.ElementID = @elementId{i}))";
+                dbManager.AddParameter(dbcmd, $"@id{i}", id);
                 dbManager.AddParameter(dbcmd, $"@elementId{i}", elementId);
-                dbManager.AddParameter(dbcmd, $"@id{i}", itemId);
             }
             try {
                 using IDataReader dbreader = dbcmd.ExecuteReader();

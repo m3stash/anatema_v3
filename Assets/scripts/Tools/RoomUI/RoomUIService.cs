@@ -10,12 +10,18 @@ namespace RoomUI {
         public string prefabPathModalRoomManager = $"{GlobalConfig.Instance.PrefabRoomUI}/modals/modalRoomManager/ModalRoomManagement";
         private ModalRoomManageRowPool pool;
         private ElementTableManager elementTableManager;
+        private SpriteLoader spriteLoader;
 
-        public void Setup(DatabaseManager dbManager, RoomUIStateManager roomUIStateManager, ElementTableManager elementTableManager) {
+        public void Setup(DatabaseManager dbManager, RoomUIStateManager roomUIStateManager, ElementTableManager elementTableManager, SpriteLoader spriteLoader) {
             this.roomUIStateManager = roomUIStateManager;
             this.elementTableManager = elementTableManager;
+            this.spriteLoader = spriteLoader;
             roomUiTable = new RoomUiTable(dbManager);
             roomUiTable.CreateTableRoom();
+        }
+
+        public SpriteLoader GetSpriteLoader() {
+            return spriteLoader;
         }
 
         public int SaveRoom(RoomUIModel roomUi) {
@@ -59,26 +65,24 @@ namespace RoomUI {
             if (roomUIModel != null) {
                 roomUIModel.Id = -1;
                 roomUIModel.Name = "Copy of " + roomUIModel.Name;
-
-
                 List<Tuple<int, int>> idsList = new List<Tuple<int, int>>();
                 List<GridElementModel> topLayerElements = roomUIModel.TopLayer;
                 topLayerElements.ForEach(element => {
                     int elementId = element.GetElementId();
-                    int itemId = element.GetId();
-                    idsList.Add(new Tuple<int, int>(elementId, itemId));
+                    int id = element.GetId();
+                    idsList.Add(new Tuple<int, int>(elementId, id));
                 });
                 List<Element> elements = elementTableManager.GetAllElementsByElementIdAndID(idsList);
                 topLayerElements.ForEach(element => {
                     int elementId = element.GetElementId();
                     int itemId = element.GetId();
                     Element elementToCopy = elements.Find(e => e.GeElementId() == elementId);
+                    elementToCopy.SetSprite(spriteLoader.GetSprite(elementToCopy.GetCategory(), elementToCopy.GetSpriteName()));
                     if (elementToCopy != null) {
                         element.SetElement(elementToCopy);
                     }
                 });
                 roomUIStateManager.OnCopyRoom(roomUIModel);
-
             }
             else {
                 Debug.LogError("RoomUIService(CopyRoom), roomUIModel is null with id : " + id);

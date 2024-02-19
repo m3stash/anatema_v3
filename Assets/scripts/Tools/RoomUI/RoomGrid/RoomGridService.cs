@@ -105,9 +105,5 @@ namespace RoomUI {
                 cellConfig.GetPosition() == cellRoomGO.GetPosition()));
         }
 
-        public List<GridElementModel> GetUsedCells() {
-            return topLayer;
-        }
-
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,14 +34,16 @@ namespace RoomUI {
         private Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>> ElementsDictionnary = new Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>>();
         private ElementTableManager elementTableManager;
         private SpriteLoader spriteLoader;
+        private List<string> categories;
 
         void OnDestroy() {
             RemoveListeners();
         }
 
-        public void Setup(ElementTableManager elementTableManager, SpriteLoader spriteLoader) {
+        public void Setup(ElementTableManager elementTableManager, List<string> categories, SpriteLoader spriteLoader) {
             this.elementTableManager = elementTableManager;
             this.spriteLoader = spriteLoader;
+            this.categories = categories;
             VerifySerialisables();
             CreateListeners();
             CreatePooling();
@@ -89,7 +93,8 @@ namespace RoomUI {
             PoolConfig config = tabCellPool.GetConfig();
             if (!config) {
                 Debug.LogError("Error no config for cellPool on GridManager awake !");
-            } else {
+            }
+            else {
                 tabCellPool.Setup(config.GetPrefab(), config.GetPoolSize());
             }
         }
@@ -99,7 +104,8 @@ namespace RoomUI {
             PoolConfig config = cellPool.GetConfig();
             if (!config) {
                 Debug.LogError("Error no config for cellPool on GridManager awake !");
-            } else {
+            }
+            else {
                 cellPool.Setup(config.GetPrefab(), config.GetPoolSize());
             }
         }
@@ -117,20 +123,20 @@ namespace RoomUI {
                 int nbrRows = (int)Math.Ceiling((decimal)nbItems / constraintCount);
                 int height = nbrRows * (cellSize + (cellSpacing * 2)) + padding.bottom + padding.top;
                 rectTransform.sizeDelta = new Vector2(gridWidth, height);
-            } else {
+            }
+            else {
                 //ResetPool();
                 // ToDo : refresh object categories !!
             }
         }
 
         private void OnTabClickHandler(string category) {
-            if(currentCategory == category) {
+            if (currentCategory == category) {
                 return;
             }
             currentCategory = category;
             cellPool.ReleaseMany(usedCells);
             LoadElements(currentCategory);
-            // CreateDictionnaryAndCellByElementCategoryType(category);
         }
 
         private void OnCellClickHandler(Element config) {
@@ -139,15 +145,15 @@ namespace RoomUI {
 
         private void CreateTabs() {
             bool isFirstElement = true;
-            List<string> categories = elementTableManager.GetCategories();
             foreach (string category in categories) {
                 if (category != ElementCategoryType.EQUIPMENT.ToString()) {
-                    if(isFirstElement) {
+                    if (isFirstElement) {
                         currentCategory = category;
                         CreateTab(category, true);
                         isFirstElement = false;
                         LoadElements(category);
-                    } else {
+                    }
+                    else {
                         CreateTab(category, false);
                     }
                 }
@@ -166,11 +172,10 @@ namespace RoomUI {
         }
 
         void LoadElements(string category) {
-            switch (category) {          
+            switch (category) {
                 case "EQUIPMENT":
                     break;
                 default:
-                    spriteLoader.LoadSprites(category);
                     CreateDictionnaryAndCellByElementCategoryType(category);
                     break;
             }
@@ -179,12 +184,14 @@ namespace RoomUI {
         private void CreateDictionnaryAndCellByElementCategoryType(string category) {
             if (!ElementsDictionnary.ContainsKey(category)) {
                 List<Element> elements = elementTableManager.GetElementsByCategory(category);
-                if(elements == null) {
+                if (elements == null) {
                     Debug.Log($"Error: No Element For This category {category} !");
-                }else{
+                }
+                else {
                     BuildElementsDictionary(category, elements);
                 }
-            }else{
+            }
+            else {
                 CreateCellWithExistingDictionnary(category);
             }
         }

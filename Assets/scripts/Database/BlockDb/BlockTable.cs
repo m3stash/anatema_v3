@@ -105,7 +105,7 @@ public class BlockTable {
         // return lastInsertedId;
     }
 
-    public List<Element> GetElementsByElementId(int id) {
+    public List<Element> GetElementsByElementId(int idElement) {
         List<Element> elements = new List<Element>();
 
         using (IDbCommand dbcmd = dbconn.CreateCommand()) {
@@ -113,11 +113,12 @@ public class BlockTable {
                 SELECT *
                 FROM {tableName}
                 WHERE ElementID = @ElementID";
-            dbManager.AddParameter(dbcmd, "@ElementID", id);
+            dbManager.AddParameter(dbcmd, "@ElementID", idElement);
 
             try {
                 using IDataReader dbreader = dbcmd.ExecuteReader();
                 while (dbreader.Read()) {
+                    int id = dbreader.GetInt32(0);
                     int elementID = dbreader.GetInt32(1);
                     string displayName = dbreader.GetString(2);
                     string subCategory = dbreader.GetString(3);
@@ -150,14 +151,15 @@ public class BlockTable {
         return elements;
     }
 
-    public Block GetBlockById(int id) {
+    public Block GetBlockById(int idElement) {
         try {
             using (IDbCommand dbcmd = dbconn.CreateCommand()) {
                 dbcmd.CommandText = $"SELECT * FROM {tableName} WHERE id = @ElementID";
-                dbManager.AddParameter(dbcmd, "@ElementID", id);
+                dbManager.AddParameter(dbcmd, "@ElementID", idElement);
 
                 using (IDataReader dbreader = dbcmd.ExecuteReader()) {
                     if (dbreader.Read()) {
+                        int id = dbreader.GetInt32(0);
                         int elementID = dbreader.GetInt32(1);
                         string displayName = dbreader.GetString(2);
                         string subCategory = dbreader.GetString(3);

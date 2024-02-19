@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace RoomUI {
@@ -21,11 +22,14 @@ namespace RoomUI {
         private RoomGridManager roomGridManager;
         private FormManager formManager;
         private ModalRoomManageRowPool modalRoomManageRowPool;
+        private List<string> categories;
 
         private void Awake() {
             VerifySerialisables();
-            roomUIService = gameObject.GetComponent<RoomUIService>();
-            InitDb();
+            DatabaseManager dbManager = InitDb();
+            spriteLoader = new SpriteLoader(elementPath);
+            _ = LoadAllSpritesAsync();
+            SetupRoomUIService(dbManager);
             InitComponents();
             CreateListeners();
             InitPool();
@@ -89,24 +93,37 @@ namespace RoomUI {
         private void InitComponents() {
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
             tabGridManager = tabGrid.GetComponent<TabGridManager>();
-            spriteLoader = new SpriteLoader(elementPath);
-            tabGridManager.Setup(elementTableManager, spriteLoader);
+            tabGridManager.Setup(elementTableManager, categories, spriteLoader);
             roomGridManager = roomGridManagerGO.GetComponent<RoomGridManager>();
             formManager = formManagerGO.GetComponent<FormManager>();
             modalRoomManageRowPool = modalRoomManageRowPoolGO.GetComponent<ModalRoomManageRowPool>();
         }
 
-        private void InitDb() {
-            DatabaseManager dbManager = new DatabaseManager();
-            elementTableManager = new ElementTableManager(dbManager);
-            roomUiTable = new RoomUiTable(dbManager);
-            roomUiTable.CreateTableRoom();
-            roomUIService.Setup(dbManager, roomUIStateManager, elementTableManager);
-            //MockDb();
+        async Task LoadAllSpritesAsync() {
+            if (categories == null) {
+                Debug.LogError("RoomUIManager: categories is null !");
+                return;
+            }
+            var tasks = new List<Task>();
+            foreach (string category in categories) {
+                tasks.Add(spriteLoader.LoadSpritesAsync(category));
+            }
+            await Task.WhenAll(tasks);
         }
 
-        public RoomUiTable GetRoomUiTable() {
-            return roomUiTable;
+        private DatabaseManager InitDb() {
+            DatabaseManager dbManager = new DatabaseManager();
+            elementTableManager = new ElementTableManager(dbManager);
+            categories = elementTableManager.GetCategories();
+            roomUiTable = new RoomUiTable(dbManager);
+            roomUiTable.CreateTableRoom();
+            //MockDb();
+            return dbManager;
+        }
+
+        private void SetupRoomUIService(DatabaseManager dbManager) {
+            roomUIService = gameObject.GetComponent<RoomUIService>();
+            roomUIService.Setup(dbManager, roomUIStateManager, elementTableManager, spriteLoader);
         }
 
         private void MockDb() {
