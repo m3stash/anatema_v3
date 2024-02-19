@@ -18,13 +18,13 @@ public class Element {
     public Element(
         int elementId,
         int id,
-        string category, 
-        string displayName, 
-        string subCategory, 
-        string description, 
-        string spriteName, 
-        int sizeX, 
-        int sizeY, 
+        string category,
+        string displayName,
+        string subCategory,
+        string description,
+        string spriteName,
+        int sizeX,
+        int sizeY,
         string biome,
         string groupType
     ) {
@@ -45,10 +45,10 @@ public class Element {
     public int GeElementId() => elementId;
     public string GetDisplayName() => displayName;
     public string GetCategory() => category;
-    public string GetSubCategory() => subCategory;  
+    public string GetSubCategory() => subCategory;
     public string GetDescription() => description;
     public string GetBiome() => biome;
-    public Sprite GetSprite()=> sprite;
+    public Sprite GetSprite() => sprite;
     public string GetSpriteName() => spriteName;
     public Vector2Int GetSize() => new Vector2Int(sizeX, sizeY);
     public string GetGroupType() => groupType;

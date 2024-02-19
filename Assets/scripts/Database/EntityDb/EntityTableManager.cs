@@ -9,11 +9,13 @@ public class EntityTableManager {
     }
 
     private void Setup(DatabaseManager dbManager, string elementTableName) {
-        if(dbManager == null) {
+        if (dbManager == null) {
             Debug.LogError("DatabaseManager Serialisable is not set.");
-        } else if(elementTableName == null){
+        }
+        else if (elementTableName == null) {
             Debug.LogError("Element table name is not set.");
-        } else {
+        }
+        else {
             SetupBlockDb(dbManager, elementTableName);
         }
     }
@@ -22,14 +24,15 @@ public class EntityTableManager {
         table = new EntityTable(dbManager);
         table.CreateTable(elementTableName);
         string tableName = table.GetTableName();
-        if(tableName == null) {
+        if (tableName == null) {
             Debug.LogError("Block table name is not set.");
-        }else{
+        }
+        else {
             //
         }
     }
 
-    public EntityTable GetBlockTable() {
+    public EntityTable GetEntityTable() {
         return table;
     }
 

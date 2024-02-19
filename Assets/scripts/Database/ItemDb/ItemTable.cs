@@ -79,8 +79,8 @@ public class ItemTable {
         int sizeX,
         int sizeY,
         string biome,
-        bool dropables, 
-        bool consumable, 
+        bool dropables,
+        bool consumable,
         bool craftable,
         string groupType
     ) {
@@ -146,18 +146,19 @@ public class ItemTable {
                         elementID,
                         id,
                         category,
-                        displayName, 
-                        subCategory, 
-                        description, 
-                        spriteName, 
-                        sizeX, 
-                        sizeY, 
+                        displayName,
+                        subCategory,
+                        description,
+                        spriteName,
+                        sizeX,
+                        sizeY,
                         biome,
                         groupType
                     );
                     elements.Add(elt);
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 Debug.LogError($"Error reading table: {e.Message}");
             }
         }
@@ -196,8 +197,8 @@ public class ItemTable {
                             sizeY,
                             biome,
                             groupType,
-                            dropable, 
-                            consumable, 
+                            dropable,
+                            consumable,
                             craftable
                         );
                     }

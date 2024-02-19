@@ -21,11 +21,11 @@ namespace RoomUI {
             this.groundLayer = null; // todo voir ça plus tard..
         }
 
-        public string Name { get => name; }
+        public string Name { get => name; set => name = value; }
         public string Shape { get => shape; }
         public string Difficulty { get => difficulty; }
         public string Biome { get => biome; }
-        public int Id { get => id; }
+        public int Id { get => id; set => id = value; }
         public List<GridElementModel> TopLayer { get => topLayer; }
         public List<GridElementModel> GroundLayer { get => groundLayer; }
     }

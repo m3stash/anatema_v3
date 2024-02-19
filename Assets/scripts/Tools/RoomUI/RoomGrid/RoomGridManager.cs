@@ -184,6 +184,7 @@ namespace RoomUI {
             roomUIStateManager.OnShapeChange -= OnShapeChange;
             roomUIStateManager.OnBiomeChange -= OnBiomeChange;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
+            roomUIStateManager.OnRoomCopy -= OnCopyRoomHandler;
             gridZoomMinus.onClick.RemoveListener(OnGridZoomMinusClick);
             gridZoomPlus.onClick.RemoveListener(OnGridZoomPlusClick);
         }
@@ -194,6 +195,7 @@ namespace RoomUI {
             roomUIStateManager.OnShapeChange += OnShapeChange;
             roomUIStateManager.OnBiomeChange += OnBiomeChange;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
+            roomUIStateManager.OnRoomCopy += OnCopyRoomHandler;
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
@@ -234,6 +236,14 @@ namespace RoomUI {
             return false;
         }
 
+        private void OnCopyRoomHandler(RoomUIModel roomUIModel) {
+            if (roomUIModel == null) {
+                Debug.LogError("RoomGridManager(OnCopyRoomHandler): RoomUIModel is null copy not possible !");
+                return;
+            }
+            CreateGridView(roomUIModel);
+        }
+
         private void OnTrashButtonClick() {
             SetButtonConfiguration(RoomUIAction.TRASH, trashButton);
         }
@@ -257,13 +267,19 @@ namespace RoomUI {
             OnSelectButtonClick();
         }
 
-        private void CreateGridView() {
+        private void CreateGridView(RoomUIModel roomUIModel = null) {
             string currentBiome = roomUIStateManager.CurrentBiome;
             string currentShape = roomUIStateManager.CurrentShape;
             RoomShapeEnum? newShape = Utilities.GetEnumValueFromDropdown<RoomShapeEnum>(currentShape);
             BiomeEnum? newBiome = Utilities.GetEnumValueFromDropdown<BiomeEnum>(currentBiome);
             if (newShape.HasValue && newBiome.HasValue) {
-                GenerateGrid(newShape.Value);
+                if (roomUIModel != null) {
+                    currentGrid.ResetGrid();
+                    GenerateGrid(newShape.Value, roomUIModel);
+                }
+                else {
+                    GenerateGrid(newShape.Value);
+                }
                 currentZoom = 1;
                 Zoom(currentZoom);
             }
@@ -302,7 +318,7 @@ namespace RoomUI {
             }
         }
 
-        private void GenerateGrid(RoomShapeEnum shape) {
+        private void GenerateGrid(RoomShapeEnum shape, RoomUIModel roomUIModel = null) {
             if (roomByShape.ContainsKey(shape)) {
                 Room room = roomByShape[shape];
                 Vector2Int[] roomSections = room.GetSections(Vector2Int.zero);
@@ -310,7 +326,12 @@ namespace RoomUI {
                 int cols = roomSize.x * (int)RoomSizeEnum.WIDTH;
                 int rows = roomSize.y * (int)RoomSizeEnum.HEIGHT;
                 gridLayout.constraintCount = cols;
-                currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
+                if (roomUIModel != null) {
+                    currentGrid.GenerateExistingGrid(transform, roomSections, roomSize, rows, cols, roomUIModel);
+                }
+                else {
+                    currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
+                }
                 ModifyGridLayoutRectTransform(cols, rows);
             }
             else {

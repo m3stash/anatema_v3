@@ -95,7 +95,6 @@ namespace RoomUI {
                 using (IDbCommand dbcmd = dbconn.CreateCommand()) {
                     string sqlQuery = "SELECT * FROM " + tableName;
 
-                    // Construire la clause WHERE dynamiquement en fonction des paramètres fournis
                     List<string> conditions = new List<string>();
                     if (id.HasValue) conditions.Add("id = @Id");
                     if (!string.IsNullOrEmpty(name)) conditions.Add("name = @Name");
@@ -117,7 +116,6 @@ namespace RoomUI {
 
                     using IDataReader reader = dbcmd.ExecuteReader();
                     while (reader.Read()) {
-                        // Créer un objet RoomUIModel à partir des données de la ligne
                         RoomUIModel room = new RoomUIModel(
                             reader.GetString(reader.GetOrdinal("name")),
                             reader.GetString(reader.GetOrdinal("shape")),
@@ -151,6 +149,32 @@ namespace RoomUI {
                 Debug.LogError($"Error deleting room with ID {id}: {e.Message}");
                 return false;
             }
+        }
+
+        public RoomUIModel GetRoomById(int id) {
+            RoomUIModel room = null;
+            try {
+                using IDbCommand dbcmd = dbconn.CreateCommand();
+                dbcmd.CommandText = $"SELECT * FROM {tableName} WHERE id = @Id;";
+                dbManager.AddParameter(dbcmd, "@Id", id);
+                using IDataReader reader = dbcmd.ExecuteReader();
+                while (reader.Read()) {
+                    List<GridElementModel> topLayer = JsonConvert.DeserializeObject<List<GridElementModel>>(reader.GetString(reader.GetOrdinal("topLayerElement")));
+                    room = new RoomUIModel(
+                        reader.GetString(reader.GetOrdinal("name")),
+                        reader.GetString(reader.GetOrdinal("shape")),
+                        reader.GetString(reader.GetOrdinal("biome")),
+                        reader.GetString(reader.GetOrdinal("difficulty")),
+                        reader.GetInt32(reader.GetOrdinal("id")),
+                        topLayer,
+                        null
+                    );
+                }
+            }
+            catch (Exception e) {
+                Debug.LogError($"Error getting room with ID {id}: {e.Message}");
+            }
+            return room;
         }
 
 

@@ -10,6 +10,7 @@ public class GridElementModel {
     private int posX;
     [JsonProperty("posY")]
     private int posY;
+    private Element element;
 
     public GridElementModel(int id, int elementID, Vector2Int position) {
         this.id = id;
@@ -26,8 +27,16 @@ public class GridElementModel {
         return elementID;
     }
 
+    public Element GetElement() {
+        return element;
+    }
+
     public Vector2Int GetPosition() {
         return new Vector2Int(posX, posY);
+    }
+
+    public void SetElement(Element element) {
+        this.element = element;
     }
 
 }

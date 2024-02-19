@@ -1,13 +1,19 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RoomUI {
     public class RoomUIService : MonoBehaviour {
 
+        private RoomUIStateManager roomUIStateManager;
         private RoomUiTable roomUiTable;
         public string prefabPathModalRoomManager = $"{GlobalConfig.Instance.PrefabRoomUI}/modals/modalRoomManager/ModalRoomManagement";
         private ModalRoomManageRowPool pool;
+        private ElementTableManager elementTableManager;
 
-        public void Setup(DatabaseManager dbManager) {
+        public void Setup(DatabaseManager dbManager, RoomUIStateManager roomUIStateManager, ElementTableManager elementTableManager) {
+            this.roomUIStateManager = roomUIStateManager;
+            this.elementTableManager = elementTableManager;
             roomUiTable = new RoomUiTable(dbManager);
             roomUiTable.CreateTableRoom();
         }
@@ -45,6 +51,39 @@ namespace RoomUI {
             }
             Debug.LogError("RoomUIService(OpenRoomManager), no prefab at this path : " + prefabPathModalRoomManager);
             return null;
+        }
+
+        public void CopyRoom(RoomUIModel partialModel) {
+            int id = partialModel.Id;
+            RoomUIModel roomUIModel = roomUiTable.GetRoomById(id);
+            if (roomUIModel != null) {
+                roomUIModel.Id = -1;
+                roomUIModel.Name = "Copy of " + roomUIModel.Name;
+
+
+                List<Tuple<int, int>> idsList = new List<Tuple<int, int>>();
+                List<GridElementModel> topLayerElements = roomUIModel.TopLayer;
+                topLayerElements.ForEach(element => {
+                    int elementId = element.GetElementId();
+                    int itemId = element.GetId();
+                    idsList.Add(new Tuple<int, int>(elementId, itemId));
+                });
+                List<Element> elements = elementTableManager.GetAllElementsByElementIdAndID(idsList);
+                topLayerElements.ForEach(element => {
+                    int elementId = element.GetElementId();
+                    int itemId = element.GetId();
+                    Element elementToCopy = elements.Find(e => e.GeElementId() == elementId);
+                    if (elementToCopy != null) {
+                        element.SetElement(elementToCopy);
+                    }
+                });
+                roomUIStateManager.OnCopyRoom(roomUIModel);
+
+            }
+            else {
+                Debug.LogError("RoomUIService(CopyRoom), roomUIModel is null with id : " + id);
+            }
+
         }
 
         public bool DeleteRoom(int id) {

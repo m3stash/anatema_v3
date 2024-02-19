@@ -146,7 +146,8 @@ namespace RoomUI {
                     }
                     break;
                 case "copy":
-                    // roomUiTable.Copy(room);
+                    roomUIService.CopyRoom(room);
+                    Close();
                     break;
                 case "edit":
                     // toDo : ouvrir une modal pour éditer la room

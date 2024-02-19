@@ -55,6 +55,33 @@ namespace RoomUI {
             }
         }
 
+        public void GenerateExistingGrid(Transform transform, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols, RoomUIModel roomUIModel) {
+            ResetPool();
+            this.roomSections = roomSections;
+            this.roomSize = roomSize;
+            this.rows = rows;
+            this.cols = cols;
+            sectionWidth = cols / roomSize.x;
+            sectionHeight = rows / roomSize.y;
+            for (int row = 0; row < rows; row++) {
+                for (int col = 0; col < cols; col++) {
+                    CellRoomGO cell = pool.GetOne();
+                    usedCells.Add(cell);
+                    cell.transform.SetParent(transform);
+                    GameObject cellRoomGo = cell.gameObject;
+                    cellRoomGo.SetActive(true);
+                    if (roomUIModel.TopLayer.Count > 0) {
+                        GridElementModel gridElementModel = roomUIModel.TopLayer.Find(element => element.GetPosition().x == col && element.GetPosition().y == row);
+                        if (gridElementModel != null) {
+                            cell.Setup(gridElementModel.GetElement(), new Vector2(col, row), new Vector2Int(col, row));
+                        }
+                    }
+                    cell.Setup(null, Vector2.zero, new Vector2Int(col, row));
+                    CreateDoorOrWall(col, row, cell);
+                }
+            }
+        }
+
         private bool FindedSection(Vector2Int currentSection) {
             bool findedSection = false;
             foreach (Vector2Int section in roomSections) {

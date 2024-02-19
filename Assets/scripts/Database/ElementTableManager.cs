@@ -1,12 +1,14 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ElementTableManager{
+public class ElementTableManager {
 
     private ElementTable elementTable;
     private ItemTableManager itemTableManager;
     private BlockTableManager blockTableManager;
     private EntityTableManager entityTableManager;
+    private DatabaseManager dbManager;
 
     public ElementTableManager(DatabaseManager dbManager) {
         elementTable = new ElementTable(dbManager);
@@ -34,7 +36,7 @@ public class ElementTableManager{
 
 
     private List<Element> CallTableByCategoryAndElementID(string category, int elementID) {
-       switch (category) {
+        switch (category) {
             case "ITEM":
                 ItemTable itemTable = itemTableManager.GetItemTable();
                 return itemTable.GetElementsByElementId(elementID);
@@ -42,12 +44,16 @@ public class ElementTableManager{
                 BlockTable blockTable = blockTableManager.GetBlockTable();
                 return blockTable.GetElementsByElementId(elementID);
             case "ENTITY":
-                EntityTable entityTable = entityTableManager.GetBlockTable();
+                EntityTable entityTable = entityTableManager.GetEntityTable();
                 return entityTable.GetElementsByElementId(elementID);
             default:
                 Debug.Log($"Category {category} not managed.");
                 return null;
-       }
+        }
+    }
+
+    public List<Element> GetAllElementsByElementIdAndID(List<Tuple<int, int>> idsList) {
+        return elementTable.GetAllElementsByElementId(idsList, itemTableManager, blockTableManager, entityTableManager);
     }
 
     public List<Element> GetElementsByCategory(string category) {
@@ -58,5 +64,5 @@ public class ElementTableManager{
     public List<string> GetCategories() {
         return elementTable.GetCategories();
     }
-    
+
 }

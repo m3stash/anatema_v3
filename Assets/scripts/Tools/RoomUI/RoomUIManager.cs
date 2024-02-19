@@ -22,7 +22,6 @@ namespace RoomUI {
         private FormManager formManager;
         private ModalRoomManageRowPool modalRoomManageRowPool;
 
-
         private void Awake() {
             VerifySerialisables();
             roomUIService = gameObject.GetComponent<RoomUIService>();
@@ -40,7 +39,6 @@ namespace RoomUI {
             else {
                 Debug.LogError("RoomUIManager: PoolConfig not set !");
             }
-
         }
 
         private void CreateListeners() {
@@ -103,7 +101,7 @@ namespace RoomUI {
             elementTableManager = new ElementTableManager(dbManager);
             roomUiTable = new RoomUiTable(dbManager);
             roomUiTable.CreateTableRoom();
-            roomUIService.Setup(dbManager);
+            roomUIService.Setup(dbManager, roomUIStateManager, elementTableManager);
             //MockDb();
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RoomUI {
@@ -14,6 +15,7 @@ namespace RoomUI {
         public event Action<Element> OnObjectSelected;
         public event Action OnSaveClick;
         public event Action OnOpenClick;
+        public event Action<RoomUIModel> OnRoomCopy;
         public string CurrentShape => shape;
         public string CurrentDifficulty => difficulty;
         public string CurrentBiome => biome;
@@ -22,19 +24,26 @@ namespace RoomUI {
             OnObjectSelected?.Invoke(selectedObject);
         }
 
-        public void OnChangeShape(string shape) {
+        public void OnCopyRoom(RoomUIModel roomUIModel) {
+            OnRoomCopy?.Invoke(roomUIModel);
+        }
+
+        public void OnChangeShape(string shape, bool canEmit = true) {
             this.shape = shape;
-            OnShapeChange.Invoke(shape);
+            if (canEmit)
+                OnShapeChange.Invoke(shape);
         }
 
-        public void OnChangeBiome(string biome) {
+        public void OnChangeBiome(string biome, bool canEmit = true) {
             this.biome = biome;
-            OnBiomeChange?.Invoke(biome);
+            if (canEmit)
+                OnBiomeChange?.Invoke(biome);
         }
 
-        public void OnChangeDifficulty(string difficulty) {
+        public void OnChangeDifficulty(string difficulty, bool canEmit = true) {
             this.difficulty = difficulty;
-            OnDifficultyChange?.Invoke(difficulty);
+            if (canEmit)
+                OnDifficultyChange?.Invoke(difficulty);
         }
 
         public void OnClickSave() {

@@ -22,6 +22,7 @@ namespace RoomUI {
         private string difficulty;
         private string shape;
         private int id = -1;
+        private bool canEmit = true;
 
         private void Awake() {
             InitComponents();
@@ -70,6 +71,7 @@ namespace RoomUI {
         }
 
         private void CreateListeners() {
+            roomUIStateManager.OnRoomCopy += OnCopyRoom;
             save.onClick.AddListener(OnSaveClick);
             delete.onClick.AddListener(OnDeleteClick);
             open.onClick.AddListener(OnOpenClick);
@@ -77,18 +79,32 @@ namespace RoomUI {
             shapeDropdown.onValueChanged.AddListener(newValue => {
                 string value = shapeDropdown.options[newValue].text;
                 shape = value;
-                roomUIStateManager.OnChangeShape(value);
+                roomUIStateManager.OnChangeShape(value, canEmit);
             });
             difficultyDropdown.onValueChanged.AddListener(newValue => {
                 string value = difficultyDropdown.options[newValue].text;
                 difficulty = value;
-                roomUIStateManager.OnChangeDifficulty(value);
+                roomUIStateManager.OnChangeDifficulty(value, canEmit);
             });
             biomeDropdown.onValueChanged.AddListener(newValue => {
                 string value = biomeDropdown.options[newValue].text;
                 biome = value;
-                roomUIStateManager.OnChangeBiome(value);
+                roomUIStateManager.OnChangeBiome(value, canEmit);
             });
+        }
+
+        private void OnCopyRoom(RoomUIModel roomUIModel) {
+            if (roomUIModel == null) {
+                Debug.LogError("FormManager(OnCopyRoom): RoomUIModel is null copy not possible !");
+                return;
+            }
+            canEmit = false;
+            displayName.text = roomUIModel.Name;
+            shapeDropdown.value = shapeDropdown.options.FindIndex(option => option.text == roomUIModel.Shape);
+            difficultyDropdown.value = difficultyDropdown.options.FindIndex(option => option.text == roomUIModel.Difficulty);
+            biomeDropdown.value = biomeDropdown.options.FindIndex(option => option.text == roomUIModel.Biome);
+            id = roomUIModel.Id;
+            canEmit = true;
         }
 
         private void OnSaveClick() {
@@ -111,6 +127,7 @@ namespace RoomUI {
         }
 
         void OnDestroy() {
+            roomUIStateManager.OnRoomCopy -= OnCopyRoom;
             save.onClick.RemoveAllListeners();
             delete.onClick.RemoveAllListeners();
             open.onClick.RemoveAllListeners();
