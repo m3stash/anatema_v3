@@ -32,7 +32,7 @@ namespace RoomUI {
         private float gridWidth;
         private string currentCategory;
         private Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>> ElementsDictionnary = new Dictionary<string, Dictionary<string, Dictionary<string, List<Element>>>>();
-        private ElementTableManager elementTableManager;
+        private ElementTable elementTable;
         private SpriteLoader spriteLoader;
         private List<string> categories;
 
@@ -40,8 +40,8 @@ namespace RoomUI {
             RemoveListeners();
         }
 
-        public void Setup(ElementTableManager elementTableManager, List<string> categories, SpriteLoader spriteLoader) {
-            this.elementTableManager = elementTableManager;
+        public void Setup(ElementTable elementTable, List<string> categories, SpriteLoader spriteLoader) {
+            this.elementTable = elementTable;
             this.spriteLoader = spriteLoader;
             this.categories = categories;
             VerifySerialisables();
@@ -183,7 +183,7 @@ namespace RoomUI {
 
         private void CreateDictionnaryAndCellByElementCategoryType(string category) {
             if (!ElementsDictionnary.ContainsKey(category)) {
-                List<Element> elements = elementTableManager.GetElementsByCategory(category);
+                List<Element> elements = elementTable.GetElementsByCategory(category);
                 if (elements == null) {
                     Debug.Log($"Error: No Element For This category {category} !");
                 }

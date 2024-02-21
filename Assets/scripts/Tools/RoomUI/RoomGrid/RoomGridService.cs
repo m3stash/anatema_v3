@@ -49,24 +49,27 @@ namespace RoomUI {
             return size.x > 1 || size.y > 1;
         }
 
-        public bool CreateCell(Element cellConfig, CellRoomGO cellRoomGO, Element selectedElement) {
-            if (selectedElement == null || cellConfig != null) return false;
+        public void CreateCell(CellRoomGO cellRoomGO, Element selectedElement) {
+            if (selectedElement == null || cellRoomGO.GetConfig() != null) return;
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, selectedElement.GetSize());
             if (cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
-                return true;
+                return;
             }
             else {
-                CellRoomGO cell = cellRoomGO;
+                CellRoomGO cell = null;
                 if (IsBigCell(selectedElement.GetSize())) {
-                    cell = SetupBigCell(cells, cellRoomGO, selectedElement);
+                    cell = DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement);
                 }
-                AddCellInUsedCell(selectedElement, cell.GetPosition());
-                cell.Setup(selectedElement, gridLayout.spacing, cell.GetPosition());
-                return true;
+                else {
+                    cell = cellRoomGO;
+                }
+                AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition());
+                cell.Setup(selectedElement, gridLayout.spacing, cellRoomGO.GetPosition());
+                return;
             }
         }
 
-        public CellRoomGO SetupBigCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement) {
+        public CellRoomGO DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement) {
             CellRoomGO topLeftCell = null;
             cells.ForEach(cell => {
                 /*
@@ -84,7 +87,7 @@ namespace RoomUI {
         }
 
         public void AddCellInUsedCell(Element element, Vector2Int position) {
-            topLayer.Add(new GridElementModel(element.GetId(), element.GeElementId(), position));
+            topLayer.Add(new GridElementModel(element.GetId(), position));
         }
 
         public void DeleteCell(CellRoomGO cellRoomGO) {
@@ -101,7 +104,6 @@ namespace RoomUI {
         private void RemoveCellInUsedCell(CellRoomGO cellRoomGO) {
             topLayer.RemoveAt(topLayer.FindIndex(cellConfig =>
                 cellConfig.GetId() == cellRoomGO.GetConfig().GetId() &&
-                cellConfig.GetElementId() == cellRoomGO.GetConfig().GeElementId() &&
                 cellConfig.GetPosition() == cellRoomGO.GetPosition()));
         }
 

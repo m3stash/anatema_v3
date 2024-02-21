@@ -3,7 +3,6 @@
 public class Element {
 
     private int id;
-    private int elementId;
     private string displayName;
     private string category;
     private string subCategory;
@@ -16,7 +15,6 @@ public class Element {
     private Sprite sprite;
 
     public Element(
-        int elementId,
         int id,
         string category,
         string displayName,
@@ -28,7 +26,6 @@ public class Element {
         string biome,
         string groupType
     ) {
-        this.elementId = elementId;
         this.id = id;
         this.category = category;
         this.displayName = displayName;
@@ -42,7 +39,6 @@ public class Element {
     }
 
     public int GetId() => id;
-    public int GeElementId() => elementId;
     public string GetDisplayName() => displayName;
     public string GetCategory() => category;
     public string GetSubCategory() => subCategory;

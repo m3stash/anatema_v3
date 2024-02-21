@@ -23,6 +23,7 @@ namespace RoomUI {
         private FormManager formManager;
         private ModalRoomManageRowPool modalRoomManageRowPool;
         private List<string> categories;
+        private readonly string CATEGORY_STRING = "ITEM BLOCK ENTITY"; // todo changer ça plus tard...
 
         private void Awake() {
             VerifySerialisables();
@@ -93,7 +94,7 @@ namespace RoomUI {
         private void InitComponents() {
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
             tabGridManager = tabGrid.GetComponent<TabGridManager>();
-            tabGridManager.Setup(elementTableManager, categories, spriteLoader);
+            tabGridManager.Setup(elementTableManager.GetElementTable(), categories, spriteLoader);
             roomGridManager = roomGridManagerGO.GetComponent<RoomGridManager>();
             formManager = formManagerGO.GetComponent<FormManager>();
             modalRoomManageRowPool = modalRoomManageRowPoolGO.GetComponent<ModalRoomManageRowPool>();
@@ -114,7 +115,8 @@ namespace RoomUI {
         private DatabaseManager InitDb() {
             DatabaseManager dbManager = new DatabaseManager();
             elementTableManager = new ElementTableManager(dbManager);
-            categories = elementTableManager.GetCategories();
+            categories = new List<string>();
+            categories.AddRange(CATEGORY_STRING.Split(' '));
             roomUiTable = new RoomUiTable(dbManager);
             roomUiTable.CreateTableRoom();
             //MockDb();
@@ -123,7 +125,7 @@ namespace RoomUI {
 
         private void SetupRoomUIService(DatabaseManager dbManager) {
             roomUIService = gameObject.GetComponent<RoomUIService>();
-            roomUIService.Setup(dbManager, roomUIStateManager, elementTableManager, spriteLoader);
+            roomUIService.Setup(dbManager, roomUIStateManager, elementTableManager.GetElementTable(), spriteLoader);
         }
 
         private void MockDb() {

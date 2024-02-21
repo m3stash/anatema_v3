@@ -9,12 +9,12 @@ namespace RoomUI {
         private RoomUiTable roomUiTable;
         public string prefabPathModalRoomManager = $"{GlobalConfig.Instance.PrefabRoomUI}/modals/modalRoomManager/ModalRoomManagement";
         private ModalRoomManageRowPool pool;
-        private ElementTableManager elementTableManager;
+        private ElementTable elementTable;
         private SpriteLoader spriteLoader;
 
-        public void Setup(DatabaseManager dbManager, RoomUIStateManager roomUIStateManager, ElementTableManager elementTableManager, SpriteLoader spriteLoader) {
+        public void Setup(DatabaseManager dbManager, RoomUIStateManager roomUIStateManager, ElementTable elementTable, SpriteLoader spriteLoader) {
             this.roomUIStateManager = roomUIStateManager;
-            this.elementTableManager = elementTableManager;
+            this.elementTable = elementTable;
             this.spriteLoader = spriteLoader;
             roomUiTable = new RoomUiTable(dbManager);
             roomUiTable.CreateTableRoom();
@@ -65,18 +65,16 @@ namespace RoomUI {
             if (roomUIModel != null) {
                 roomUIModel.Id = -1;
                 roomUIModel.Name = "Copy of " + roomUIModel.Name;
-                List<Tuple<int, int>> idsList = new List<Tuple<int, int>>();
                 List<GridElementModel> topLayerElements = roomUIModel.TopLayer;
+                List<int> idsList = new List<int>();
                 topLayerElements.ForEach(element => {
-                    int elementId = element.GetElementId();
-                    int id = element.GetId();
-                    idsList.Add(new Tuple<int, int>(elementId, id));
+                    idsList.Add(element.GetId());
                 });
-                List<Element> elements = elementTableManager.GetAllElementsByElementIdAndID(idsList);
+                List<Element> elements = elementTable.GetElementsByIds(idsList);
                 topLayerElements.ForEach(element => {
-                    int elementId = element.GetElementId();
+                    int elementId = element.GetId();
                     int itemId = element.GetId();
-                    Element elementToCopy = elements.Find(e => e.GeElementId() == elementId);
+                    Element elementToCopy = elements.Find(e => e.GetId() == elementId);
                     elementToCopy.SetSprite(spriteLoader.GetSprite(elementToCopy.GetCategory(), elementToCopy.GetSpriteName()));
                     if (elementToCopy != null) {
                         element.SetElement(elementToCopy);

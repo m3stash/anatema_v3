@@ -4,27 +4,20 @@ using Newtonsoft.Json;
 public class GridElementModel {
     [JsonProperty("id")]
     private int id;
-    [JsonProperty("elementId")]
-    private int elementID;
     [JsonProperty("posX")]
     private int posX;
     [JsonProperty("posY")]
     private int posY;
     private Element element;
 
-    public GridElementModel(int id, int elementID, Vector2Int position) {
+    public GridElementModel(int id, Vector2Int position) {
         this.id = id;
-        this.elementID = elementID;
         posX = position.x;
         posY = position.y;
     }
 
     public int GetId() {
         return id;
-    }
-
-    public int GetElementId() {
-        return elementID;
     }
 
     public Element GetElement() {

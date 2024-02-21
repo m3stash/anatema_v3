@@ -22,7 +22,15 @@ public class ElementTable {
     public void CreateTable() {
         string sqlQuery = $@"CREATE TABLE IF NOT EXISTS {tableName} (
             [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-            [Category] TEXT NOT NULL
+            [Category] TEXT NOT NULL,
+            [DisplayName] TEXT NOT NULL,
+            [SubCategory] TEXT NOT NULL,
+            [Description] TEXT NOT NULL,
+            [SpriteName] TEXT NOT NULL,
+            [SizeX] INTEGER NOT NULL,
+            [SizeY] INTEGER NOT NULL,
+            [Biome] TEXT NOT NULL,
+            [GroupType] TEXT NOT NULL
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
     }
@@ -40,6 +48,14 @@ public class ElementTable {
             while (dbreader.Read()) {
                 int id = dbreader.GetInt32(0);
                 string category = dbreader.GetString(1);
+                string displayName = dbreader.GetString(2);
+                string subCategory = dbreader.GetString(3);
+                string description = dbreader.GetString(4);
+                string spriteName = dbreader.GetString(5);
+                int sizeX = dbreader.GetInt32(6);
+                int sizeY = dbreader.GetInt32(7);
+                string biome = dbreader.GetString(8);
+                string groupType = dbreader.GetString(9);
             }
             Debug.Log("Table read successfully.");
         }
@@ -49,13 +65,29 @@ public class ElementTable {
     }
 
     public void Insert(
-            string category
+            string category,
+            string displayName,
+            string subCategory,
+            string description,
+            string spriteName,
+            int sizeX,
+            int sizeY,
+            string biome,
+            string groupType
         ) {
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (Category) " +
-                "VALUES (@Category)";
+            dbcmd.CommandText = $"INSERT INTO {tableName} (Category, DisplayName, SubCategory, Description, SpriteName, SizeX, SizeY, Biome, GroupType) " +
+                "VALUES (@Category, @DisplayName, @SubCategory, @Description, @SpriteName, @SizeX, @SizeY, @Biome, @GroupType); ";
             dbManager.AddParameter(dbcmd, "@Category", category);
+            dbManager.AddParameter(dbcmd, "@DisplayName", displayName);
+            dbManager.AddParameter(dbcmd, "@SubCategory", subCategory);
+            dbManager.AddParameter(dbcmd, "@Description", description);
+            dbManager.AddParameter(dbcmd, "@SpriteName", spriteName);
+            dbManager.AddParameter(dbcmd, "@SizeX", sizeX);
+            dbManager.AddParameter(dbcmd, "@SizeY", sizeY);
+            dbManager.AddParameter(dbcmd, "@Biome", biome);
+            dbManager.AddParameter(dbcmd, "@GroupType", groupType);
             dbcmd.ExecuteNonQuery();
             Debug.Log("Item inserted successfully.");
         }
@@ -64,6 +96,91 @@ public class ElementTable {
         }
     }
 
+    public List<Element> GetElementsByCategory(string Category) {
+        try {
+            using IDbCommand dbcmd = dbconn.CreateCommand();
+            dbcmd.CommandText = $"SELECT * FROM {tableName} WHERE Category = @Category";
+            dbManager.AddParameter(dbcmd, "@Category", Category);
+
+            using IDataReader dbreader = dbcmd.ExecuteReader();
+            List<Element> elements = new List<Element>();
+            while (dbreader.Read()) {
+                int id = dbreader.GetInt32(0);
+                string category = dbreader.GetString(1);
+                string displayName = dbreader.GetString(2);
+                string subCategory = dbreader.GetString(3);
+                string description = dbreader.GetString(4);
+                string spriteName = dbreader.GetString(5);
+                int sizeX = dbreader.GetInt32(6);
+                int sizeY = dbreader.GetInt32(7);
+                string biome = dbreader.GetString(8);
+                string groupType = dbreader.GetString(9);
+                Element elt = new Element(
+                    id,
+                    category,
+                    displayName,
+                    subCategory,
+                    description,
+                    spriteName,
+                    sizeX,
+                    sizeY,
+                    biome,
+                    groupType
+                );
+                elements.Add(elt);
+            }
+            return elements;
+        }
+        catch (Exception e) {
+            Debug.LogError($"Error getting elements by category: {e.Message}");
+            return null;
+        }
+    }
+
+    public List<Element> GetElementsByIds(List<int> elementIds) {
+        List<Element> elements = new List<Element>();
+        string sqlQuery = $"SELECT * FROM {tableName} WHERE id IN (";
+        sqlQuery += string.Join(",", elementIds);
+        sqlQuery += ");";
+        try {
+            using IDbCommand dbcmd = dbconn.CreateCommand();
+            dbcmd.CommandText = sqlQuery;
+            using IDataReader dbreader = dbcmd.ExecuteReader();
+            while (dbreader.Read()) {
+                int id = dbreader.GetInt32(0);
+                string category = dbreader.GetString(1);
+                string displayName = dbreader.GetString(2);
+                string subCategory = dbreader.GetString(3);
+                string description = dbreader.GetString(4);
+                string spriteName = dbreader.GetString(5);
+                int sizeX = dbreader.GetInt32(6);
+                int sizeY = dbreader.GetInt32(7);
+                string biome = dbreader.GetString(8);
+                string groupType = dbreader.GetString(9);
+                Element elt = new Element(
+                    id,
+                    category,
+                    displayName,
+                    subCategory,
+                    description,
+                    spriteName,
+                    sizeX,
+                    sizeY,
+                    biome,
+                    groupType
+                );
+                elements.Add(elt);
+            }
+            return elements;
+        }
+        catch (Exception e) {
+            Debug.LogError($"Error reading table: {e.Message}");
+            return null;
+        }
+    }
+
+    // toDO VIRER ÇA !
+    /*
     public int GetIdByType(string category) {
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
@@ -83,8 +200,10 @@ public class ElementTable {
             return -1;
         }
     }
+    */
 
-    public List<string> GetCategories() {
+    // toDO VIRER ÇA !
+    /*public List<string> GetCategories() {
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
             dbcmd.CommandText = $"SELECT Category FROM {tableName}";
@@ -100,9 +219,10 @@ public class ElementTable {
             Debug.LogError($"Error getting categories: {e.Message}");
             return null;
         }
-    }
+    }*/
 
-    public List<Element> GetAllElementsByElementId(List<Tuple<int, int>> idsList, ItemTableManager itemTableManager, BlockTableManager blockTableManager, EntityTableManager entityTableManager) {
+    // TODO VIRER CETTE MERDE !!
+    /*public List<Element> GetAllElementsByElementId(List<Tuple<int, int>> idsList, ItemTableManager itemTableManager, BlockTableManager blockTableManager, EntityTableManager entityTableManager) {
         List<Element> elements = new List<Element>();
         using (IDbCommand dbcmd = dbconn.CreateCommand()) {
             string itemTableName = itemTableManager.GetItemTable().GetTableName();
@@ -173,6 +293,6 @@ public class ElementTable {
             }
         }
         return elements;
-    }
+    }*/
 
 }

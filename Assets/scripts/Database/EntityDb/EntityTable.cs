@@ -27,14 +27,7 @@ public class EntityTable {
         string sqlQuery = $@"CREATE TABLE IF NOT EXISTS {tableName} (
             [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             [ElementID] INTEGER NOT NULL,
-            [DisplayName] TEXT NOT NULL,
-            [SubCategory] TEXT NOT NULL,
-            [Description] TEXT NOT NULL,
-            [SpriteName] TEXT NOT NULL,
-            [SizeX] INTEGER NOT NULL,
-            [SizeY] INTEGER NOT NULL,
-            [Biome] TEXT NOT NULL,
-            [GroupType] TEXT NOT NULL,
+            [Life] INTEGER NOT NULL,
             FOREIGN KEY (ElementID) REFERENCES {elementTableName}(id)
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
@@ -48,14 +41,7 @@ public class EntityTable {
             while (dbreader.Read()) {
                 int id = dbreader.GetInt32(0);
                 int elementId = dbreader.GetInt32(1);
-                string displayName = dbreader.GetString(2);
-                string subCategory = dbreader.GetString(3);
-                string description = dbreader.GetString(4);
-                string spriteName = dbreader.GetString(5);
-                int sizeX = dbreader.GetInt32(6);
-                int sizeY = dbreader.GetInt32(7);
-                string biome = dbreader.GetString(8);
-                string groupType = dbreader.GetString(9);
+                int life = dbreader.GetInt32(2);
             }
             Debug.Log("Table read successfully.");
         }
@@ -64,48 +50,34 @@ public class EntityTable {
         }
     }
 
-    public void Insert(
+    public int Insert(
         int elementId,
-        string displayName,
-        string subCategory,
-        string description,
-        string spriteName,
-        int sizeX,
-        int sizeY,
-        string biome,
-        string groupType
+        int life
     ) {
-        // int lastInsertedId = -1;
+        int lastInsertedId = -1;
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, DisplayName, SubCategory, Description, SpriteName, SizeX, SizeY, Biome, GroupType) " +
-                "VALUES (@ElementID, @DisplayName, @SubCategory, @Description, @SpriteName, @SizeX, @SizeY, @Biome, @GroupType); " +
+            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, Life) " +
+                "VALUES (@ElementID, @Life); " +
                 "SELECT last_insert_rowid() AS new_id;";
             dbManager.AddParameter(dbcmd, "@ElementID", elementId);
-            dbManager.AddParameter(dbcmd, "@DisplayName", displayName);
-            dbManager.AddParameter(dbcmd, "@SubCategory", subCategory);
-            dbManager.AddParameter(dbcmd, "@Description", description);
-            dbManager.AddParameter(dbcmd, "@SpriteName", spriteName);
-            dbManager.AddParameter(dbcmd, "@SizeX", sizeX);
-            dbManager.AddParameter(dbcmd, "@SizeY", sizeY);
-            dbManager.AddParameter(dbcmd, "@Biome", biome);
-            dbManager.AddParameter(dbcmd, "@GroupType", groupType);
+            dbManager.AddParameter(dbcmd, "@Life", life);
             dbcmd.ExecuteNonQuery();
             Debug.Log($"{tableName} inserted successfully.");
-            /*using IDataReader reader = dbcmd.ExecuteReader();
+            using IDataReader reader = dbcmd.ExecuteReader();
             if (reader.Read()) {
                 lastInsertedId = Convert.ToInt32(reader["new_id"]);
                 Debug.Log($"{tableName} inserted successfully. Last inserted ID: {lastInsertedId}");
-            }*/
+            }
         }
         catch (Exception e) {
             Debug.LogError($"Error inserting {tableName}: {e.Message}");
-            // return lastInsertedId;
+            return lastInsertedId;
         }
-        // return lastInsertedId;
+        return lastInsertedId;
     }
 
-    public List<Element> GetElementsByElementId(int idElement) {
+    /*public List<Element> GetElementsByElementId(int idElement) {
         List<Element> elements = new List<Element>();
 
         using (IDbCommand dbcmd = dbconn.CreateCommand()) {
@@ -149,7 +121,7 @@ public class EntityTable {
             }
         }
         return elements;
-    }
+    }*/
 
     public Entity GetEntityById(int idElement) {
         try {
@@ -160,7 +132,7 @@ public class EntityTable {
                 using (IDataReader dbreader = dbcmd.ExecuteReader()) {
                     if (dbreader.Read()) {
                         int id = dbreader.GetInt32(0);
-                        int elementID = dbreader.GetInt32(1);
+                        string category = dbreader.GetString(1);
                         string displayName = dbreader.GetString(2);
                         string subCategory = dbreader.GetString(3);
                         string description = dbreader.GetString(4);
@@ -170,7 +142,6 @@ public class EntityTable {
                         string biome = dbreader.GetString(8);
                         string groupType = dbreader.GetString(9);
                         return new Entity(
-                            elementID,
                             id,
                             category,
                             displayName,

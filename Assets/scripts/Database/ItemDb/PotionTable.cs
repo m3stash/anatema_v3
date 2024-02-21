@@ -8,7 +8,7 @@ using Database;
 public class PotionTable {
     private IDbConnection dbconn;
     private readonly string tableName = "potion_table";
-    private TableManager tableManager;    
+    private TableManager tableManager;
     private DatabaseManager dbManager;
 
     public PotionTable(DatabaseManager dbManager) {
@@ -17,11 +17,11 @@ public class PotionTable {
         tableManager = dbManager.GetTableManager();
     }
 
-    public void CreateTable(string itemTableName) {
+    public void CreateTable(string elementTableName) {
         string sqlQuery = $@"CREATE TABLE IF NOT EXISTS {tableName} (
             [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-            [ItemID] INTEGER NOT NULL,
-            FOREIGN KEY (ItemID) REFERENCES {itemTableName}(id)
+            [ElementID] INTEGER NOT NULL,
+            FOREIGN KEY (ElementID) REFERENCES {elementTableName}(id)
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
     }

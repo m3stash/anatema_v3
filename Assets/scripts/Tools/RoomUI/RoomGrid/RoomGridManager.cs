@@ -76,7 +76,7 @@ namespace RoomUI {
                     CopyCell(cellConfig);
                     break;
                 case RoomUIAction.SELECT:
-                    SelectCell(cellConfig, cellRoomGO);
+                    SelectCell(cellRoomGO);
                     break;
                 case RoomUIAction.TRASH:
                     DeleteCell(cellRoomGO);
@@ -91,11 +91,9 @@ namespace RoomUI {
             }
         }
 
-        private void SelectCell(Element cellConfig, CellRoomGO cellRoomGO) {
-            bool isExistingCell = roomGridService.CreateCell(cellConfig, cellRoomGO, currenSelectedObject);
-            if (isExistingCell) {
-                cellPreviewManager.Forbidden();
-            }
+        private void SelectCell(CellRoomGO cellRoomGO) {
+            roomGridService.CreateCell(cellRoomGO, currenSelectedObject);
+            cellPreviewManager.Forbidden();
         }
 
         private void CopyCell(Element cellConfig) {
@@ -241,7 +239,19 @@ namespace RoomUI {
                 Debug.LogError("RoomGridManager(OnCopyRoomHandler): RoomUIModel is null copy not possible !");
                 return;
             }
-            CreateGridView(roomUIModel);
+            if (roomUIModel != null) {
+                // create TOP layer
+                currentGrid.ResetGrid();
+                CreateGridView(roomUIModel);
+                roomUIModel.TopLayer.ForEach(cell => {
+                    int x = cell.GetPosition().x;
+                    int y = cell.GetPosition().y;
+                    int index = y * gridLayout.constraintCount + x;
+                    GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
+                    CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
+                    roomGridService.CreateCell(cellRoomGO, cell.GetElement());
+                });
+            }
         }
 
         private void OnTrashButtonClick() {
@@ -273,13 +283,7 @@ namespace RoomUI {
             RoomShapeEnum? newShape = Utilities.GetEnumValueFromDropdown<RoomShapeEnum>(currentShape);
             BiomeEnum? newBiome = Utilities.GetEnumValueFromDropdown<BiomeEnum>(currentBiome);
             if (newShape.HasValue && newBiome.HasValue) {
-                if (roomUIModel != null) {
-                    currentGrid.ResetGrid();
-                    GenerateGrid(newShape.Value, roomUIModel);
-                }
-                else {
-                    GenerateGrid(newShape.Value);
-                }
+                GenerateGrid(newShape.Value);
                 currentZoom = 1;
                 Zoom(currentZoom);
             }
@@ -318,7 +322,7 @@ namespace RoomUI {
             }
         }
 
-        private void GenerateGrid(RoomShapeEnum shape, RoomUIModel roomUIModel = null) {
+        private void GenerateGrid(RoomShapeEnum shape) {
             if (roomByShape.ContainsKey(shape)) {
                 Room room = roomByShape[shape];
                 Vector2Int[] roomSections = room.GetSections(Vector2Int.zero);
@@ -326,12 +330,7 @@ namespace RoomUI {
                 int cols = roomSize.x * (int)RoomSizeEnum.WIDTH;
                 int rows = roomSize.y * (int)RoomSizeEnum.HEIGHT;
                 gridLayout.constraintCount = cols;
-                if (roomUIModel != null) {
-                    currentGrid.GenerateExistingGrid(transform, roomSections, roomSize, rows, cols, roomUIModel);
-                }
-                else {
-                    currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
-                }
+                currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
                 ModifyGridLayoutRectTransform(cols, rows);
             }
             else {
