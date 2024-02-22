@@ -4,8 +4,12 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static RoomUIInput;
 
 namespace RoomUI {
+
+    public delegate void ModalClosedCallback();
+
     public class ModalRoomMananger : MonoBehaviour {
 
         [SerializeField] public TMP_InputField displayName;
@@ -24,6 +28,9 @@ namespace RoomUI {
         private ModalRoomManageRowPool pool;
         private List<ModalRoomManagerRowGO> usedRows = new List<ModalRoomManagerRowGO>();
         private RoomUIService roomUIService;
+        private Modal_RoomManangerActions modalAction;
+
+        private ModalClosedCallback modalClosedCallback;
 
         void Awake() {
             VerifySerialisables();
@@ -32,12 +39,15 @@ namespace RoomUI {
             InitDropdowns();
         }
 
-        public void Setup(RoomUiTable table, ModalRoomManageRowPool pool, RoomUIService roomUIService) {
+        public void Setup(RoomUiTable table, ModalRoomManageRowPool pool, RoomUIService roomUIService, Modal_RoomManangerActions modalAction, ModalClosedCallback callback) {
             if (table == null || pool == null || roomUIService == null)
                 throw new ArgumentNullException("ModalRoomMananger Setup, table, pool or roomUIService is null !");
             this.roomUIService = roomUIService;
             this.pool = pool;
             roomUiTable = table;
+            this.modalAction = modalAction;
+            modalAction.Close.performed += ctx => Close();
+            modalClosedCallback = callback;
         }
 
         private void VerifySerialisables() {
@@ -89,6 +99,7 @@ namespace RoomUI {
             string difficulty = GetDropdownSelectedText(difficultyDropdown);
             string biome = GetDropdownSelectedText(biomeDropdown);
             int? parsedId = ParseID(id.text);
+            Debug.Log("Display name : " + displayNameText + " shape : " + shape + " difficulty : " + difficulty + " biome : " + biome + " id : " + parsedId);
             // toDo : obliger  à remplir au moins le champ shape (ou autre pour limiter le nombre d'objets reçu ou lors prévoir une pagination..);
             roomUIModels = roomUiTable.SearchRoomsByParams(parsedId, displayNameText, shape, difficulty, biome);
             RefreshTable(roomUIModels);
@@ -116,6 +127,7 @@ namespace RoomUI {
             int? parsedId = null;
             if (!string.IsNullOrEmpty(idText) && int.TryParse(idText, out int parsedIdValue)) {
                 parsedId = parsedIdValue;
+                return parsedId;
             }
             return null;
         }
@@ -159,10 +171,11 @@ namespace RoomUI {
         }
 
         private void Close() {
-            Destroy(gameObject);
+            modalClosedCallback?.Invoke();
         }
 
         void OnDestroy() {
+            modalAction.Close.performed -= ctx => Close();
             buttonClose.onClick.RemoveAllListeners();
             buttonSearch.onClick.RemoveAllListeners();
             ModalRoomManagerRowGO.OnButtonClick -= OnActionButtonClick;

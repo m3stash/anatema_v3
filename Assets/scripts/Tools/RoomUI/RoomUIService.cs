@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +10,10 @@ namespace RoomUI {
         private ModalRoomManageRowPool pool;
         private ElementTable elementTable;
         private SpriteLoader spriteLoader;
+        RoomUIInputManager roomUIInputManager;
+        RoomUIInput roomUIInput;
+
+        ModalRoomMananger modalComponent;
 
         public void Setup(DatabaseManager dbManager, RoomUIStateManager roomUIStateManager, ElementTable elementTable, SpriteLoader spriteLoader) {
             this.roomUIStateManager = roomUIStateManager;
@@ -18,6 +21,13 @@ namespace RoomUI {
             this.spriteLoader = spriteLoader;
             roomUiTable = new RoomUiTable(dbManager);
             roomUiTable.CreateTableRoom();
+            SetRoomUIInput();
+        }
+
+        private void SetRoomUIInput() {
+            roomUIInputManager = new RoomUIInputManager();
+            roomUIInput = roomUIInputManager.GetRoomUIInput();
+            roomUIInput.Modal_RoomMananger.Enable();
         }
 
         public SpriteLoader GetSpriteLoader() {
@@ -41,8 +51,12 @@ namespace RoomUI {
             }
             ModalRoomMananger modalComponent = InstanciateRoomManagerModal(transform);
             if (modalComponent != null) {
-                modalComponent.Setup(roomUiTable, pool, this);
+                modalComponent.Setup(roomUiTable, pool, this, roomUIInput.Modal_RoomMananger, OnModalClosed);
             }
+        }
+
+        private void OnModalClosed() {
+            Destroy(modalComponent.gameObject);
         }
 
         private ModalRoomMananger InstanciateRoomManagerModal(Transform transform) {
@@ -52,7 +66,7 @@ namespace RoomUI {
                 roomUIManagerModal.transform.SetParent(transform);
                 roomUIManagerModal.transform.localPosition = Vector3.zero;
                 roomUIManagerModal.transform.localScale = Vector3.one;
-                ModalRoomMananger modalComponent = roomUIManagerModal.GetComponent<ModalRoomMananger>();
+                modalComponent = roomUIManagerModal.GetComponent<ModalRoomMananger>();
                 return modalComponent;
             }
             Debug.LogError("RoomUIService(OpenRoomManager), no prefab at this path : " + prefabPathModalRoomManager);

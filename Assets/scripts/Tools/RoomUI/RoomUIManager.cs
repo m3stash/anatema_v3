@@ -36,6 +36,7 @@ namespace RoomUI {
             InitPool();
         }
 
+
         private void InitPool() {
             PoolConfig config = modalRoomManageRowPool.GetConfig();
             if (config != null) {

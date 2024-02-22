@@ -1,0 +1,34 @@
+{
+    "name": "RoomUI",
+    "maps": [
+        {
+            "name": "Modal_RoomMananger",
+            "id": "b7f1f87c-3e9b-421f-99ea-4b96c6caf90a",
+            "actions": [
+                {
+                    "name": "Close",
+                    "type": "PassThrough",
+                    "id": "4fe57867-6387-4283-ad57-d89cbc0ab568",
+                    "expectedControlType": "Key",
+                    "processors": "",
+                    "interactions": "Press(behavior=1)",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4d04695b-e6eb-4d8e-8329-61c497c2b11b",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Close",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

@@ -43,7 +43,7 @@ public class Player : MonoBehaviour {
         if (hMove) {
             currentSpeed = Mathf.Abs(moveDirection.x * speed);
             targetVelocity = new Vector2(moveDirection.x * currentSpeed, rg2d.velocity.y);
-        } 
+        }
         if (vMove) {
             currentSpeed = Mathf.Abs(moveDirection.y * speed);
             targetVelocity = new Vector2(0, rg2d.velocity.y);
