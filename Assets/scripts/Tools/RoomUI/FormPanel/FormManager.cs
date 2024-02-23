@@ -124,7 +124,7 @@ namespace RoomUI {
                 roomUIStateManager.OnClickSave();
             }
             else {
-                Debug.LogError("FormManager: Some fields are empty");
+                TooltipManager.Instance.CreateToolTip(TooltipType.INFORMATION, "Some fields are empty !");
             }
         }
 
