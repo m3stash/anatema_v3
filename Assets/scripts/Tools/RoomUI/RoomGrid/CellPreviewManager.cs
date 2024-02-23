@@ -14,12 +14,41 @@ namespace RoomUI {
 
         public void ManagePreview(Vector3 position, Vector2 elementSize, Vector2 cellSize) {
             Vector2 previewSize = new Vector2(cellSize.x * elementSize.x, cellSize.y * elementSize.y);
-            Vector3 previewPosition = position;
+
+            // Calculate scale factor as a function of resolution
+            float scaleFactor = GetScaleFactor();
+
+            // Calculate offset based on cell size and anchor point
+            Vector2 offset = new Vector2(cellSize.x * (elementSize.x - 1) / 2f, cellSize.y * (elementSize.y - 1) / 2f);
+
+            // Apply scale factor to offset
+            offset *= scaleFactor;
+
+            Vector3 previewPosition;
             if (elementSize.x > 1 || elementSize.y > 1) {
-                previewPosition = new Vector3(position.x + previewSize.x - cellSize.x, position.y + previewSize.y - cellSize.y, position.z);
+                previewPosition = new Vector3(
+                    position.x + offset.x,
+                    position.y + offset.y,
+                    position.z
+                );
             }
+            else {
+                previewPosition = position;
+            }
+
             cellPreview.SetSize(previewSize);
             cellPreview.SetPosition(previewPosition);
+        }
+
+        /*
+        ** Function to obtain the scale factor as a function of resolution
+        */
+        float GetScaleFactor() {
+            // base resolution
+            float baseResolutionHeight = 1080f;
+
+            // Calculate scale factor as a function of screen height
+            return Screen.height / baseResolutionHeight;
         }
 
         public void Hide() {
