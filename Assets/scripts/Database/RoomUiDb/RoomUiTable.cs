@@ -79,7 +79,6 @@ namespace RoomUI {
                 dbManager.AddParameter(dbcmd, "@TopLayerElement", elementsJson);
                 dbManager.AddParameter(dbcmd, "@Id", roomUi.Id);
                 dbcmd.ExecuteNonQuery();
-                Debug.Log($"Room with ID {roomUi.Id} updated successfully.");
                 return roomUi.Id;
             }
             catch (Exception e) {

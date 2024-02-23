@@ -35,21 +35,21 @@ public class TooltipManager : MonoBehaviour {
         gridLayoutGroup = gridLayoutGroupGO.GetComponent<GridLayoutGroup>();
     }
 
-    public void CreateToolTip(TooltipType tooltipType, string message) {
+    public void CallTooltip(TooltipType tooltipType, string message) {
         switch (tooltipType) {
             case TooltipType.INFORMATION:
-                CreateToolTip(tooltipRowInfo, message);
+                CallTooltip(tooltipRowInfo, message);
                 break;
             case TooltipType.ERROR:
-                CreateToolTip(tooltipRowError, message);
+                CallTooltip(tooltipRowError, message);
                 break;
             case TooltipType.SUCCESS:
-                CreateToolTip(tooltipRowSuccess, message);
+                CallTooltip(tooltipRowSuccess, message);
                 break;
         }
     }
 
-    private void CreateToolTip(GameObject tooltipType, string message) {
+    private void CallTooltip(GameObject tooltipType, string message) {
         GameObject row = Instantiate(tooltipType, gridLayoutGroupGO.transform);
         row.transform.localScale = Vector3.one;
         RowTooltip rowTooltip = row.GetComponent<RowTooltip>();

@@ -15,12 +15,22 @@ namespace RoomUI {
         public event Action OnSaveClick;
         public event Action OnOpenClick;
         public event Action<RoomUIModel> OnRoomLoad;
+        public event Action<int> OnRoomDelete;
+        public event Action<int> OnRoomReset;
         public string CurrentShape => shape;
         public string CurrentDifficulty => difficulty;
         public string CurrentBiome => biome;
 
         public void OnSelectObject(Element selectedObject) {
             OnObjectSelected?.Invoke(selectedObject);
+        }
+
+        public void OnDeleteRoom(int id) {
+            OnRoomDelete?.Invoke(id);
+        }
+
+        public void OnResetRoom(int id) {
+            OnRoomReset?.Invoke(id);
         }
 
         public void OnLoadRoom(RoomUIModel roomUIModel) {

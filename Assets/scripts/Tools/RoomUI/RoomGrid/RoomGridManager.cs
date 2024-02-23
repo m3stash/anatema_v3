@@ -184,8 +184,10 @@ namespace RoomUI {
             roomUIStateManager.OnBiomeChange -= OnBiomeChange;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
             roomUIStateManager.OnRoomLoad -= OnLoadRoomHandler;
+            roomUIStateManager.OnRoomDelete -= OnDeleteRoomHandler;
             gridZoomMinus.onClick.RemoveListener(OnGridZoomMinusClick);
             gridZoomPlus.onClick.RemoveListener(OnGridZoomPlusClick);
+            roomUIStateManager.OnRoomReset -= OnDeleteRoomHandler;
         }
 
         private void CreateListeners() {
@@ -195,6 +197,8 @@ namespace RoomUI {
             roomUIStateManager.OnBiomeChange += OnBiomeChange;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
             roomUIStateManager.OnRoomLoad += OnLoadRoomHandler;
+            roomUIStateManager.OnRoomDelete += OnDeleteRoomHandler;
+            roomUIStateManager.OnRoomReset += OnDeleteRoomHandler;
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
@@ -233,6 +237,13 @@ namespace RoomUI {
                 return true;
             }
             return false;
+        }
+
+        private void OnDeleteRoomHandler(int id) {
+            roomGridService.ResetLayers();
+            currentGrid.ResetGrid();
+            if (id != -1)
+                TooltipManager.Instance.CallTooltip(TooltipType.INFORMATION, "Room GRID reset because current id had been deleted !");
         }
 
         private void OnLoadRoomHandler(RoomUIModel roomUIModel) {

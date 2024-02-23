@@ -2,8 +2,13 @@ namespace Modal {
     using UnityEngine;
 
     public class ModalManager : MonoBehaviour {
+        public static ModalManager Instance { get; private set; }
 
         private string prefabPathModalConfig = $"{GlobalConfig.Instance.CommonModalPath}/Modal_Confirm";
+
+        private void Awake() {
+            Instance = this;
+        }
 
         public ModalConfirm GetModalConfirm() {
             GameObject prefab = Resources.Load<GameObject>(prefabPathModalConfig);

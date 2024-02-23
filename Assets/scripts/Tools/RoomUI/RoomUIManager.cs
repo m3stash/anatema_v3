@@ -64,10 +64,10 @@ namespace RoomUI {
             int newRoomId = roomUIService.SaveRoom(roomUI);
             if (newRoomId != -1) {
                 formManager.SetRoomId(newRoomId);
-                TooltipManager.Instance.CreateToolTip(TooltipType.SUCCESS, "Room saved successfully !");
+                TooltipManager.Instance.CallTooltip(TooltipType.SUCCESS, "Room saved successfully !");
             }
             else {
-                TooltipManager.Instance.CreateToolTip(TooltipType.ERROR, "Room save failed !");
+                TooltipManager.Instance.CallTooltip(TooltipType.ERROR, "Room save failed !");
             }
         }
 

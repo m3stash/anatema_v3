@@ -213,9 +213,6 @@ namespace RoomUI {
                 CloseConfirmation();
                 pool.ReleaseOne(modalRoomManagerRowGO);
             }
-            else {
-                Debug.LogError("ModalRoomMananger: OnActionButtonClick, room not deleted !");
-            }
         }
 
         public void OnConfirm_ValidateEditRoomUI(RoomUIModel room) {

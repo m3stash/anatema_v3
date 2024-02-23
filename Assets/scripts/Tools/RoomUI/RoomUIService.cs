@@ -103,7 +103,7 @@ namespace RoomUI {
                 roomUIStateManager.OnLoadRoom(roomUIModel);
             }
             else {
-                Debug.LogError("RoomUIService(CopyRoom), roomUIModel is null with id : " + id);
+                TooltipManager.Instance.CallTooltip(TooltipType.ERROR, "Room id not found in database !");
             }
 
         }
@@ -130,14 +130,20 @@ namespace RoomUI {
                 roomUIStateManager.OnLoadRoom(roomUIModel);
             }
             else {
-                Debug.LogError("RoomUIService(CopyRoom), roomUIModel is null with id : " + id);
+                TooltipManager.Instance.CallTooltip(TooltipType.ERROR, "roomUIModel is null with id: " + id);
             }
 
         }
 
         public bool DeleteRoom(int id) {
-            // faire apparaitre une modale YES / NO
-            return roomUiTable.Delete(id);
+            bool roomIsDeleted = roomUiTable.Delete(id);
+            if (roomIsDeleted) {
+                TooltipManager.Instance.CallTooltip(TooltipType.SUCCESS, "Room deleted successfully !");
+                roomUIStateManager.OnDeleteRoom(id);
+                return true;
+            }
+            TooltipManager.Instance.CallTooltip(TooltipType.ERROR, "An error has been encountered while deleting the room !");
+            return false;
         }
 
     }

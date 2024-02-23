@@ -4,6 +4,7 @@ using RoomNs;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Modal;
 
 namespace RoomUI {
     public class FormManager : MonoBehaviour {
@@ -80,22 +81,26 @@ namespace RoomUI {
         }
 
         private void CreateListeners() {
+            roomUIStateManager.OnRoomDelete += OnRoomDelete;
             roomUIStateManager.OnRoomLoad += OnRoomLoad;
             save.onClick.AddListener(OnSaveClick);
-            delete.onClick.AddListener(OnDeleteClick);
+            delete.onClick.AddListener(() => ResetForm(true));
             open.onClick.AddListener(OnOpenClick);
 
             shapeDropdown.onValueChanged.AddListener(newValue => {
+                if (newValue == -1) return;
                 string value = shapeDropdown.options[newValue].text;
                 shape = value;
                 roomUIStateManager.OnChangeShape(value, canEmit);
             });
             difficultyDropdown.onValueChanged.AddListener(newValue => {
+                if (newValue == -1) return;
                 string value = difficultyDropdown.options[newValue].text;
                 difficulty = value;
                 roomUIStateManager.OnChangeDifficulty(value, canEmit);
             });
             biomeDropdown.onValueChanged.AddListener(newValue => {
+                if (newValue == -1) return;
                 string value = biomeDropdown.options[newValue].text;
                 biome = value;
                 roomUIStateManager.OnChangeBiome(value, canEmit);
@@ -124,7 +129,7 @@ namespace RoomUI {
                 roomUIStateManager.OnClickSave();
             }
             else {
-                TooltipManager.Instance.CreateToolTip(TooltipType.INFORMATION, "Some fields are empty !");
+                TooltipManager.Instance.CallTooltip(TooltipType.INFORMATION, "Some fields are empty !");
             }
         }
 
@@ -132,9 +137,39 @@ namespace RoomUI {
             roomUIStateManager.OnClickOpen();
         }
 
-        private void OnDeleteClick() {
-            id = -1;
-            idText.text = id.ToString();
+        private void ResetForm(bool canEmit = false) {
+            // TODO : AJOUTER la gestion de la touche escape (voir refactoriser tout car c'est pas terrible !!!)
+            if (canEmit) {
+                ModalConfirm modalConfirm = ModalManager.Instance.GetModalConfirm();
+                if (modalConfirm != null) {
+                    modalConfirm.Setup("the room will be destroyed and all unsaved changes will be lost, do you want to continue? ", () => OnCancelConfirm(modalConfirm), () => OnValideConfirm(modalConfirm));
+                }
+            }
+            else {
+                formReset();
+            }
+        }
+
+        private void formReset() {
+            idText.text = "-1";
+            displayName.text = "";
+            shapeDropdown.value = -1;
+            difficultyDropdown.value = -1;
+            biomeDropdown.value = -1;
+        }
+
+        private void OnRoomDelete(int id) {
+            ResetForm(false);
+        }
+
+        private void OnCancelConfirm(ModalConfirm modalConfirm) {
+            Destroy(modalConfirm.gameObject);
+        }
+
+        private void OnValideConfirm(ModalConfirm modalConfirm) {
+            roomUIStateManager.OnResetRoom(-1);
+            formReset();
+            Destroy(modalConfirm.gameObject);
         }
 
         void OnDestroy() {
