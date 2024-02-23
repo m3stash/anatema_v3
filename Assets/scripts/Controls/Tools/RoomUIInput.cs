@@ -50,6 +50,34 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Modal_Confirm"",
+            ""id"": ""941ccca3-3a1c-4bc4-b89f-82c912db2dd6"",
+            ""actions"": [
+                {
+                    ""name"": ""Close"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""02600d85-310b-46bc-8a81-b4dd2a8117ad"",
+                    ""expectedControlType"": ""Key"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""d5056a69-35e9-4a49-9207-e5b266097bde"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Close"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -57,6 +85,9 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
         // Modal_RoomMananger
         m_Modal_RoomMananger = asset.FindActionMap("Modal_RoomMananger", throwIfNotFound: true);
         m_Modal_RoomMananger_Close = m_Modal_RoomMananger.FindAction("Close", throwIfNotFound: true);
+        // Modal_Confirm
+        m_Modal_Confirm = asset.FindActionMap("Modal_Confirm", throwIfNotFound: true);
+        m_Modal_Confirm_Close = m_Modal_Confirm.FindAction("Close", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -160,7 +191,57 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
         }
     }
     public Modal_RoomManangerActions @Modal_RoomMananger => new Modal_RoomManangerActions(this);
+
+    // Modal_Confirm
+    private readonly InputActionMap m_Modal_Confirm;
+    private List<IModal_ConfirmActions> m_Modal_ConfirmActionsCallbackInterfaces = new List<IModal_ConfirmActions>();
+    private readonly InputAction m_Modal_Confirm_Close;
+    public struct Modal_ConfirmActions
+    {
+        private @RoomUIInput m_Wrapper;
+        public Modal_ConfirmActions(@RoomUIInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Close => m_Wrapper.m_Modal_Confirm_Close;
+        public InputActionMap Get() { return m_Wrapper.m_Modal_Confirm; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(Modal_ConfirmActions set) { return set.Get(); }
+        public void AddCallbacks(IModal_ConfirmActions instance)
+        {
+            if (instance == null || m_Wrapper.m_Modal_ConfirmActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_Modal_ConfirmActionsCallbackInterfaces.Add(instance);
+            @Close.started += instance.OnClose;
+            @Close.performed += instance.OnClose;
+            @Close.canceled += instance.OnClose;
+        }
+
+        private void UnregisterCallbacks(IModal_ConfirmActions instance)
+        {
+            @Close.started -= instance.OnClose;
+            @Close.performed -= instance.OnClose;
+            @Close.canceled -= instance.OnClose;
+        }
+
+        public void RemoveCallbacks(IModal_ConfirmActions instance)
+        {
+            if (m_Wrapper.m_Modal_ConfirmActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IModal_ConfirmActions instance)
+        {
+            foreach (var item in m_Wrapper.m_Modal_ConfirmActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_Modal_ConfirmActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public Modal_ConfirmActions @Modal_Confirm => new Modal_ConfirmActions(this);
     public interface IModal_RoomManangerActions
+    {
+        void OnClose(InputAction.CallbackContext context);
+    }
+    public interface IModal_ConfirmActions
     {
         void OnClose(InputAction.CallbackContext context);
     }

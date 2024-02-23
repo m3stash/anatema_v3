@@ -20,6 +20,11 @@ namespace RoomUI {
             return topLayer;
         }
 
+        public void ResetLayers() {
+            groundLayer = new List<GridElementModel>();
+            topLayer = new List<GridElementModel>();
+        }
+
         public List<CellRoomGO> GetCellsAtPosition(CellRoomGO cellRoomGO, Vector2Int selectedElementSize) {
             List<CellRoomGO> cells = new List<CellRoomGO>();
             Vector2Int size = selectedElementSize;

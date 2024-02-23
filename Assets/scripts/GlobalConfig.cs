@@ -12,6 +12,7 @@ public class GlobalConfig {
     private readonly string directoryResourceFolder;
     private readonly string scriptablePath;
     private readonly string prefabRoomsUIPath = "Prefabs/tools/roomUI";
+    private readonly string commonModalPath = "Prefabs/Common/Modal";
 
     private GlobalConfig() {
         prefabRoomsPath = "Prefabs/rooms/";
@@ -26,6 +27,12 @@ public class GlobalConfig {
     public static GlobalConfig Instance {
         get {
             return instance;
+        }
+    }
+
+    public string CommonModalPath {
+        get {
+            return commonModalPath;
         }
     }
 

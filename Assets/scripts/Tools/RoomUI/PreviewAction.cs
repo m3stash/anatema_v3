@@ -5,4 +5,5 @@ public enum PreviewAction {
     TRASH,
     SHOW_SPRITE,
     COPY,
+    DEFAULT
 }

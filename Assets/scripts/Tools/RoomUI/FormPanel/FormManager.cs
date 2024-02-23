@@ -10,6 +10,7 @@ namespace RoomUI {
         [SerializeField] public Button save;
         [SerializeField] public Button delete;
         [SerializeField] public Button open;
+        [SerializeField] public GameObject idGO;
         [SerializeField] public TMP_InputField displayName;
         [SerializeField] private TMP_Dropdown shapeDropdown;
         [SerializeField] private TMP_Dropdown difficultyDropdown;
@@ -18,6 +19,7 @@ namespace RoomUI {
 
         private RoomUIStateManager roomUIStateManager;
         private RoomUIFormValues roomUIFormValues;
+        private TextMeshProUGUI idText;
         private string biome;
         private string difficulty;
         private string shape;
@@ -32,6 +34,8 @@ namespace RoomUI {
         }
 
         private void InitComponents() {
+            idText = idGO.GetComponent<TextMeshProUGUI>();
+            idText.text = id.ToString();
             roomUIStateManager = stateManager.GetComponent<RoomUIStateManager>();
         }
 
@@ -41,6 +45,7 @@ namespace RoomUI {
 
         public void SetRoomId(int newRoomId) {
             id = newRoomId;
+            idText.text = newRoomId.ToString();
         }
 
         private void VerifySerialisables() {
@@ -50,6 +55,10 @@ namespace RoomUI {
                 { "difficultyDropdown", difficultyDropdown },
                 { "biomeDropdown", biomeDropdown },
                 { "stateManager", stateManager },
+                { "save", save },
+                { "delete", delete },
+                { "open", open },
+                { "idGO", idGO }
             };
             foreach (var field in serializableFields) {
                 if (field.Value == null) {
@@ -71,7 +80,7 @@ namespace RoomUI {
         }
 
         private void CreateListeners() {
-            roomUIStateManager.OnRoomCopy += OnCopyRoom;
+            roomUIStateManager.OnRoomLoad += OnRoomLoad;
             save.onClick.AddListener(OnSaveClick);
             delete.onClick.AddListener(OnDeleteClick);
             open.onClick.AddListener(OnOpenClick);
@@ -93,7 +102,7 @@ namespace RoomUI {
             });
         }
 
-        private void OnCopyRoom(RoomUIModel roomUIModel) {
+        private void OnRoomLoad(RoomUIModel roomUIModel) {
             if (roomUIModel == null) {
                 Debug.LogError("FormManager(OnCopyRoom): RoomUIModel is null copy not possible !");
                 return;
@@ -104,6 +113,7 @@ namespace RoomUI {
             difficultyDropdown.value = difficultyDropdown.options.FindIndex(option => option.text == roomUIModel.Difficulty);
             biomeDropdown.value = biomeDropdown.options.FindIndex(option => option.text == roomUIModel.Biome);
             id = roomUIModel.Id;
+            idText.text = id.ToString();
             canEmit = true;
         }
 
@@ -124,10 +134,11 @@ namespace RoomUI {
 
         private void OnDeleteClick() {
             id = -1;
+            idText.text = id.ToString();
         }
 
         void OnDestroy() {
-            roomUIStateManager.OnRoomCopy -= OnCopyRoom;
+            roomUIStateManager.OnRoomLoad -= OnRoomLoad;
             save.onClick.RemoveAllListeners();
             delete.onClick.RemoveAllListeners();
             open.onClick.RemoveAllListeners();

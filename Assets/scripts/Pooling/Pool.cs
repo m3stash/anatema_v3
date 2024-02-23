@@ -13,7 +13,6 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
 
     public void Setup(T prefab, int size) {
         this.prefab = prefab;
-
         for (int i = 0; i < size; i++) {
             T obj = Instantiate(prefab, transform);
             availableObjects.Enqueue(obj);
@@ -34,7 +33,8 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
 
         if (availableObjects.Count > 0) {
             obj = availableObjects.Dequeue();
-        } else {
+        }
+        else {
             obj = Instantiate(prefab, transform);
         }
         usedObjects.Add(obj);

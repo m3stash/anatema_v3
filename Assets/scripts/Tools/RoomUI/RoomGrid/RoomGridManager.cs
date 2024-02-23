@@ -93,7 +93,8 @@ namespace RoomUI {
 
         private void SelectCell(CellRoomGO cellRoomGO) {
             roomGridService.CreateCell(cellRoomGO, currenSelectedObject);
-            cellPreviewManager.Forbidden();
+            if (currenSelectedObject != null)
+                cellPreviewManager.Forbidden();
         }
 
         private void CopyCell(Element cellConfig) {
@@ -182,7 +183,7 @@ namespace RoomUI {
             roomUIStateManager.OnShapeChange -= OnShapeChange;
             roomUIStateManager.OnBiomeChange -= OnBiomeChange;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
-            roomUIStateManager.OnRoomCopy -= OnCopyRoomHandler;
+            roomUIStateManager.OnRoomLoad -= OnLoadRoomHandler;
             gridZoomMinus.onClick.RemoveListener(OnGridZoomMinusClick);
             gridZoomPlus.onClick.RemoveListener(OnGridZoomPlusClick);
         }
@@ -193,7 +194,7 @@ namespace RoomUI {
             roomUIStateManager.OnShapeChange += OnShapeChange;
             roomUIStateManager.OnBiomeChange += OnBiomeChange;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;
-            roomUIStateManager.OnRoomCopy += OnCopyRoomHandler;
+            roomUIStateManager.OnRoomLoad += OnLoadRoomHandler;
 
             if (gridZoomMinus != null) {
                 gridZoomMinus.onClick.AddListener(OnGridZoomMinusClick);
@@ -234,15 +235,15 @@ namespace RoomUI {
             return false;
         }
 
-        private void OnCopyRoomHandler(RoomUIModel roomUIModel) {
+        private void OnLoadRoomHandler(RoomUIModel roomUIModel) {
             if (roomUIModel == null) {
-                Debug.LogError("RoomGridManager(OnCopyRoomHandler): RoomUIModel is null copy not possible !");
+                Debug.LogError("RoomGridManager(OnLoadRoomHandler): RoomUIModel is null copy not possible !");
                 return;
             }
             if (roomUIModel != null) {
-                // create TOP layer
+                roomGridService.ResetLayers();
                 currentGrid.ResetGrid();
-                CreateGridView(roomUIModel);
+                CreateGridView();
                 roomUIModel.TopLayer.ForEach(cell => {
                     int x = cell.GetPosition().x;
                     int y = cell.GetPosition().y;
@@ -277,7 +278,7 @@ namespace RoomUI {
             OnSelectButtonClick();
         }
 
-        private void CreateGridView(RoomUIModel roomUIModel = null) {
+        private void CreateGridView() {
             string currentBiome = roomUIStateManager.CurrentBiome;
             string currentShape = roomUIStateManager.CurrentShape;
             RoomShapeEnum? newShape = Utilities.GetEnumValueFromDropdown<RoomShapeEnum>(currentShape);

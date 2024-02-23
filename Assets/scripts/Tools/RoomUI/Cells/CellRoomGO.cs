@@ -2,8 +2,9 @@
 using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.EventSystems;
+using UnityEngine.AI;
 
-public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
+public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
 
     [SerializeField] private GameObject cell;
     [SerializeField] private GameObject background;
@@ -32,6 +33,8 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
     }
 
     void Awake() {
+        // issue with localscale on 1080p resolution after instantiate go
+        transform.localScale = Vector3Int.one;
         button = cell.GetComponent<Button>();
         button.onClick.AddListener(OnCellClick);
         image = cell.GetComponent<Image>();
@@ -66,7 +69,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         this.isDoorOrWall = isDoorOrWall;
     }
 
-    private void SetComponentValues(Element config){
+    private void SetComponentValues(Element config) {
         this.config = config;
         Sprite cellIcon = config.GetSprite();
         image.sprite = cellIcon;
@@ -76,12 +79,12 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         button.onClick.RemoveListener(OnCellClick);
     }
 
-    public void DesactivateDisplay(){
+    public void DesactivateDisplay() {
         isDesactivatedCell = true;
         background.SetActive(false);
     }
 
-    public void ActivateDisplay(){
+    public void ActivateDisplay() {
         isDesactivatedCell = false;
         background.SetActive(true);
     }
@@ -109,7 +112,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         cellTransform.anchoredPosition = Vector2.zero;
     }
 
-    public void ResetCell(){
+    public void ResetCell() {
         ResetPoolCell();
         ResizeCellSize();
     }
@@ -142,11 +145,11 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         width = rectWidth;
         height = rectHeight;
         Vector2Int size;
-        if(config != null){
+        if (config != null) {
             size = config.GetSize();
-            if(size.x > 1 || size.y > 1) {
-                width = rectWidth  * size.x + (size.x - 1 * spacing.x);
-                height = rectHeight  * size.y + (size.y - 1 * spacing.y);
+            if (size.x > 1 || size.y > 1) {
+                width = rectWidth * size.x + (size.x - 1 * spacing.x);
+                height = rectHeight * size.y + (size.y - 1 * spacing.y);
             }
             ChangeSpriteYPosition(size.y, height);
         }
@@ -155,8 +158,8 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         backgroundTransform.sizeDelta = vSize;
     }
 
-    private void ChangeSpriteYPosition(int sizeY, float height){
-        if(sizeY > 1){
+    private void ChangeSpriteYPosition(int sizeY, float height) {
+        if (sizeY > 1) {
             Vector2 currentPosition = cellTransform.anchoredPosition;
             currentPosition.y = -(height - cellSize.y);
             cellTransform.anchoredPosition = currentPosition;
@@ -164,7 +167,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         }
     }
 
-    public Vector2 GetCellSize(){
+    public Vector2 GetCellSize() {
         return cellSize;
     }
 
@@ -183,7 +186,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
     }
 
     public CellRoomGO GetRootCellRoomGO() {
-        if(rootCellRoomGO == null){
+        if (rootCellRoomGO == null) {
             return this;
         }
         return rootCellRoomGO;
@@ -195,7 +198,7 @@ public class CellRoomGO: MonoBehaviour, IPointerEnterHandler {
         DesactivateDisplay();
     }
 
-    public void ResizeCellZiseAfterZoom(){
+    public void ResizeCellZiseAfterZoom() {
         StartCoroutine(AdjustSizeAfterFrame());
     }
 

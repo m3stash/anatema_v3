@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static RoomUIInput;
+using Modal;
+using DungeonNs;
 
 namespace RoomUI {
 
@@ -28,9 +29,11 @@ namespace RoomUI {
         private ModalRoomManageRowPool pool;
         private List<ModalRoomManagerRowGO> usedRows = new List<ModalRoomManagerRowGO>();
         private RoomUIService roomUIService;
-        private Modal_RoomManangerActions modalAction;
-
         private ModalClosedCallback modalClosedCallback;
+        private ModalConfirm modalConfirm;
+        private ModalManager modalManager;
+        private RoomUIInput.Modal_RoomManangerActions modal_RoomManangerActions;
+        private RoomUIInput.Modal_ConfirmActions modal_ConfirmActions;
 
         void Awake() {
             VerifySerialisables();
@@ -39,15 +42,24 @@ namespace RoomUI {
             InitDropdowns();
         }
 
-        public void Setup(RoomUiTable table, ModalRoomManageRowPool pool, RoomUIService roomUIService, Modal_RoomManangerActions modalAction, ModalClosedCallback callback) {
+        public void Setup(RoomUiTable table, ModalRoomManageRowPool pool, RoomUIService roomUIService, RoomUIInput roomUIInput, ModalClosedCallback callback, ModalManager modalManager) {
             if (table == null || pool == null || roomUIService == null)
                 throw new ArgumentNullException("ModalRoomMananger Setup, table, pool or roomUIService is null !");
+            ManageInput(roomUIInput);
             this.roomUIService = roomUIService;
             this.pool = pool;
             roomUiTable = table;
-            this.modalAction = modalAction;
-            modalAction.Close.performed += ctx => Close();
             modalClosedCallback = callback;
+            this.modalManager = modalManager;
+        }
+
+        private void ManageInput(RoomUIInput roomUIInput) {
+            modal_RoomManangerActions = roomUIInput.Modal_RoomMananger;
+            modal_RoomManangerActions.Enable();
+            modal_RoomManangerActions.Close.performed += ctx => Close();
+            modal_ConfirmActions = roomUIInput.Modal_Confirm;
+            modal_ConfirmActions.Disable();
+            modal_ConfirmActions.Close.performed += ctx => CloseConfirmation();
         }
 
         private void VerifySerialisables() {
@@ -99,8 +111,6 @@ namespace RoomUI {
             string difficulty = GetDropdownSelectedText(difficultyDropdown);
             string biome = GetDropdownSelectedText(biomeDropdown);
             int? parsedId = ParseID(id.text);
-            Debug.Log("Display name : " + displayNameText + " shape : " + shape + " difficulty : " + difficulty + " biome : " + biome + " id : " + parsedId);
-            // toDo : obliger  à remplir au moins le champ shape (ou autre pour limiter le nombre d'objets reçu ou lors prévoir une pagination..);
             roomUIModels = roomUiTable.SearchRoomsByParams(parsedId, displayNameText, shape, difficulty, biome);
             RefreshTable(roomUIModels);
         }
@@ -119,6 +129,7 @@ namespace RoomUI {
                 row.Setup(room);
                 usedRows.Add(row);
                 row.transform.SetParent(gridLayoutGroup.transform);
+                row.transform.localScale = Vector3.one;
                 row.gameObject.SetActive(true);
             }
         }
@@ -149,20 +160,13 @@ namespace RoomUI {
         private void OnActionButtonClick(RoomUIModel room, string action, ModalRoomManagerRowGO modalRoomManagerRowGO) {
             switch (action) {
                 case "delete":
-                    bool roomHasBeenDelete = roomUIService.DeleteRoom(room.Id);
-                    if (roomHasBeenDelete) {
-                        pool.ReleaseOne(modalRoomManagerRowGO);
-                    }
-                    else {
-                        Debug.LogError("ModalRoomMananger: OnActionButtonClick, room not deleted !");
-                    }
+                    OpenConfirmationModalDelete(room, modalRoomManagerRowGO);
                     break;
                 case "copy":
-                    roomUIService.CopyRoom(room);
-                    Close();
+                    OpenConfirmationModalCopy(room);
                     break;
                 case "edit":
-                    // toDo : ouvrir une modal pour éditer la room
+                    OpenConfirmationModalEdit(room);
                     break;
                 default:
                     Debug.LogError("ModalRoomMananger: OnActionButtonClick, action not found !");
@@ -170,12 +174,71 @@ namespace RoomUI {
             }
         }
 
+
+
+        public void CloseConfirmation() {
+            modal_RoomManangerActions.Enable();
+            modal_ConfirmActions.Disable();
+            Destroy(modalConfirm.gameObject);
+        }
+
+        public void OpenConfirmationModalDelete(RoomUIModel room, ModalRoomManagerRowGO modalRoomManagerRowGO) {
+            modalConfirm = modalManager.GetModalConfirm();
+            if (modalConfirm != null) {
+                modalConfirm.Setup("Are you sure you want to delete this room ?", CloseConfirmation, () => OnConfirm_ValidateDeleteRoomUI(room, modalRoomManagerRowGO));
+            }
+        }
+
+        public void OpenConfirmationModalEdit(RoomUIModel room) {
+            modal_RoomManangerActions.Disable();
+            modal_ConfirmActions.Enable();
+            modalConfirm = modalManager.GetModalConfirm();
+            if (modalConfirm != null) {
+                modalConfirm.Setup("Do you want to edit this room ?", CloseConfirmation, () => OnConfirm_ValidateEditRoomUI(room));
+            }
+        }
+
+        public void OpenConfirmationModalCopy(RoomUIModel room) {
+            modal_RoomManangerActions.Disable();
+            modal_ConfirmActions.Enable();
+            modalConfirm = modalManager.GetModalConfirm();
+            if (modalConfirm != null) {
+                modalConfirm.Setup("Do you want to create a new room from a copy of this one?", CloseConfirmation, () => OnConfirm_ValidateCopyRoomUI(room));
+            }
+        }
+
+        public void OnConfirm_ValidateDeleteRoomUI(RoomUIModel room, ModalRoomManagerRowGO modalRoomManagerRowGO) {
+            bool roomHasBeenDelete = roomUIService.DeleteRoom(room.Id);
+            if (roomHasBeenDelete) {
+                CloseConfirmation();
+                pool.ReleaseOne(modalRoomManagerRowGO);
+            }
+            else {
+                Debug.LogError("ModalRoomMananger: OnActionButtonClick, room not deleted !");
+            }
+        }
+
+        public void OnConfirm_ValidateEditRoomUI(RoomUIModel room) {
+            CloseConfirmation();
+            Close();
+            roomUIService.EditRoom(room);
+        }
+
+        public void OnConfirm_ValidateCopyRoomUI(RoomUIModel room) {
+            CloseConfirmation();
+            Close();
+            roomUIService.CopyRoom(room);
+        }
+
         private void Close() {
             modalClosedCallback?.Invoke();
         }
 
         void OnDestroy() {
-            modalAction.Close.performed -= ctx => Close();
+            modal_RoomManangerActions.Disable();
+            modal_ConfirmActions.Disable();
+            modal_RoomManangerActions.Close.performed -= ctx => Close();
+            modal_ConfirmActions.Close.performed -= ctx => Close();
             buttonClose.onClick.RemoveAllListeners();
             buttonSearch.onClick.RemoveAllListeners();
             ModalRoomManagerRowGO.OnButtonClick -= OnActionButtonClick;
