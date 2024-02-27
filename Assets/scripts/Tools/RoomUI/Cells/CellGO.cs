@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class CellGO: MonoBehaviour {
+public class CellGO : MonoBehaviour {
 
     private Image image;
     private Button button;
@@ -21,7 +21,7 @@ public class CellGO: MonoBehaviour {
     }
 
     void OnDestroy() {
-        if(button != null){
+        if (button != null) {
             button.onClick.RemoveListener(OnCellClick);
         }
     }
@@ -48,7 +48,8 @@ public class CellGO: MonoBehaviour {
             image = GetComponent<Image>();
             defaultColor = image.color;
             icon = cell.GetComponent<Image>();
-        } else {
+        }
+        else {
             image.enabled = true;
             button.interactable = true;
             image.color = defaultColor;
@@ -57,12 +58,14 @@ public class CellGO: MonoBehaviour {
         if (config == null) {
             // toDo voir quoi faire...
             // Debug.LogError("CellGO config cannot be null");
-        } else {
+        }
+        else {
             this.config = config;
             Sprite cellIcon = config.GetSprite();
             if (cellIcon) {
                 icon.sprite = cellIcon;
-            } else {
+            }
+            else {
                 icon.sprite = defaultIcon;
             }
 
