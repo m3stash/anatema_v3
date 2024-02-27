@@ -2,4 +2,5 @@
     DOOR,
     ENNEMY,
     ITEM,
+    UICell,
 }

@@ -13,6 +13,14 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
 
     public void Setup(T prefab, int size) {
         this.prefab = prefab;
+        for (int i = 0; i < size; i++) {
+            T obj = Instantiate(prefab, transform);
+            availableObjects.Enqueue(obj);
+        }
+    }
+
+    public void SetupWithParent(T prefab, int size, Transform transform) {
+        this.prefab = prefab;
 
         for (int i = 0; i < size; i++) {
             T obj = Instantiate(prefab, transform);
@@ -25,10 +33,10 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
 
         if (availableObjects.Count > 0) {
             obj = availableObjects.Dequeue();
-        } else {
+        }
+        else {
             obj = Instantiate(prefab, transform);
         }
-
         usedObjects.Add(obj);
 
         return obj;
@@ -42,8 +50,12 @@ public class Pool<T> : MonoBehaviour where T : MonoBehaviour {
             var pooledObjectTransform = obj.transform;
             pooledObjectTransform.SetParent(transform);
             pooledObjectTransform.localPosition = Vector3.zero;
+            //(obj as MonoBehaviour)?.StopAllCoroutines();
             obj.gameObject.SetActive(false);
-
         }
+    }
+
+    public void ReleaseMany(List<T> objects) {
+        objects.ForEach(obj => ReleaseOne(obj));
     }
 }

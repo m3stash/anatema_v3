@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85cd0b93e8e4e47148127f0c707c6994, type: 3}
+  m_Name: ElementTabConfig
+  m_EditorClassIdentifier: 
+  item: {fileID: 21300000, guid: 4f852af1b181644c4905732c4c4f1dca, type: 3}
+  entity: {fileID: 21300000, guid: e2b95708fbcc447c0ab44ad5f5b53da6, type: 3}
+  block: {fileID: 21300000, guid: cc17f923a454441faba9054a5193c331, type: 3}
+  decoration: {fileID: 21300000, guid: ffda039a704584b86a8e2377acbf4885, type: 3}
+  pedestral: {fileID: 21300000, guid: aede0df864f214b39beb27e5b8af85ee, type: 3}

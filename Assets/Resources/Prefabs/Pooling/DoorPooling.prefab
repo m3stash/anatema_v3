@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7445417672816584894}
   - component: {fileID: -3633085235604359642}
   m_Layer: 0
-  m_Name: DoorPooling
+  m_Name: doorPooling
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -45,7 +45,7 @@ public class SpriteConfig : ScriptableObject {
     };
 
     [SerializeField]
-    private BiomeRoomTypeSprites itemConfig = new BiomeRoomTypeSprites() {
+    private BiomeRoomTypeSprites Item = new BiomeRoomTypeSprites() {
         roomType = RoomTypeEnum.ITEMS.ToString(),
         leftSprite = null,
         topSprite = null
@@ -69,8 +69,8 @@ public class SpriteConfig : ScriptableObject {
 
     private List<BiomeEnum> GetExistingBiomes() {
         return Enum.GetValues(typeof(BiomeEnum))
-                   .Cast<BiomeEnum>()
-                   .ToList();
+            .Cast<BiomeEnum>()
+            .ToList();
     }
 
     private void Initialize() {
@@ -166,7 +166,7 @@ public class SpriteConfig : ScriptableObject {
             case RoomTypeEnum.BOSS:
                 return bossConfig;
             case RoomTypeEnum.ITEMS:
-                return itemConfig;
+                return Item;
             case RoomTypeEnum.SECRET:
                 return secretConfig;
             case RoomTypeEnum.STARTER:
