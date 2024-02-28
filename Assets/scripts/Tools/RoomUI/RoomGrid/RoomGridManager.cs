@@ -15,6 +15,9 @@ namespace RoomUI {
         [SerializeField] private Button selectButton;
         [SerializeField] private Button copyButton;
         [SerializeField] private Button trashButton;
+        [SerializeField] private Button layerTopButton;
+        [SerializeField] private Button layerMiddleButton;
+        [SerializeField] private Button layerBottomButton;
         [SerializeField] private Camera mainCamera;
         [SerializeField] private Sprite cursorSprite;
 
@@ -32,6 +35,7 @@ namespace RoomUI {
         private Color selectedButtonColor = Color.yellow;
         private Color defaultButtonColor;
         private RoomUIAction currentAction;
+        private RoomUIAction currentLayer;
         private Element currenSelectedObject;
         private string[,] roomGridPlane;
         private CellPreviewManager cellPreviewManager;
@@ -131,8 +135,10 @@ namespace RoomUI {
 
         private void InitButtonPanel() {
             currentAction = RoomUIAction.SELECT;
+            currentLayer = RoomUIAction.SELECT_LAYER_MIDDLE;
             defaultButtonColor = selectButton.colors.normalColor;
             ChangeButtonColor(selectButton, Color.yellow);
+            ChangeButtonColor(layerMiddleButton, Color.yellow);
         }
 
         private void ChangeButtonColor(Button button, Color color) {
@@ -140,6 +146,12 @@ namespace RoomUI {
             colorBlock.normalColor = color;
             colorBlock.selectedColor = color;
             button.colors = colorBlock;
+        }
+
+        private void ResetLayersColor() {
+            ChangeButtonColor(layerTopButton, defaultButtonColor);
+            ChangeButtonColor(layerMiddleButton, defaultButtonColor);
+            ChangeButtonColor(layerBottomButton, defaultButtonColor);
         }
 
         private void ResetButtonsColor() {
@@ -168,7 +180,12 @@ namespace RoomUI {
                 { "selectButton", selectButton },
                 { "copyButton", copyButton },
                 { "trashButton", trashButton },
-                { "cellPreviewGO", cellPreviewGO }
+                { "cellPreviewGO", cellPreviewGO },
+                { "layerTopButton", layerTopButton },
+                { "layerMiddleButton", layerMiddleButton },
+                { "layerBottomButton", layerBottomButton },
+                { "mainCamera", mainCamera },
+                { "cursorSprite", cursorSprite }
             };
             foreach (var field in serializableFields) {
                 if (field.Value == null) {
@@ -223,6 +240,24 @@ namespace RoomUI {
             }
             else {
                 Debug.LogError("copyButton is null");
+            }
+            if (layerTopButton != null) {
+                layerTopButton.onClick.AddListener(OnLayerTopButtonClick);
+            }
+            else {
+                Debug.LogError("layerTopButton is null");
+            }
+            if (layerMiddleButton != null) {
+                layerMiddleButton.onClick.AddListener(OnLayerMiddleButtonClick);
+            }
+            else {
+                Debug.LogError("layerMiddleButton is null");
+            }
+            if (layerBottomButton != null) {
+                layerBottomButton.onClick.AddListener(OnLayerBottomButtonClick);
+            }
+            else {
+                Debug.LogError("layerBottomButton is null");
             }
             if (trashButton != null) {
                 trashButton.onClick.AddListener(OnTrashButtonClick);
@@ -282,6 +317,23 @@ namespace RoomUI {
             currentAction = action;
             ResetButtonsColor();
             ChangeButtonColor(button, selectedButtonColor);
+        }
+
+        private void SetLayerConfiguration(RoomUIAction action, Button button) {
+            currentLayer = action;
+            ResetLayersColor();
+            ChangeButtonColor(button, selectedButtonColor);
+        }
+        private void OnLayerTopButtonClick() {
+            SetLayerConfiguration(RoomUIAction.SELECT_LAYER_TOP, layerTopButton);
+        }
+
+        private void OnLayerMiddleButtonClick() {
+            SetLayerConfiguration(RoomUIAction.SELECT_LAYER_MIDDLE, layerMiddleButton);
+        }
+
+        private void OnLayerBottomButtonClick() {
+            SetLayerConfiguration(RoomUIAction.SELECT_LAYER_BOTTOM, layerBottomButton);
         }
 
         private void OnObjectSelectedHandler(Element selectedObject) {

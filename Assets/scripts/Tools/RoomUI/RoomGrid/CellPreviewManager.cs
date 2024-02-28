@@ -35,7 +35,6 @@ namespace RoomUI {
             else {
                 previewPosition = position;
             }
-
             cellPreview.SetSize(previewSize);
             cellPreview.SetPosition(previewPosition);
         }
