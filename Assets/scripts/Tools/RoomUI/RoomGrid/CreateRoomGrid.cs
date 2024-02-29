@@ -32,7 +32,7 @@ namespace RoomUI {
             }
         }
 
-        public void GenerateGrid(Transform transform, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols) {
+        public void GenerateGrid(Transform transform, Vector2Int[] roomSections, Vector2Int roomSize, int rows, int cols, LayerType layerType) {
             ResetPool();
             this.roomSections = roomSections;
             this.roomSize = roomSize;
@@ -47,7 +47,7 @@ namespace RoomUI {
                     cell.transform.SetParent(transform);
                     GameObject cellRoomGo = cell.gameObject;
                     cellRoomGo.SetActive(true);
-                    cell.Setup(null, Vector2.zero, new Vector2Int(col, row));
+                    cell.Setup(null, layerType, Vector2.zero, new Vector2Int(col, row));
                     CreateDoorOrWall(col, row, cell);
                 }
             }

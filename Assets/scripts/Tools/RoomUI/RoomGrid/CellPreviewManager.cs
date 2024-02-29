@@ -109,29 +109,29 @@ namespace RoomUI {
             }
         }
 
-        public void OnHoverTrashAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition) {
-            if (cellRoomGO.GetConfig() == null) {
+        public void OnHoverTrashAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition, LayerType layerType) {
+            if (cellRoomGO.GetConfig(layerType) == null) {
                 SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
                 return;
             }
-            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO().transform.position, cellRoomGO.GetConfig().GetSize(), cellSize);
+            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO(layerType).transform.position, cellRoomGO.GetConfig(layerType).GetSize(), cellSize);
         }
 
-        public void OnClickTrashAction(CellRoomGO cellRoomGO) {
+        public void OnClickTrashAction(CellRoomGO cellRoomGO, LayerType layerType) {
             Vector2 cellSize = cellRoomGO.GetCellSize();
-            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO().transform.position, new Vector2(1, 1), cellSize);
+            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO(layerType).transform.position, new Vector2(1, 1), cellSize);
             Hover();
         }
 
-        public void OnHoverCopyAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition) {
-            if (cellRoomGO.GetConfig() == null) {
+        public void OnHoverCopyAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition, LayerType layerType) {
+            if (cellRoomGO.GetConfig(layerType) == null) {
                 SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
                 return;
             }
-            SetPreviewByActionType(PreviewAction.COPY, cellRoomGO.GetRootCellRoomGO().transform.position, cellRoomGO.GetConfig().GetSize(), cellSize);
+            SetPreviewByActionType(PreviewAction.COPY, cellRoomGO.GetRootCellRoomGO(layerType).transform.position, cellRoomGO.GetConfig(layerType).GetSize(), cellSize);
         }
 
-        public void OnHoverSelectAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition, bool isVoidCell, Element currenSelectedObject) {
+        public void OnHoverSelectAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition, bool isVoidCell, Element currenSelectedObject, LayerType layerType) {
             if (isVoidCell && currenSelectedObject == null) {
                 SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
                 return;
@@ -139,7 +139,7 @@ namespace RoomUI {
             if (currenSelectedObject != null) {
                 Vector2Int selectedElementSize = currenSelectedObject.GetSize();
                 List<CellRoomGO> cells = roomGridService.GetCellsAtPosition(cellRoomGO, selectedElementSize);
-                if (cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
+                if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
                     SetPreviewByActionType(PreviewAction.FORBIDDEN, cellRoomGOPosition, selectedElementSize, cellSize);
                 }
                 else {

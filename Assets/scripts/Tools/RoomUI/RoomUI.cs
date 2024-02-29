@@ -9,16 +9,18 @@ namespace RoomUI {
         private int id;
 
         private List<GridElementModel> topLayer = new List<GridElementModel>();
-        private List<GridElementModel> groundLayer = new List<GridElementModel>();
+        private List<GridElementModel> bottomLayer = new List<GridElementModel>();
+        private List<GridElementModel> middleLayer = new List<GridElementModel>();
 
-        public RoomUIModel(string name, string shape, string biome, string difficulty, int id, List<GridElementModel> topLayer, List<GridElementModel> groundLayer) {
+        public RoomUIModel(string name, string shape, string biome, string difficulty, int id, List<GridElementModel> topLayer, List<GridElementModel> bottomLayer, List<GridElementModel> middleLayer) {
             this.name = name;
             this.shape = shape;
             this.biome = biome;
             this.difficulty = difficulty;
             this.id = id;
             this.topLayer = topLayer;
-            this.groundLayer = null; // todo voir ça plus tard..
+            this.bottomLayer = bottomLayer;
+            this.middleLayer = middleLayer;
         }
 
         public string Name { get => name; set => name = value; }
@@ -27,6 +29,7 @@ namespace RoomUI {
         public string Biome { get => biome; }
         public int Id { get => id; set => id = value; }
         public List<GridElementModel> TopLayer { get => topLayer; }
-        public List<GridElementModel> GroundLayer { get => groundLayer; }
+        public List<GridElementModel> BottomLayer { get => bottomLayer; }
+        public List<GridElementModel> MiddleLayer { get => middleLayer; }
     }
 }

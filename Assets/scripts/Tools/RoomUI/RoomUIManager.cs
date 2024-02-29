@@ -59,8 +59,8 @@ namespace RoomUI {
 
         private void SaveRoom() {
             RoomUIFormValues roomUIFormValues = formManager.GetFormValues();
-            (List<GridElementModel> topLayer, List<GridElementModel> groundLayer) = roomGridManager.GetLayers();
-            RoomUIModel roomUI = new RoomUIModel(roomUIFormValues.Name, roomUIFormValues.Shape, roomUIFormValues.Biome, roomUIFormValues.Difficulty, roomUIFormValues.Id, topLayer, groundLayer);
+            (List<GridElementModel> topLayer, List<GridElementModel> bottomLayer, List<GridElementModel> middleLayer) = roomGridManager.GetLayers();
+            RoomUIModel roomUI = new RoomUIModel(roomUIFormValues.Name, roomUIFormValues.Shape, roomUIFormValues.Biome, roomUIFormValues.Difficulty, roomUIFormValues.Id, topLayer, bottomLayer, middleLayer);
             int newRoomId = roomUIService.SaveRoom(roomUI);
             if (newRoomId != -1) {
                 formManager.SetRoomId(newRoomId);

@@ -30,7 +30,9 @@ namespace RoomUI {
                 [Shape] TEXT NOT NULL,
                 [Difficulty] TEXT NOT NULL,
                 [Biome] TEXT NOT NULL,
-                [TopLayerElement] TEXT NOT NULL
+                [TopLayerElement] TEXT NOT NULL,
+                [BottomLayerElement] TEXT NOT NULL,
+                [MiddleLayerElement] TEXT NOT NULL
             )";
             tableManager.CreateTable(tableName, sqlQuery, dbconn);
         }
@@ -38,14 +40,18 @@ namespace RoomUI {
         public int Insert(RoomUIModel room) {
             try {
                 using IDbCommand dbcmd = dbconn.CreateCommand();
-                dbcmd.CommandText = $"INSERT INTO {tableName} (name, shape, difficulty, biome, topLayerElement) VALUES (@Name, @Shape, @Difficulty, @Biome, @TopLayerElement);";
+                dbcmd.CommandText = $"INSERT INTO {tableName} (name, shape, difficulty, biome, topLayerElement, bottomLayerElement, middleLayerElement) VALUES (@Name, @Shape, @Difficulty, @Biome, @TopLayerElement, @BottomLayerElement, @MiddleLayerElement);";
                 dbManager.AddParameter(dbcmd, "@Name", room.Name);
                 dbManager.AddParameter(dbcmd, "@Shape", room.Shape);
                 dbManager.AddParameter(dbcmd, "@Difficulty", room.Difficulty);
                 dbManager.AddParameter(dbcmd, "@Biome", room.Biome);
                 // Sérialiser la liste d'éléments en JSON
-                string elementsJson = JsonConvert.SerializeObject(room.TopLayer);
-                dbManager.AddParameter(dbcmd, "@TopLayerElement", elementsJson);
+                string topLayerJson = JsonConvert.SerializeObject(room.TopLayer);
+                dbManager.AddParameter(dbcmd, "@TopLayerElement", topLayerJson);
+                string bottomLayerJson = JsonConvert.SerializeObject(room.BottomLayer);
+                dbManager.AddParameter(dbcmd, "@BottomLayerElement", bottomLayerJson);
+                string middleLayerJson = JsonConvert.SerializeObject(room.MiddleLayer);
+                dbManager.AddParameter(dbcmd, "@MiddleLayerElement", middleLayerJson);
                 dbcmd.ExecuteNonQuery();
 
                 dbcmd.CommandText = "SELECT last_insert_rowid()";
@@ -70,13 +76,17 @@ namespace RoomUI {
         public int Update(RoomUIModel roomUi) {
             try {
                 using IDbCommand dbcmd = dbconn.CreateCommand();
-                dbcmd.CommandText = $"UPDATE {tableName} SET name = @Name, shape = @Shape, difficulty = @Difficulty, biome = @Biome, topLayerElement = @TopLayerElement WHERE id = @Id;";
+                dbcmd.CommandText = $"UPDATE {tableName} SET name = @Name, shape = @Shape, difficulty = @Difficulty, biome = @Biome, topLayerElement = @TopLayerElement, bottomLayerElement = @BottomLayerElement, middleLayerElement = @MiddleLayerElement WHERE id = @Id;";
                 dbManager.AddParameter(dbcmd, "@Name", roomUi.Name);
                 dbManager.AddParameter(dbcmd, "@Shape", roomUi.Shape);
                 dbManager.AddParameter(dbcmd, "@Difficulty", roomUi.Difficulty);
                 dbManager.AddParameter(dbcmd, "@Biome", roomUi.Biome);
-                string elementsJson = JsonConvert.SerializeObject(roomUi.TopLayer);
-                dbManager.AddParameter(dbcmd, "@TopLayerElement", elementsJson);
+                string topLayerJson = JsonConvert.SerializeObject(roomUi.TopLayer);
+                dbManager.AddParameter(dbcmd, "@TopLayerElement", topLayerJson);
+                string bottomLayerJson = JsonConvert.SerializeObject(roomUi.TopLayer);
+                dbManager.AddParameter(dbcmd, "@BottomLayerElement", bottomLayerJson);
+                string middleLayerJson = JsonConvert.SerializeObject(roomUi.TopLayer);
+                dbManager.AddParameter(dbcmd, "@MiddleLayerElement", middleLayerJson);
                 dbManager.AddParameter(dbcmd, "@Id", roomUi.Id);
                 dbcmd.ExecuteNonQuery();
                 return roomUi.Id;
@@ -122,6 +132,7 @@ namespace RoomUI {
                             reader.GetString(reader.GetOrdinal("difficulty")),
                             reader.GetInt32(reader.GetOrdinal("id")),
                             null,
+                            null,
                             null
                         );
                         results.Add(room);
@@ -159,6 +170,8 @@ namespace RoomUI {
                 using IDataReader reader = dbcmd.ExecuteReader();
                 while (reader.Read()) {
                     List<GridElementModel> topLayer = JsonConvert.DeserializeObject<List<GridElementModel>>(reader.GetString(reader.GetOrdinal("topLayerElement")));
+                    List<GridElementModel> bottomLayer = JsonConvert.DeserializeObject<List<GridElementModel>>(reader.GetString(reader.GetOrdinal("bottomLayerElement")));
+                    List<GridElementModel> middleLayer = JsonConvert.DeserializeObject<List<GridElementModel>>(reader.GetString(reader.GetOrdinal("middleLayerElement")));
                     room = new RoomUIModel(
                         reader.GetString(reader.GetOrdinal("name")),
                         reader.GetString(reader.GetOrdinal("shape")),
@@ -166,7 +179,8 @@ namespace RoomUI {
                         reader.GetString(reader.GetOrdinal("difficulty")),
                         reader.GetInt32(reader.GetOrdinal("id")),
                         topLayer,
-                        null
+                        bottomLayer,
+                        middleLayer
                     );
                 }
             }

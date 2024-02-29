@@ -35,7 +35,7 @@ namespace RoomUI {
         private Color selectedButtonColor = Color.yellow;
         private Color defaultButtonColor;
         private RoomUIAction currentAction;
-        private RoomUIAction currentLayer;
+        private LayerType layerType = LayerType.MIDDLE;
         private Element currenSelectedObject;
         private string[,] roomGridPlane;
         private CellPreviewManager cellPreviewManager;
@@ -61,8 +61,8 @@ namespace RoomUI {
             currentGrid = new CreateRoomGrid(pool);
         }
 
-        public (List<GridElementModel>, List<GridElementModel>) GetLayers() {
-            return (roomGridService.GetTopLayer(), roomGridService.GetGroundLayer());
+        public (List<GridElementModel>, List<GridElementModel>, List<GridElementModel>) GetLayers() {
+            return (roomGridService.GetTopLayer(), roomGridService.GetBottomLayer(), roomGridService.GetMiddleLayer());
         }
 
         private void ChangeCursor() {
@@ -74,7 +74,7 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-            Element cellConfig = cellRoomGO.GetConfig();
+            Element cellConfig = cellRoomGO.GetConfig(layerType);
             switch (currentAction) {
                 case RoomUIAction.COPY:
                     CopyCell(cellConfig);
@@ -90,13 +90,13 @@ namespace RoomUI {
 
         private void DeleteCell(CellRoomGO cellRoomGO) {
             if (!IsVoidCell(cellRoomGO)) {
-                roomGridService.DeleteCell(cellRoomGO);
-                cellPreviewManager.OnClickTrashAction(cellRoomGO);
+                roomGridService.DeleteCell(cellRoomGO, layerType);
+                cellPreviewManager.OnClickTrashAction(cellRoomGO, layerType);
             }
         }
 
         private void SelectCell(CellRoomGO cellRoomGO) {
-            roomGridService.CreateCell(cellRoomGO, currenSelectedObject);
+            roomGridService.CreateCell(cellRoomGO, currenSelectedObject, layerType);
             if (currenSelectedObject != null)
                 cellPreviewManager.Forbidden();
         }
@@ -119,13 +119,13 @@ namespace RoomUI {
             Vector3 cellRoomGOPosition = cellRoomGO.transform.position;
             switch (currentAction) {
                 case RoomUIAction.SELECT:
-                    cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject);
+                    cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
                     break;
                 case RoomUIAction.TRASH:
-                    cellPreviewManager.OnHoverTrashAction(cellRoomGO, cellSize, cellRoomGOPosition);
+                    cellPreviewManager.OnHoverTrashAction(cellRoomGO, cellSize, cellRoomGOPosition, layerType);
                     break;
                 case RoomUIAction.COPY:
-                    cellPreviewManager.OnHoverCopyAction(cellRoomGO, cellSize, cellRoomGOPosition);
+                    cellPreviewManager.OnHoverCopyAction(cellRoomGO, cellSize, cellRoomGOPosition, layerType);
                     break;
                 default:
                     cellPreviewManager.Reset();
@@ -135,7 +135,7 @@ namespace RoomUI {
 
         private void InitButtonPanel() {
             currentAction = RoomUIAction.SELECT;
-            currentLayer = RoomUIAction.SELECT_LAYER_MIDDLE;
+            layerType = LayerType.MIDDLE;
             defaultButtonColor = selectButton.colors.normalColor;
             ChangeButtonColor(selectButton, Color.yellow);
             ChangeButtonColor(layerMiddleButton, Color.yellow);
@@ -268,7 +268,7 @@ namespace RoomUI {
         }
 
         private bool IsVoidCell(CellRoomGO cellRoomGO) {
-            if (cellRoomGO?.GetConfig() == null && !cellRoomGO.IsDesactivatedCell()) {
+            if (cellRoomGO?.GetConfig(layerType) == null && !cellRoomGO.IsDesactivatedCell()) {
                 return true;
             }
             return false;
@@ -296,7 +296,7 @@ namespace RoomUI {
                     int index = y * gridLayout.constraintCount + x;
                     GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
                     CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
-                    roomGridService.CreateCell(cellRoomGO, cell.GetElement());
+                    roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
                 });
             }
         }
@@ -319,21 +319,21 @@ namespace RoomUI {
             ChangeButtonColor(button, selectedButtonColor);
         }
 
-        private void SetLayerConfiguration(RoomUIAction action, Button button) {
-            currentLayer = action;
+        private void SetLayerConfiguration(LayerType layerType, Button button) {
+            this.layerType = layerType;
             ResetLayersColor();
             ChangeButtonColor(button, selectedButtonColor);
         }
         private void OnLayerTopButtonClick() {
-            SetLayerConfiguration(RoomUIAction.SELECT_LAYER_TOP, layerTopButton);
+            SetLayerConfiguration(LayerType.TOP, layerTopButton);
         }
 
         private void OnLayerMiddleButtonClick() {
-            SetLayerConfiguration(RoomUIAction.SELECT_LAYER_MIDDLE, layerMiddleButton);
+            SetLayerConfiguration(LayerType.MIDDLE, layerMiddleButton);
         }
 
         private void OnLayerBottomButtonClick() {
-            SetLayerConfiguration(RoomUIAction.SELECT_LAYER_BOTTOM, layerBottomButton);
+            SetLayerConfiguration(LayerType.BOTTOM, layerBottomButton);
         }
 
         private void OnObjectSelectedHandler(Element selectedObject) {
@@ -394,7 +394,7 @@ namespace RoomUI {
                 int cols = roomSize.x * (int)RoomSizeEnum.WIDTH;
                 int rows = roomSize.y * (int)RoomSizeEnum.HEIGHT;
                 gridLayout.constraintCount = cols;
-                currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols);
+                currentGrid.GenerateGrid(transform, roomSections, roomSize, rows, cols, layerType);
                 ModifyGridLayoutRectTransform(cols, rows);
             }
             else {

@@ -6,23 +6,29 @@ namespace RoomUI {
 
         private GridLayoutGroup gridLayout;
         private List<GridElementModel> topLayer = new List<GridElementModel>();
-        private List<GridElementModel> groundLayer = new List<GridElementModel>();
+        private List<GridElementModel> middleLayer = new List<GridElementModel>();
+        private List<GridElementModel> bottomLayer = new List<GridElementModel>();
 
         public RoomGridService(GridLayoutGroup gridLayout) {
             this.gridLayout = gridLayout;
         }
 
-        public List<GridElementModel> GetGroundLayer() {
-            return groundLayer;
+        public List<GridElementModel> GetBottomLayer() {
+            return bottomLayer;
         }
 
         public List<GridElementModel> GetTopLayer() {
             return topLayer;
         }
 
+        public List<GridElementModel> GetMiddleLayer() {
+            return middleLayer;
+        }
+
         public void ResetLayers() {
-            groundLayer = new List<GridElementModel>();
+            bottomLayer = new List<GridElementModel>();
             topLayer = new List<GridElementModel>();
+            middleLayer = new List<GridElementModel>();
         }
 
         public List<CellRoomGO> GetCellsAtPosition(CellRoomGO cellRoomGO, Vector2Int selectedElementSize) {
@@ -54,27 +60,27 @@ namespace RoomUI {
             return size.x > 1 || size.y > 1;
         }
 
-        public void CreateCell(CellRoomGO cellRoomGO, Element selectedElement) {
-            if (selectedElement == null || cellRoomGO.GetConfig() != null) return;
+        public void CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
+            if (selectedElement == null || cellRoomGO.GetConfig(layerType) != null) return;
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, selectedElement.GetSize());
-            if (cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
+            if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
                 return;
             }
             else {
                 CellRoomGO cell = null;
                 if (IsBigCell(selectedElement.GetSize())) {
-                    cell = DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement);
+                    cell = DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement, layerType);
                 }
                 else {
                     cell = cellRoomGO;
                 }
-                AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition());
-                cell.Setup(selectedElement, gridLayout.spacing, cellRoomGO.GetPosition());
+                AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layerType);
+                cell.Setup(selectedElement, layerType, gridLayout.spacing, cellRoomGO.GetPosition());
                 return;
             }
         }
 
-        public CellRoomGO DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement) {
+        public CellRoomGO DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
             CellRoomGO topLeftCell = null;
             cells.ForEach(cell => {
                 /*
@@ -86,30 +92,50 @@ namespace RoomUI {
                 if (topLeftCell == null || cell.GetPosition().x < topLeftCell.GetPosition().x || cell.GetPosition().y < topLeftCell.GetPosition().y) {
                     topLeftCell = cell;
                 }
-                cell.SetupDesactivatedCell(cellRoomGO, selectedElement);
+                cell.SetupDesactivatedCell(cellRoomGO, selectedElement, layerType);
             });
             return topLeftCell;
         }
 
-        public void AddCellInUsedCell(Element element, Vector2Int position) {
-            topLayer.Add(new GridElementModel(element.GetId(), position));
+        public void AddCellInUsedCell(Element element, Vector2Int position, LayerType layerType) {
+            if (layerType == LayerType.BOTTOM) {
+                bottomLayer.Add(new GridElementModel(element.GetId(), position));
+            }
+            if (layerType == LayerType.MIDDLE) {
+                middleLayer.Add(new GridElementModel(element.GetId(), position));
+            }
+            if (layerType == LayerType.TOP) {
+                topLayer.Add(new GridElementModel(element.GetId(), position));
+            }
         }
 
-        public void DeleteCell(CellRoomGO cellRoomGO) {
-            Element config = cellRoomGO.GetConfig();
+        public void DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
+            Element config = cellRoomGO.GetConfig(layerType);
             if (config == null && !cellRoomGO.IsDesactivatedCell()) return;
-            RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO());
+            RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO(layerType), layerType);
             Vector2Int size = config.GetSize();
-            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(), config.GetSize());
+            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(layerType), config.GetSize());
             cells.ForEach(cell => {
                 cell.ResetCell();
             });
         }
 
-        private void RemoveCellInUsedCell(CellRoomGO cellRoomGO) {
-            topLayer.RemoveAt(topLayer.FindIndex(cellConfig =>
-                cellConfig.GetId() == cellRoomGO.GetConfig().GetId() &&
+        private void RemoveCellInUsedCell(CellRoomGO cellRoomGO, LayerType layerType) {
+            if (layerType == LayerType.BOTTOM) {
+                bottomLayer.RemoveAt(bottomLayer.FindIndex(cellConfig =>
+                    cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
+                    cellConfig.GetPosition() == cellRoomGO.GetPosition()));
+            }
+            if (layerType == LayerType.MIDDLE) {
+                middleLayer.RemoveAt(middleLayer.FindIndex(cellConfig =>
+                    cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
+                    cellConfig.GetPosition() == cellRoomGO.GetPosition()));
+            }
+            if (layerType == LayerType.TOP) {
+                topLayer.RemoveAt(topLayer.FindIndex(cellConfig =>
+                cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
                 cellConfig.GetPosition() == cellRoomGO.GetPosition()));
+            }
         }
 
     }
