@@ -24,6 +24,7 @@ namespace RoomUI {
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
+        private List<CellRoomGO> cellRoomGoList = new List<CellRoomGO>();
         private CreateRoomGrid currentGrid;
         private RectTransform rectTransform;
         private int cellSize = 28;
@@ -90,13 +91,23 @@ namespace RoomUI {
 
         private void DeleteCell(CellRoomGO cellRoomGO) {
             if (!IsVoidCell(cellRoomGO)) {
-                roomGridService.DeleteCell(cellRoomGO, layerType);
+                CellRoomGO deletedCell = roomGridService.DeleteCell(cellRoomGO, layerType);
+                if (deletedCell) {
+                    bool isEmptyCell = deletedCell.IsLayersEmpty();
+                    if (isEmptyCell) {
+                        cellRoomGoList.Remove(deletedCell);
+                        Debug.Log("CellRoomGO removed from list " + cellRoomGoList.Count);
+                    }
+                }
                 cellPreviewManager.OnClickTrashAction(cellRoomGO, layerType);
             }
         }
 
         private void SelectCell(CellRoomGO cellRoomGO) {
-            roomGridService.CreateCell(cellRoomGO, currenSelectedObject, layerType);
+            CellRoomGO cellCreated = roomGridService.CreateCell(cellRoomGO, currenSelectedObject, layerType);
+            if (cellCreated) {
+                AddUniqueCell(cellCreated);
+            }
             if (currenSelectedObject != null)
                 cellPreviewManager.Forbidden();
         }
@@ -268,7 +279,7 @@ namespace RoomUI {
         }
 
         private bool IsVoidCell(CellRoomGO cellRoomGO) {
-            if (cellRoomGO?.GetConfig(layerType) == null && !cellRoomGO.IsDesactivatedCell()) {
+            if (cellRoomGO?.GetConfig(layerType) == null && !cellRoomGO.IsDesactivatedCell(layerType)) {
                 return true;
             }
             return false;
@@ -281,24 +292,90 @@ namespace RoomUI {
                 TooltipManager.Instance.CallTooltip(TooltipType.INFORMATION, "Room GRID reset because current id had been deleted !");
         }
 
+        private void AddUniqueCell(CellRoomGO cellRoomGO) {
+            if (!cellRoomGoList.Contains(cellRoomGO)) {
+                cellRoomGoList.Add(cellRoomGO);
+                Debug.Log("CellRoomGO added to list " + cellRoomGoList.Count);
+            }
+        }
+
+        // private void OnLoadRoomHandler(RoomUIModel roomUIModel) {
+        //     if (roomUIModel == null) {
+        //         Debug.LogError("RoomGridManager(OnLoadRoomHandler): RoomUIModel is null copy not possible !");
+        //         return;
+        //     }
+        //     if (roomUIModel != null) {
+        //         roomGridService.ResetLayers();
+        //         currentGrid.ResetGrid();
+        //         ClearCellRoomGoList();
+        //         Debug.Log("Clear List" + cellRoomGoList.Count);
+        //         CreateGridView();
+
+        //         roomUIModel.TopLayer.ForEach(cell => {
+        //             int x = cell.GetPosition().x;
+        //             int y = cell.GetPosition().y;
+        //             int index = y * gridLayout.constraintCount + x;
+        //             GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
+        //             CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
+        //             CellRoomGO createdCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
+        //             if (createdCell) {
+        //                 AddUniqueCell(cellRoomGO);
+        //             }
+        //         });
+        //         roomUIModel.MiddleLayer.ForEach(cell => {
+        //             int x = cell.GetPosition().x;
+        //             int y = cell.GetPosition().y;
+        //             int index = y * gridLayout.constraintCount + x;
+        //             GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
+        //             CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
+        //             CellRoomGO createdCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
+        //             if (createdCell) {
+        //                 AddUniqueCell(cellRoomGO);
+        //             }
+        //         });
+        //         roomUIModel.BottomLayer.ForEach(cell => {
+        //             int x = cell.GetPosition().x;
+        //             int y = cell.GetPosition().y;
+        //             int index = y * gridLayout.constraintCount + x;
+        //             GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
+        //             CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
+        //             CellRoomGO createdCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
+        //             if (createdCell) {
+        //                 AddUniqueCell(cellRoomGO);
+        //             }
+        //         });
+        //     }
+        // }
+
         private void OnLoadRoomHandler(RoomUIModel roomUIModel) {
             if (roomUIModel == null) {
                 Debug.LogError("RoomGridManager(OnLoadRoomHandler): RoomUIModel is null copy not possible !");
                 return;
             }
-            if (roomUIModel != null) {
-                roomGridService.ResetLayers();
-                currentGrid.ResetGrid();
-                CreateGridView();
-                roomUIModel.TopLayer.ForEach(cell => {
-                    int x = cell.GetPosition().x;
-                    int y = cell.GetPosition().y;
-                    int index = y * gridLayout.constraintCount + x;
-                    GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
-                    CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
-                    roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
-                });
-            }
+
+            roomGridService.ResetLayers();
+            currentGrid.ResetGrid();
+            ClearCellRoomGoList();
+            Debug.Log("Clear List" + cellRoomGoList.Count);
+            CreateGridView();
+
+            CreateCellsForLayer(roomUIModel.TopLayer);
+            CreateCellsForLayer(roomUIModel.MiddleLayer);
+            CreateCellsForLayer(roomUIModel.BottomLayer);
+        }
+
+        private void CreateCellsForLayer(List<GridElementModel> layer) {
+            layer.ForEach(cell => {
+                int x = cell.GetPosition().x;
+                int y = cell.GetPosition().y;
+                int index = y * gridLayout.constraintCount + x;
+                GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
+                CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
+                CellRoomGO createdCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
+                if (createdCell) {
+                    AddUniqueCell(cellRoomGO);
+                }
+            });
         }
 
         private void OnTrashButtonClick() {
@@ -321,8 +398,33 @@ namespace RoomUI {
 
         private void SetLayerConfiguration(LayerType layerType, Button button) {
             this.layerType = layerType;
+            ChangeLayerOpacity(layerType);
             ResetLayersColor();
             ChangeButtonColor(button, selectedButtonColor);
+        }
+
+        private void ChangeLayerOpacity(LayerType layerType) {
+            if (layerType == LayerType.TOP) {
+                cellRoomGoList.ForEach(cellRoomGO => {
+                    cellRoomGO.SetOpacity(LayerType.TOP, 1f);
+                    cellRoomGO.SetOpacity(LayerType.MIDDLE, 0.5f);
+                    cellRoomGO.SetOpacity(LayerType.BOTTOM, 0.5f);
+                });
+            }
+            else if (layerType == LayerType.MIDDLE) {
+                cellRoomGoList.ForEach(cellRoomGO => {
+                    cellRoomGO.SetOpacity(LayerType.TOP, 0.5f);
+                    cellRoomGO.SetOpacity(LayerType.MIDDLE, 1f);
+                    cellRoomGO.SetOpacity(LayerType.BOTTOM, 0.5f);
+                });
+            }
+            else if (layerType == LayerType.BOTTOM) {
+                cellRoomGoList.ForEach(cellRoomGO => {
+                    cellRoomGO.SetOpacity(LayerType.TOP, 0.5f);
+                    cellRoomGO.SetOpacity(LayerType.MIDDLE, 0.5f);
+                    cellRoomGO.SetOpacity(LayerType.BOTTOM, 1f);
+                });
+            }
         }
         private void OnLayerTopButtonClick() {
             SetLayerConfiguration(LayerType.TOP, layerTopButton);
@@ -353,7 +455,17 @@ namespace RoomUI {
             }
             else {
                 currentGrid.ResetGrid();
+                ClearCellRoomGoList();
             }
+        }
+
+        private void ClearCellRoomGoList() {
+            cellRoomGoList.ForEach(cell => {
+                cell.SetOpacity(LayerType.TOP, 1f);
+                cell.SetOpacity(LayerType.MIDDLE, 1f);
+                cell.SetOpacity(LayerType.BOTTOM, 1f);
+            });
+            cellRoomGoList.Clear();
         }
 
         private void OnShapeChange(string shape) {

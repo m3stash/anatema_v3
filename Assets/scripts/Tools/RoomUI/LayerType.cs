@@ -1,9 +1,8 @@
-namespace RoomUI
-{
-    public enum LayerType
-    {
+namespace RoomUI {
+    public enum LayerType {
         TOP,
         MIDDLE,
-        BOTTOM
+        BOTTOM,
+        ALL
     }
 }

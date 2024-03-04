@@ -60,11 +60,11 @@ namespace RoomUI {
             return size.x > 1 || size.y > 1;
         }
 
-        public void CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
-            if (selectedElement == null || cellRoomGO.GetConfig(layerType) != null) return;
+        public CellRoomGO CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
+            if (selectedElement == null || cellRoomGO.GetConfig(layerType) != null) return null;
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, selectedElement.GetSize());
-            if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
-                return;
+            if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layerType))) {
+                return null;
             }
             else {
                 CellRoomGO cell = null;
@@ -76,7 +76,7 @@ namespace RoomUI {
                 }
                 AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layerType);
                 cell.Setup(selectedElement, layerType, gridLayout.spacing, cellRoomGO.GetPosition());
-                return;
+                return cell;
             }
         }
 
@@ -109,33 +109,43 @@ namespace RoomUI {
             }
         }
 
-        public void DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
+        public CellRoomGO DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
             Element config = cellRoomGO.GetConfig(layerType);
-            if (config == null && !cellRoomGO.IsDesactivatedCell()) return;
-            RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO(layerType), layerType);
-            Vector2Int size = config.GetSize();
-            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(layerType), config.GetSize());
-            cells.ForEach(cell => {
-                cell.ResetCell();
-            });
+            if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return null;
+            CellRoomGO deletedCell = RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO(layerType), layerType);
+            if (deletedCell) {
+                Vector2Int size = config.GetSize();
+                List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(layerType), config.GetSize());
+                cells.ForEach(cell => {
+                    cell.ResetCell(layerType);
+                });
+                return deletedCell;
+            }
+            return null;
         }
 
-        private void RemoveCellInUsedCell(CellRoomGO cellRoomGO, LayerType layerType) {
+        private CellRoomGO RemoveCellInUsedCell(CellRoomGO cellRoomGO, LayerType layerType) {
             if (layerType == LayerType.BOTTOM) {
-                bottomLayer.RemoveAt(bottomLayer.FindIndex(cellConfig =>
-                    cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
-                    cellConfig.GetPosition() == cellRoomGO.GetPosition()));
+                return DeleteElement(bottomLayer, layerType, cellRoomGO);
             }
             if (layerType == LayerType.MIDDLE) {
-                middleLayer.RemoveAt(middleLayer.FindIndex(cellConfig =>
-                    cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
-                    cellConfig.GetPosition() == cellRoomGO.GetPosition()));
+                return DeleteElement(middleLayer, layerType, cellRoomGO);
             }
             if (layerType == LayerType.TOP) {
-                topLayer.RemoveAt(topLayer.FindIndex(cellConfig =>
-                cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
-                cellConfig.GetPosition() == cellRoomGO.GetPosition()));
+                return DeleteElement(topLayer, layerType, cellRoomGO);
             }
+            return null;
+        }
+
+        private CellRoomGO DeleteElement(List<GridElementModel> layer, LayerType layerType, CellRoomGO cellRoomGO) {
+            int index = layer.FindIndex(cellConfig =>
+                cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
+                cellConfig.GetPosition() == cellRoomGO.GetPosition());
+            if (index != -1) {
+                layer.RemoveAt(index);
+                return cellRoomGO;
+            }
+            return null;
         }
 
     }

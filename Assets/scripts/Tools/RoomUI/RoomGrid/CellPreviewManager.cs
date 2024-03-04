@@ -139,7 +139,7 @@ namespace RoomUI {
             if (currenSelectedObject != null) {
                 Vector2Int selectedElementSize = currenSelectedObject.GetSize();
                 List<CellRoomGO> cells = roomGridService.GetCellsAtPosition(cellRoomGO, selectedElementSize);
-                if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
+                if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layerType))) {
                     SetPreviewByActionType(PreviewAction.FORBIDDEN, cellRoomGOPosition, selectedElementSize, cellSize);
                 }
                 else {
