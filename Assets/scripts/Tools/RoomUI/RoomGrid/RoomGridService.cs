@@ -76,7 +76,7 @@ namespace RoomUI {
                 }
                 AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layerType);
                 cell.Setup(selectedElement, layerType, gridLayout.spacing, cellRoomGO.GetPosition());
-                return cell;
+                return cellRoomGO;
             }
         }
 
@@ -108,6 +108,21 @@ namespace RoomUI {
                 topLayer.Add(new GridElementModel(element.GetId(), position));
             }
         }
+
+        // public CellRoomGO DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
+        //     Element config = cellRoomGO.GetConfig(layerType);
+        //     if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return null;
+        //     CellRoomGO deletedCell = RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO(layerType), layerType);
+        //     if (deletedCell) {
+        //         Vector2Int size = config.GetSize();
+        //         List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(layerType), config.GetSize());
+        //         cells.ForEach(cell => {
+        //             cell.ResetCell(layerType);
+        //         });
+        //         return deletedCell;
+        //     }
+        //     return null;
+        // }
 
         public CellRoomGO DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
             Element config = cellRoomGO.GetConfig(layerType);
