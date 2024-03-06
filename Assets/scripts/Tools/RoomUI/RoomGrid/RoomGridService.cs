@@ -60,41 +60,25 @@ namespace RoomUI {
             return size.x > 1 || size.y > 1;
         }
 
-        public CellRoomGO CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
-            if (selectedElement == null || cellRoomGO.GetConfig(layerType) != null) return null;
-            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, selectedElement.GetSize());
+        public bool CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
+            if (selectedElement == null || cellRoomGO.GetConfig(layerType) != null) return false;
+            Vector2Int size = selectedElement.GetSize();
+            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, size);
             if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layerType))) {
-                return null;
+                return false;
             }
-            else {
-                CellRoomGO cell = null;
-                if (IsBigCell(selectedElement.GetSize())) {
-                    cell = DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement, layerType);
-                }
-                else {
-                    cell = cellRoomGO;
-                }
-                AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layerType);
-                cell.Setup(selectedElement, layerType, gridLayout.spacing, cellRoomGO.GetPosition());
-                return cellRoomGO;
+            if (IsBigCell(size)) {
+                DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement, layerType);
             }
+            AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layerType);
+            cellRoomGO.Setup(selectedElement, layerType, gridLayout.spacing, cellRoomGO.GetPosition());
+            return true;
         }
 
-        public CellRoomGO DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
-            CellRoomGO topLeftCell = null;
+        public void DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
             cells.ForEach(cell => {
-                /*
-                * Creates the sprite in the top-left cell.
-                * Unity manages its rows in such a way that each row below has a higher z'index than the one above.
-                * Otherwise, the image passes over the other cells and, when hovering, if it's at the bottom left, you can no longer select the cells above.
-                *
-                */
-                if (topLeftCell == null || cell.GetPosition().x < topLeftCell.GetPosition().x || cell.GetPosition().y < topLeftCell.GetPosition().y) {
-                    topLeftCell = cell;
-                }
-                cell.SetupDesactivatedCell(cellRoomGO, selectedElement, layerType);
+                cell.SetupBigCell(cellRoomGO.GetInstanceID(), selectedElement, layerType);
             });
-            return topLeftCell;
         }
 
         public void AddCellInUsedCell(Element element, Vector2Int position, LayerType layerType) {
@@ -109,37 +93,21 @@ namespace RoomUI {
             }
         }
 
-        // public CellRoomGO DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
-        //     Element config = cellRoomGO.GetConfig(layerType);
-        //     if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return null;
-        //     CellRoomGO deletedCell = RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO(layerType), layerType);
-        //     if (deletedCell) {
-        //         Vector2Int size = config.GetSize();
-        //         List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(layerType), config.GetSize());
-        //         cells.ForEach(cell => {
-        //             cell.ResetCell(layerType);
-        //         });
-        //         return deletedCell;
-        //     }
-        //     return null;
-        // }
-
-        public CellRoomGO DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
+        public bool DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
             Element config = cellRoomGO.GetConfig(layerType);
-            if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return null;
-            CellRoomGO deletedCell = RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO(layerType), layerType);
-            if (deletedCell) {
-                Vector2Int size = config.GetSize();
-                List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(layerType), config.GetSize());
+            if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return false;
+            bool isDeletedCell = RemoveCellInUsedCell(cellRoomGO, layerType);
+            if (isDeletedCell) {
+                List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, config.GetSize());
                 cells.ForEach(cell => {
                     cell.ResetCell(layerType);
                 });
-                return deletedCell;
+                return true;
             }
-            return null;
+            return false;
         }
 
-        private CellRoomGO RemoveCellInUsedCell(CellRoomGO cellRoomGO, LayerType layerType) {
+        private bool RemoveCellInUsedCell(CellRoomGO cellRoomGO, LayerType layerType) {
             if (layerType == LayerType.BOTTOM) {
                 return DeleteElement(bottomLayer, layerType, cellRoomGO);
             }
@@ -149,18 +117,18 @@ namespace RoomUI {
             if (layerType == LayerType.TOP) {
                 return DeleteElement(topLayer, layerType, cellRoomGO);
             }
-            return null;
+            return false;
         }
 
-        private CellRoomGO DeleteElement(List<GridElementModel> layer, LayerType layerType, CellRoomGO cellRoomGO) {
+        private bool DeleteElement(List<GridElementModel> layer, LayerType layerType, CellRoomGO cellRoomGO) {
             int index = layer.FindIndex(cellConfig =>
                 cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
                 cellConfig.GetPosition() == cellRoomGO.GetPosition());
             if (index != -1) {
                 layer.RemoveAt(index);
-                return cellRoomGO;
+                return true;
             }
-            return null;
+            return false;
         }
 
     }

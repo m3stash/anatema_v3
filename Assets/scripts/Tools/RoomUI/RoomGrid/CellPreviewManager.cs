@@ -114,12 +114,12 @@ namespace RoomUI {
                 SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
                 return;
             }
-            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO(layerType).transform.position, cellRoomGO.GetConfig(layerType).GetSize(), cellSize);
+            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.transform.position, cellRoomGO.GetConfig(layerType).GetSize(), cellSize);
         }
 
         public void OnClickTrashAction(CellRoomGO cellRoomGO, LayerType layerType) {
             Vector2 cellSize = cellRoomGO.GetCellSize();
-            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.GetRootCellRoomGO(layerType).transform.position, new Vector2(1, 1), cellSize);
+            SetPreviewByActionType(PreviewAction.TRASH, cellRoomGO.transform.position, new Vector2(1, 1), cellSize);
             Hover();
         }
 
@@ -128,7 +128,7 @@ namespace RoomUI {
                 SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
                 return;
             }
-            SetPreviewByActionType(PreviewAction.COPY, cellRoomGO.GetRootCellRoomGO(layerType).transform.position, cellRoomGO.GetConfig(layerType).GetSize(), cellSize);
+            SetPreviewByActionType(PreviewAction.COPY, cellRoomGO.transform.position, cellRoomGO.GetConfig(layerType).GetSize(), cellSize);
         }
 
         public void OnHoverSelectAction(CellRoomGO cellRoomGO, Vector2 cellSize, Vector3 cellRoomGOPosition, bool isVoidCell, Element currenSelectedObject, LayerType layerType) {

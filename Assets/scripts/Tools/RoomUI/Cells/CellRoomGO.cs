@@ -31,9 +31,9 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     private bool isLayerTopDesactivated;
     private bool isLayerMiddleDesactivated;
     private bool isLayerBottomDesactivated;
-    private CellRoomGO rootTopCellRoomGO;
-    private CellRoomGO rootMiddleCellRoomGO;
-    private CellRoomGO rootBottomCellRoomGO;
+    private int rootTopCellRoomGOInstanceID;
+    private int rootMiddleCellRoomGOInstanceID;
+    private int rootBottomCellRoomGOInstanceID;
     private Color32 defaultColorCell = new Color32(200, 200, 200, 255);
     private Color32 doorColor = new Color32(125, 125, 45, 255);
     private Color32 wallColor = new Color32(50, 50, 50, 255);
@@ -65,9 +65,19 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         // backgroundTransform = background.GetComponent<RectTransform>();
     }
 
-    // public Transform GetCellTransform() {
-    //     return cellTransform.transform;
-    // }
+    public int GetInstanceIDByLayer(LayerType layerType) {
+        if (layerType == LayerType.TOP) {
+            return rootTopCellRoomGOInstanceID;
+        }
+        if (layerType == LayerType.MIDDLE) {
+            return rootMiddleCellRoomGOInstanceID;
+
+        }
+        if (layerType == LayerType.BOTTOM) {
+            return rootBottomCellRoomGOInstanceID;
+        }
+        return -1;
+    }
 
     public bool IsDesactivatedCell(LayerType layerType) {
         return cellDesactivated;
@@ -87,16 +97,22 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
 
     private void SetComponentValues(Element config, LayerType layerType) {
         if (layerType == LayerType.TOP) {
+            rootTopCellRoomGOInstanceID = GetInstanceID();
             configTopLayer = config;
             imageTop.sprite = configTopLayer.GetSprite();
+            imageTop.raycastTarget = false;  // avoids interaction with cells above due to image size if larger than 1x1
         }
         if (layerType == LayerType.MIDDLE) {
+            rootMiddleCellRoomGOInstanceID = GetInstanceID();
             configMiddleLayer = config;
             imageMiddle.sprite = configMiddleLayer.GetSprite();
+            imageMiddle.raycastTarget = false;
         }
         if (layerType == LayerType.BOTTOM) {
+            rootBottomCellRoomGOInstanceID = GetInstanceID();
             configBottomLayer = config;
             imageBottom.sprite = configBottomLayer.GetSprite();
+            imageBottom.raycastTarget = false;
         }
         imageCell.sprite = transparentIcon;
     }
@@ -151,34 +167,34 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         if (layerType == LayerType.TOP || layerType == LayerType.ALL) {
             configTopLayer = null;
             if (imageTop.sprite != transparentIcon) {
+                imageTop.sprite = transparentIcon;
+                imageTop.raycastTarget = true;
                 ResizeCellSize(layerType);
             }
-            rootTopCellRoomGO = null;
-            imageTop.sprite = transparentIcon;
+            rootTopCellRoomGOInstanceID = -1;
             cellTopTransform.anchoredPosition = Vector2.zero;
         }
         if (layerType == LayerType.MIDDLE || layerType == LayerType.ALL) {
             configMiddleLayer = null;
             if (imageMiddle.sprite != transparentIcon) {
+                imageMiddle.sprite = transparentIcon;
+                imageMiddle.raycastTarget = true;
                 ResizeCellSize(layerType);
             }
-            rootMiddleCellRoomGO = null;
-            imageMiddle.sprite = transparentIcon;
+            rootMiddleCellRoomGOInstanceID = -1;
             cellMiddleTransform.anchoredPosition = Vector2.zero;
         }
         if (layerType == LayerType.BOTTOM || layerType == LayerType.ALL) {
             configBottomLayer = null;
             if (imageBottom.sprite != transparentIcon) {
+                imageBottom.sprite = transparentIcon;
+                imageBottom.raycastTarget = true;
                 ResizeCellSize(layerType);
             }
-            rootBottomCellRoomGO = null;
-            imageBottom.sprite = transparentIcon;
+            rootBottomCellRoomGOInstanceID = -1;
             cellBottomTransform.anchoredPosition = Vector2.zero;
         }
         ResetPoolCell();
-        // if ((configTopLayer == null && configMiddleLayer == null && configBottomLayer == null) || layerType == LayerType.ALL) {
-        //     ResetPoolCell(layerType);
-        // }
     }
 
     public void ForbiddenAction() {
@@ -239,16 +255,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
             height = rectHeight * size.y + (size.y - 1 * spacing.y);
         }
         rectTransform.sizeDelta = new Vector2(width, height);
-        ChangeSpriteYPosition(size.y, height, rectTransform);
-    }
-
-    private void ChangeSpriteYPosition(int sizeY, float height, RectTransform rectTransform) {
-        if (sizeY > 1) {
-            Vector2 currentPosition = rectTransform.anchoredPosition;
-            currentPosition.y = -(height - cellSize.y);
-            rectTransform.anchoredPosition = currentPosition;
-            //backgroundTransform.anchoredPosition = currentPosition;
-        }
     }
 
     public Vector2 GetCellSize() {
@@ -285,40 +291,40 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         image.color = new Color(image.color.r, image.color.g, image.color.b, opacity);
     }
 
-    public CellRoomGO GetRootCellRoomGO(LayerType layerType) {
+    public int GetRootCellRoomGOInstanceID(LayerType layerType) {
         if (layerType == LayerType.TOP) {
-            if (rootTopCellRoomGO == null) {
-                return this;
+            if (rootTopCellRoomGOInstanceID == -1) {
+                return GetInstanceID();
             }
-            return rootTopCellRoomGO;
+            return rootTopCellRoomGOInstanceID;
         }
         else if (layerType == LayerType.MIDDLE) {
-            if (rootMiddleCellRoomGO == null) {
-                return this;
+            if (rootMiddleCellRoomGOInstanceID == -1) {
+                return GetInstanceID();
             }
-            return rootMiddleCellRoomGO;
+            return rootMiddleCellRoomGOInstanceID;
         }
         else if (layerType == LayerType.BOTTOM) {
-            if (rootBottomCellRoomGO == null) {
-                return this;
+            if (rootBottomCellRoomGOInstanceID == -1) {
+                return GetInstanceID();
             }
-            return rootBottomCellRoomGO;
+            return rootBottomCellRoomGOInstanceID;
         }
-        return null;
+        return -1;
     }
 
-    public void SetupDesactivatedCell(CellRoomGO rootCellRoomGO, Element config, LayerType layerType) {
+    public void SetupBigCell(int instanceID, Element config, LayerType layerType) {
         if (layerType == LayerType.TOP) {
             configTopLayer = config;
-            rootTopCellRoomGO = rootCellRoomGO;
+            rootTopCellRoomGOInstanceID = instanceID;
         }
         else if (layerType == LayerType.MIDDLE) {
             configMiddleLayer = config;
-            rootMiddleCellRoomGO = rootCellRoomGO;
+            rootMiddleCellRoomGOInstanceID = instanceID;
         }
         else if (layerType == LayerType.BOTTOM) {
             configBottomLayer = config;
-            rootBottomCellRoomGO = rootCellRoomGO;
+            rootBottomCellRoomGOInstanceID = instanceID;
         }
         DesactivateDisplay();
     }
