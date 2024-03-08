@@ -298,6 +298,19 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         image.color = new Color(image.color.r, image.color.g, image.color.b, opacity);
     }
 
+    public bool IsVoidCell(LayerType layerType) {
+        if (layerType == LayerType.TOP) {
+            return rootTopCellRoomGOInstanceID <= 0 && configTopLayer == null;
+        }
+        else if (layerType == LayerType.MIDDLE) {
+            return rootMiddleCellRoomGOInstanceID <= 0 && configMiddleLayer == null;
+        }
+        else if (layerType == LayerType.BOTTOM) {
+            return rootBottomCellRoomGOInstanceID <= 0 && configBottomLayer == null;
+        }
+        return false;
+    }
+
     public int GetRootCellRoomGOInstanceID(LayerType layerType) {
         if (layerType == LayerType.TOP) {
             if (rootTopCellRoomGOInstanceID == -1) {

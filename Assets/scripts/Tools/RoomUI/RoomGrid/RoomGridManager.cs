@@ -193,13 +193,7 @@ namespace RoomUI {
             }
             switch (currentAction) {
                 case RoomUIAction.SELECT:
-                    if (elementSize.x > 1 || elementSize.y > 1) {
-                        CellRoomGO rootCell = GetRootCellByIdAndLayer(cellRoomGO, layerType);
-                        cellPreviewManager.OnHoverSelectAction(rootCell, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
-                    }
-                    else {
-                        cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
-                    }
+                    cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
                     break;
                 case RoomUIAction.TRASH:
                     if (elementSize.x > 1 || elementSize.y > 1) {
@@ -360,7 +354,7 @@ namespace RoomUI {
         }
 
         private bool IsVoidCell(CellRoomGO cellRoomGO) {
-            if (cellRoomGO.GetRootCellRoomGOInstanceID(layerType) == 0 && !cellRoomGO.IsDesactivatedCell(layerType)) {
+            if (cellRoomGO.IsVoidCell(layerType) && !cellRoomGO.IsDesactivatedCell(layerType)) {
                 return true;
             }
             return false;
