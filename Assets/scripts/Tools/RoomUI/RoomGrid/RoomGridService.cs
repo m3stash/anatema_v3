@@ -83,18 +83,18 @@ namespace RoomUI {
             return size.x > 1 || size.y > 1;
         }
 
-        public bool CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
-            if (selectedElement == null || cellRoomGO.GetConfig(layerType) != null) return false;
+        public bool CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layer) {
+            if (selectedElement == null || cellRoomGO.GetConfig(layer) != null) return false;
             Vector2Int size = selectedElement.GetSize();
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, size);
-            if (cells.Exists(cell => cell.GetConfig(layerType) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layerType))) {
+            if (cells.Exists(cell => cell.GetConfig(layer) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layer))) {
                 return false;
             }
             if (IsBigCell(size)) {
-                DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement, layerType);
+                DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement, layer);
             }
-            AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layerType);
-            cellRoomGO.Setup(selectedElement, layerType, gridLayout.spacing, cellRoomGO.GetPosition());
+            AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layer);
+            cellRoomGO.Setup(selectedElement, layer, gridLayout.spacing, cellRoomGO.GetPosition());
             return true;
         }
 
@@ -123,7 +123,7 @@ namespace RoomUI {
             if (isDeletedCell) {
                 List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, config.GetSize());
                 cells.ForEach(cell => {
-                    cell.ResetCell(layerType);
+                    cell.ResetLayerCell(layerType);
                 });
                 return true;
             }

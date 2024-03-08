@@ -80,59 +80,52 @@ namespace RoomUI {
         }
 
         public void CopyRoom(RoomUIModel partialModel) {
-            int id = partialModel.Id;
-            RoomUIModel roomUIModel = roomUiTable.GetRoomById(id);
-            if (roomUIModel != null) {
-                roomUIModel.Id = -1;
-                roomUIModel.Name = "Copy of " + roomUIModel.Name;
-                List<GridElementModel> topLayerElements = roomUIModel.TopLayer;
-                List<int> idsList = new List<int>();
-                topLayerElements.ForEach(element => {
-                    idsList.Add(element.GetId());
-                });
-                List<Element> elements = elementTable.GetElementsByIds(idsList);
-                topLayerElements.ForEach(element => {
-                    int elementId = element.GetId();
-                    int itemId = element.GetId();
-                    Element elementToCopy = elements.Find(e => e.GetId() == elementId);
-                    elementToCopy.SetSprite(spriteLoader.GetSprite(elementToCopy.GetCategory(), elementToCopy.GetSpriteName()));
-                    if (elementToCopy != null) {
-                        element.SetElement(elementToCopy);
-                    }
-                });
-                roomUIStateManager.OnLoadRoom(roomUIModel);
-            }
-            else {
-                TooltipManager.Instance.CallTooltip(TooltipType.ERROR, "Room id not found in database !");
-            }
-
+            EditRoom(partialModel, true);
         }
 
-        public void EditRoom(RoomUIModel partialModel) {
+        public void EditRoom(RoomUIModel partialModel, bool isCopy = false) {
             int id = partialModel.Id;
             RoomUIModel roomUIModel = roomUiTable.GetRoomById(id);
             if (roomUIModel != null) {
-                List<GridElementModel> topLayerElements = roomUIModel.TopLayer;
-                List<int> idsList = new List<int>();
-                topLayerElements.ForEach(element => {
-                    idsList.Add(element.GetId());
-                });
-                List<Element> elements = elementTable.GetElementsByIds(idsList);
-                topLayerElements.ForEach(element => {
-                    int elementId = element.GetId();
-                    int itemId = element.GetId();
-                    Element elt = elements.Find(e => e.GetId() == elementId);
-                    elt.SetSprite(spriteLoader.GetSprite(elt.GetCategory(), elt.GetSpriteName()));
-                    if (elt != null) {
-                        element.SetElement(elt);
-                    }
-                });
+                List<int> idList = new List<int>();
+                AddIdInList(roomUIModel.TopLayer, idList);
+                AddIdInList(roomUIModel.MiddleLayer, idList);
+                AddIdInList(roomUIModel.BottomLayer, idList);
+                List<Element> elements = elementTable.GetElementsByIds(idList);
+                CreateElementFromId(roomUIModel.TopLayer, elements);
+                CreateElementFromId(roomUIModel.MiddleLayer, elements);
+                CreateElementFromId(roomUIModel.BottomLayer, elements);
+                if (isCopy) {
+                    roomUIModel.Id = -1;
+                    roomUIModel.Name = "Copy of " + roomUIModel.Name;
+                }
                 roomUIStateManager.OnLoadRoom(roomUIModel);
             }
             else {
                 TooltipManager.Instance.CallTooltip(TooltipType.ERROR, "roomUIModel is null with id: " + id);
             }
+        }
 
+        private void AddIdInList(List<GridElementModel> eltlayer, List<int> idList) {
+            if (eltlayer == null) return;
+            eltlayer.ForEach(element => {
+                if (!idList.Contains(element.GetId())) {
+                    idList.Add(element.GetId());
+                }
+            });
+        }
+
+        private void CreateElementFromId(List<GridElementModel> eltlayer, List<Element> elements) {
+            if (eltlayer == null) return;
+            eltlayer.ForEach(element => {
+                int elementId = element.GetId();
+                int itemId = element.GetId();
+                Element elt = elements.Find(e => e.GetId() == elementId);
+                elt.SetSprite(spriteLoader.GetSprite(elt.GetCategory(), elt.GetSpriteName()));
+                if (elt != null) {
+                    element.SetElement(elt);
+                }
+            });
         }
 
         public bool DeleteRoom(int id) {

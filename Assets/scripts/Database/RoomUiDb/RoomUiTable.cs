@@ -83,9 +83,9 @@ namespace RoomUI {
                 dbManager.AddParameter(dbcmd, "@Biome", roomUi.Biome);
                 string topLayerJson = JsonConvert.SerializeObject(roomUi.TopLayer);
                 dbManager.AddParameter(dbcmd, "@TopLayerElement", topLayerJson);
-                string bottomLayerJson = JsonConvert.SerializeObject(roomUi.TopLayer);
+                string bottomLayerJson = JsonConvert.SerializeObject(roomUi.BottomLayer);
                 dbManager.AddParameter(dbcmd, "@BottomLayerElement", bottomLayerJson);
-                string middleLayerJson = JsonConvert.SerializeObject(roomUi.TopLayer);
+                string middleLayerJson = JsonConvert.SerializeObject(roomUi.MiddleLayer);
                 dbManager.AddParameter(dbcmd, "@MiddleLayerElement", middleLayerJson);
                 dbManager.AddParameter(dbcmd, "@Id", roomUi.Id);
                 dbcmd.ExecuteNonQuery();

@@ -45,11 +45,18 @@ namespace RoomUI {
         private void Awake() {
             VerifySerialisables();
             CreateListeners();
+            InitCellDictionary();
             InitButtonPanel();
             CreatePooling();
             InitGrid();
             CreateRoomInstance();
             // ChangeCursor();
+        }
+
+        private void InitCellDictionary() {
+            cellRoomGoDictionary.Add(LayerType.TOP, new Dictionary<int, (int, Image, Image, Image)>());
+            cellRoomGoDictionary.Add(LayerType.MIDDLE, new Dictionary<int, (int, Image, Image, Image)>());
+            cellRoomGoDictionary.Add(LayerType.BOTTOM, new Dictionary<int, (int, Image, Image, Image)>());
         }
 
         private void InitGrid() {
@@ -90,9 +97,6 @@ namespace RoomUI {
         }
 
         public void AddCellRoomGoItem(int instanceID, int index, LayerType layerType, (Image, Image, Image) images) {
-            if (!cellRoomGoDictionary.ContainsKey(layerType)) {
-                cellRoomGoDictionary[layerType] = new Dictionary<int, (int, Image, Image, Image)>();
-            }
             if (!cellRoomGoDictionary[layerType].ContainsKey(instanceID)) {
                 cellRoomGoDictionary[layerType][instanceID] = (index, images.Item1, images.Item2, images.Item3);
             }
@@ -166,6 +170,11 @@ namespace RoomUI {
             }
         }
 
+        private CellRoomGO GetRootCellByIdAndLayer(CellRoomGO cell, LayerType layerType) {
+            int index = GetIndexByLayerAndInstanceID(cell.GetRootCellRoomGOInstanceID(layerType), layerType);
+            return roomGridService.GetCellByIndex(index);
+        }
+
         private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
             cellPreviewManager.Reset();
             if (cellRoomGO.IsDoorOrWall()) {
@@ -185,8 +194,7 @@ namespace RoomUI {
             switch (currentAction) {
                 case RoomUIAction.SELECT:
                     if (elementSize.x > 1 || elementSize.y > 1) {
-                        int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
-                        CellRoomGO rootCell = roomGridService.GetCellByIndex(index);
+                        CellRoomGO rootCell = GetRootCellByIdAndLayer(cellRoomGO, layerType);
                         cellPreviewManager.OnHoverSelectAction(rootCell, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
                     }
                     else {
@@ -195,8 +203,7 @@ namespace RoomUI {
                     break;
                 case RoomUIAction.TRASH:
                     if (elementSize.x > 1 || elementSize.y > 1) {
-                        int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
-                        CellRoomGO rootCell = roomGridService.GetCellByIndex(index);
+                        CellRoomGO rootCell = GetRootCellByIdAndLayer(cellRoomGO, layerType);
                         cellPreviewManager.OnHoverTrashAction(rootCell, cellSize, cellRoomGOPosition, layerType);
                     }
                     else {
@@ -205,8 +212,7 @@ namespace RoomUI {
                     break;
                 case RoomUIAction.COPY:
                     if (elementSize.x > 1 || elementSize.y > 1) {
-                        int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
-                        CellRoomGO rootCell = roomGridService.GetCellByIndex(index);
+                        CellRoomGO rootCell = GetRootCellByIdAndLayer(cellRoomGO, layerType);
                         cellPreviewManager.OnHoverCopyAction(rootCell, cellSize, cellRoomGOPosition, layerType);
                     }
                     else {
@@ -354,7 +360,7 @@ namespace RoomUI {
         }
 
         private bool IsVoidCell(CellRoomGO cellRoomGO) {
-            if (cellRoomGO?.GetConfig(layerType) == null && !cellRoomGO.IsDesactivatedCell(layerType)) {
+            if (cellRoomGO.GetRootCellRoomGOInstanceID(layerType) == 0 && !cellRoomGO.IsDesactivatedCell(layerType)) {
                 return true;
             }
             return false;
@@ -372,28 +378,31 @@ namespace RoomUI {
                 Debug.LogError("RoomGridManager(OnLoadRoomHandler): RoomUIModel is null copy not possible !");
                 return;
             }
-
             roomGridService.ResetLayers();
             currentGrid.ResetGrid();
             cellRoomGoDictionary.Clear();
-            Debug.Log("Clear List" + cellRoomGoDictionary[layerType].Count);
+            InitCellDictionary();
+            if (cellRoomGoDictionary.Count > 0) {
+                Debug.Log("Clear List" + cellRoomGoDictionary[layerType].Count);
+            }
             CreateGridView();
-
-            CreateCellsForLayer(roomUIModel.TopLayer);
-            CreateCellsForLayer(roomUIModel.MiddleLayer);
-            CreateCellsForLayer(roomUIModel.BottomLayer);
+            CreateCellsForLayer(roomUIModel.TopLayer, LayerType.TOP);
+            CreateCellsForLayer(roomUIModel.MiddleLayer, LayerType.MIDDLE);
+            CreateCellsForLayer(roomUIModel.BottomLayer, LayerType.BOTTOM);
+            ChangeLayerOpacity(layerType);
         }
 
-        private void CreateCellsForLayer(List<GridElementModel> layer) {
-            layer.ForEach(cell => {
+        private void CreateCellsForLayer(List<GridElementModel> layerGridModel, LayerType layer) {
+            if (layerGridModel.Count == 0) return;
+            layerGridModel.ForEach(cell => {
                 int x = cell.GetPosition().x;
                 int y = cell.GetPosition().y;
                 int index = y * gridLayout.constraintCount + x;
                 GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
                 CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
-                bool isCreatedCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
+                bool isCreatedCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layer);
                 if (isCreatedCell) {
-                    AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layerType, cellRoomGO.GetImages());
+                    AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layer, cellRoomGO.GetImages());
                 }
             });
         }
@@ -489,6 +498,7 @@ namespace RoomUI {
             else {
                 currentGrid.ResetGrid();
                 cellRoomGoDictionary.Clear();
+                InitCellDictionary();
             }
         }
 

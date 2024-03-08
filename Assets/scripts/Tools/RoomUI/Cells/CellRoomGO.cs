@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.EventSystems;
 using RoomUI;
+using NUnit.Framework;
 
 public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
 
@@ -28,9 +29,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     private Vector2Int position;
     private Vector2 cellSize;
     private bool cellDesactivated;
-    private bool isLayerTopDesactivated;
-    private bool isLayerMiddleDesactivated;
-    private bool isLayerBottomDesactivated;
     private int rootTopCellRoomGOInstanceID;
     private int rootMiddleCellRoomGOInstanceID;
     private int rootBottomCellRoomGOInstanceID;
@@ -96,19 +94,19 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     }
 
     private void SetComponentValues(Element config, LayerType layerType) {
-        if (layerType == LayerType.TOP) {
+        if (layerType == LayerType.TOP || layerType == LayerType.ALL) {
             rootTopCellRoomGOInstanceID = GetInstanceID();
             configTopLayer = config;
             imageTop.sprite = configTopLayer.GetSprite();
             imageTop.raycastTarget = false;  // avoids interaction with cells above due to image size if larger than 1x1
         }
-        if (layerType == LayerType.MIDDLE) {
+        if (layerType == LayerType.MIDDLE || layerType == LayerType.ALL) {
             rootMiddleCellRoomGOInstanceID = GetInstanceID();
             configMiddleLayer = config;
             imageMiddle.sprite = configMiddleLayer.GetSprite();
             imageMiddle.raycastTarget = false;
         }
-        if (layerType == LayerType.BOTTOM) {
+        if (layerType == LayerType.BOTTOM || layerType == LayerType.ALL) {
             rootBottomCellRoomGOInstanceID = GetInstanceID();
             configBottomLayer = config;
             imageBottom.sprite = configBottomLayer.GetSprite();
@@ -134,7 +132,7 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     public void DesactivateCell() {
         cellDesactivated = true;
         DesactivateDisplay();
-        ResetCell(LayerType.ALL);
+        ResetLayerCell(LayerType.ALL);
     }
 
     public Element GetConfig(LayerType layerType) {
@@ -166,13 +164,13 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         // backgroundTransform.anchoredPosition = Vector2.zero;
     }
 
-    public void ResetCell(LayerType layerType) {
+    public void ResetLayerCell(LayerType layerType) {
         if (layerType == LayerType.TOP || layerType == LayerType.ALL) {
             configTopLayer = null;
             if (imageTop.sprite != transparentIcon) {
                 imageTop.sprite = transparentIcon;
                 imageTop.raycastTarget = true;
-                ResizeCellSize(layerType);
+                ResizeCellSize(LayerType.TOP);
             }
             rootTopCellRoomGOInstanceID = -1;
             cellTopTransform.anchoredPosition = Vector2.zero;
@@ -182,7 +180,7 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
             if (imageMiddle.sprite != transparentIcon) {
                 imageMiddle.sprite = transparentIcon;
                 imageMiddle.raycastTarget = true;
-                ResizeCellSize(layerType);
+                ResizeCellSize(LayerType.MIDDLE);
             }
             rootMiddleCellRoomGOInstanceID = -1;
             cellMiddleTransform.anchoredPosition = Vector2.zero;
@@ -192,7 +190,7 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
             if (imageBottom.sprite != transparentIcon) {
                 imageBottom.sprite = transparentIcon;
                 imageBottom.raycastTarget = true;
-                ResizeCellSize(layerType);
+                ResizeCellSize(LayerType.BOTTOM);
             }
             rootBottomCellRoomGOInstanceID = -1;
             cellBottomTransform.anchoredPosition = Vector2.zero;
@@ -223,31 +221,37 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         float rectWidth = rectTransform.sizeDelta.x;
         float rectHeight = rectTransform.sizeDelta.y;
         cellSize = new Vector2(rectWidth, rectHeight);
+        int InstanceId = GetInstanceID();
         Vector2Int defaultSize = new Vector2Int(1, 1);
-        if (layerType == LayerType.ALL) {
-            Vector2Int topSize = configTopLayer != null ? configTopLayer.GetSize() : defaultSize;
-            Vector2Int middleSize = configMiddleLayer != null ? configMiddleLayer.GetSize() : defaultSize;
-            Vector2Int bottomSize = configBottomLayer != null ? configBottomLayer.GetSize() : defaultSize;
-            CalculCellSizeAndManagePosition(topSize, rectWidth, rectHeight, cellTopTransform);
-            CalculCellSizeAndManagePosition(middleSize, rectWidth, rectHeight, cellMiddleTransform);
-            CalculCellSizeAndManagePosition(bottomSize, rectWidth, rectHeight, cellBottomTransform);
-            return;
+        switch (layerType) {
+            case LayerType.TOP:
+                ResizeLayerCell(rectWidth, rectHeight, defaultSize, configTopLayer, cellTopTransform);
+                break;
+            case LayerType.MIDDLE:
+                ResizeLayerCell(rectWidth, rectHeight, defaultSize, configMiddleLayer, cellMiddleTransform);
+                break;
+            case LayerType.BOTTOM:
+                ResizeLayerCell(rectWidth, rectHeight, defaultSize, configBottomLayer, cellBottomTransform);
+                break;
+            case LayerType.ALL:
+                bool isRootTop = rootTopCellRoomGOInstanceID == InstanceId;
+                bool isRootMiddle = rootMiddleCellRoomGOInstanceID == InstanceId;
+                bool isRootBottom = rootBottomCellRoomGOInstanceID == InstanceId;
+                if (isRootTop) {
+                    ResizeLayerCell(rectWidth, rectHeight, defaultSize, configTopLayer, cellTopTransform);
+                }
+                if (isRootMiddle) {
+                    ResizeLayerCell(rectWidth, rectHeight, defaultSize, configMiddleLayer, cellMiddleTransform);
+                }
+                if (isRootBottom) {
+                    ResizeLayerCell(rectWidth, rectHeight, defaultSize, configBottomLayer, cellBottomTransform);
+                }
+                break;
         }
-        if (layerType == LayerType.TOP) {
-            Vector2Int topSize = configTopLayer != null ? configTopLayer.GetSize() : defaultSize;
-            CalculCellSizeAndManagePosition(topSize, rectWidth, rectHeight, cellTopTransform);
-            return;
-        }
-        if (layerType == LayerType.MIDDLE) {
-            Vector2Int middleSize = configMiddleLayer != null ? configMiddleLayer.GetSize() : defaultSize;
-            CalculCellSizeAndManagePosition(middleSize, rectWidth, rectHeight, cellMiddleTransform);
-            return;
-        }
-        if (layerType == LayerType.BOTTOM) {
-            Vector2Int bottomSize = configBottomLayer != null ? configBottomLayer.GetSize() : defaultSize;
-            CalculCellSizeAndManagePosition(bottomSize, rectWidth, rectHeight, cellBottomTransform);
-            return;
-        }
+    }
+    private void ResizeLayerCell(float rectWidth, float rectHeight, Vector2Int defaultSize, Element config, RectTransform cellTransform) {
+        Vector2Int size = config != null ? config.GetSize() : defaultSize;
+        CalculCellSizeAndManagePosition(size, rectWidth, rectHeight, cellTransform);
     }
 
     private void CalculCellSizeAndManagePosition(Vector2Int size, float rectWidth, float rectHeight, RectTransform rectTransform) {
@@ -271,7 +275,7 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     public void Setup(Element config, LayerType layerType, Vector2 spacing, Vector2Int position) {
         this.position = position;
         this.spacing = spacing;
-        StartCoroutine(AdjustSizeAfterFrame());
+        StartCoroutine(AdjustSizeAfterFrame(layerType));
         ActivateDisplay();
         if (config != null) {
             SetComponentValues(config, layerType);
@@ -337,13 +341,13 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     }
 
     public void ResizeCellZiseAfterZoom() {
-        StartCoroutine(AdjustSizeAfterFrame());
+        StartCoroutine(AdjustSizeAfterFrame(LayerType.ALL));
     }
 
     // used to solve the problem of recovering the size of the RectTransform, which is erroneous because it is driven by the gridLayout
-    private IEnumerator AdjustSizeAfterFrame() {
+    private IEnumerator AdjustSizeAfterFrame(LayerType layerType) {
         yield return new WaitForEndOfFrame();
-        ResizeCellSize(LayerType.ALL);
+        ResizeCellSize(layerType);
     }
 
 }

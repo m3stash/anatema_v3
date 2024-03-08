@@ -47,7 +47,7 @@ namespace RoomUI {
                     cell.transform.SetParent(transform);
                     GameObject cellRoomGo = cell.gameObject;
                     cellRoomGo.SetActive(true);
-                    cell.Setup(null, layerType, Vector2.zero, new Vector2Int(col, row));
+                    cell.Setup(null, LayerType.ALL, Vector2.zero, new Vector2Int(col, row));
                     CreateDoorOrWall(col, row, cell);
                 }
             }
