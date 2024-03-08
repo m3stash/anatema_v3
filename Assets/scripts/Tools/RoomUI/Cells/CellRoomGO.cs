@@ -160,6 +160,9 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         cellDesactivated = false;
         imageCell.color = defaultColorCell;
         imageCell.sprite = null;
+        SetOpacity(LayerType.TOP, 1f);
+        SetOpacity(LayerType.MIDDLE, 1f);
+        SetOpacity(LayerType.BOTTOM, 1f);
         // backgroundTransform.anchoredPosition = Vector2.zero;
     }
 
@@ -311,6 +314,10 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
             return rootBottomCellRoomGOInstanceID;
         }
         return -1;
+    }
+
+    public (Image, Image, Image) GetImages() {
+        return (imageTop, imageMiddle, imageBottom);
     }
 
     public void SetupBigCell(int instanceID, Element config, LayerType layerType) {

@@ -45,6 +45,7 @@ namespace RoomUI {
                         int targetY = y - yOffset;
                         int targetChildIndex = targetY * gridSizeX + targetX;
                         if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
+                            gridLayout.transform.GetChild(targetChildIndex).GetInstanceID();
                             CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
                             cells.Add(targetCell);
                         }
@@ -54,6 +55,28 @@ namespace RoomUI {
             }
             cells.Add(cellRoomGO);
             return cells;
+        }
+
+        // public CellRoomGO GetCellByGridLayoutIndex(int instanceID) {
+        //     Transform gridTransform = gridLayout.transform;
+        //     for (int i = 0; i < gridTransform.childCount; i++) {
+        //         if (instanceID == gridTransform.GetChild(i).GetInstanceID()) {
+        //             return gridTransform.GetChild(i).GetComponent<CellRoomGO>();
+        //         }
+        //     }
+        //     return null;
+        // }
+
+        public CellRoomGO GetCellByIndex(int index) {
+            Transform child = gridLayout.transform.GetChild(index);
+            if (child) {
+                return child.GetComponent<CellRoomGO>();
+            }
+            return null;
+        }
+
+        public int GetCellIndexByPosition(Vector2Int pos) {
+            return pos.y * gridLayout.constraintCount + pos.x;
         }
 
         public bool IsBigCell(Vector2Int size) {

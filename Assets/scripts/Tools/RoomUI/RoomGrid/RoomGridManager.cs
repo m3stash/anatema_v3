@@ -24,7 +24,8 @@ namespace RoomUI {
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
-        private List<CellRoomGO> cellRoomGoList = new List<CellRoomGO>();
+
+        private Dictionary<LayerType, Dictionary<int, (int, Image, Image, Image)>> cellRoomGoDictionary = new Dictionary<LayerType, Dictionary<int, (int, Image, Image, Image)>>();
         private CreateRoomGrid currentGrid;
         private RectTransform rectTransform;
         private int cellSize = 28;
@@ -38,7 +39,6 @@ namespace RoomUI {
         private RoomUIAction currentAction;
         private LayerType layerType = LayerType.MIDDLE;
         private Element currenSelectedObject;
-        private string[,] roomGridPlane;
         private CellPreviewManager cellPreviewManager;
         private RoomGridService roomGridService;
 
@@ -89,14 +89,51 @@ namespace RoomUI {
             }
         }
 
+        public void AddCellRoomGoItem(int instanceID, int index, LayerType layerType, (Image, Image, Image) images) {
+            if (!cellRoomGoDictionary.ContainsKey(layerType)) {
+                cellRoomGoDictionary[layerType] = new Dictionary<int, (int, Image, Image, Image)>();
+            }
+            if (!cellRoomGoDictionary[layerType].ContainsKey(instanceID)) {
+                cellRoomGoDictionary[layerType][instanceID] = (index, images.Item1, images.Item2, images.Item3);
+            }
+            Debug.Log("ADD removed from list " + cellRoomGoDictionary[layerType].Count);
+        }
+
+        public bool RemoveCellRoomGoItemByLayerAndInstanceID(int instanceID, LayerType layerType) {
+            if (cellRoomGoDictionary.ContainsKey(layerType) && cellRoomGoDictionary[layerType].ContainsKey(instanceID)) {
+                cellRoomGoDictionary[layerType].Remove(instanceID);
+                return true;
+            }
+            return false;
+        }
+
+        public int GetIndexByLayerAndInstanceID(int instanceID, LayerType layerType) {
+            if (cellRoomGoDictionary.ContainsKey(layerType) && cellRoomGoDictionary[layerType].ContainsKey(instanceID)) {
+                if (cellRoomGoDictionary.TryGetValue(layerType, out var layerDictionary)) {
+                    if (layerDictionary.TryGetValue(instanceID, out var data)) {
+                        return data.Item1;
+                    }
+                }
+            }
+            return -1;
+        }
+
         private void DeleteCell(CellRoomGO cellRoomGO) {
             if (!IsVoidCell(cellRoomGO)) {
                 Vector2Int cellSize = cellRoomGO.GetConfig(layerType).GetSize();
                 CellRoomGO rootCell = cellRoomGO;
-                bool isdeletedCell;
+                bool isdeletedCell = false;
                 if (cellSize.x > 1 || cellSize.y > 1) {
-                    rootCell = cellRoomGoList.Find(cell => cell.GetInstanceID() == cellRoomGO.GetRootCellRoomGOInstanceID(layerType));
-                    isdeletedCell = roomGridService.DeleteCell(rootCell, layerType);
+                    int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
+                    if (index != -1) {
+                        rootCell = roomGridService.GetCellByIndex(index);
+                        if (rootCell) {
+                            isdeletedCell = roomGridService.DeleteCell(rootCell, layerType);
+                        }
+                        else {
+                            Debug.LogError("DeleteCell: no rootCell with this id: ");
+                        }
+                    }
                 }
                 else {
                     isdeletedCell = roomGridService.DeleteCell(cellRoomGO, layerType);
@@ -104,18 +141,19 @@ namespace RoomUI {
                 if (isdeletedCell) {
                     bool isEmptyCell = rootCell.IsLayersEmpty();
                     if (isEmptyCell) {
-                        cellRoomGoList.Remove(rootCell);
-                        Debug.Log("CellRoomGO removed from list " + cellRoomGoList.Count);
+                        RemoveCellRoomGoItemByLayerAndInstanceID(rootCell.GetInstanceID(), layerType);
+                        Debug.Log("CellRoomGO removed from list " + cellRoomGoDictionary[layerType].Count);
                     }
+                    cellPreviewManager.SetPreviewByActionType(PreviewAction.HOVER, cellRoomGO.transform.position, new Vector2(1, 1), cellRoomGO.GetCellSize());
                 }
-                cellPreviewManager.SetPreviewByActionType(PreviewAction.HOVER, cellRoomGO.transform.position, new Vector2(1, 1), cellRoomGO.GetCellSize());
             }
         }
 
         private void SelectCell(CellRoomGO cellRoomGO) {
             bool isCellCreated = roomGridService.CreateCell(cellRoomGO, currenSelectedObject, layerType);
             if (isCellCreated) {
-                AddUniqueCell(cellRoomGO);
+                int index = roomGridService.GetCellIndexByPosition(cellRoomGO.GetPosition());
+                AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layerType, cellRoomGO.GetImages());
             }
             if (currenSelectedObject != null)
                 cellPreviewManager.Forbidden();
@@ -147,8 +185,8 @@ namespace RoomUI {
             switch (currentAction) {
                 case RoomUIAction.SELECT:
                     if (elementSize.x > 1 || elementSize.y > 1) {
-                        CellRoomGO rootCell = cellRoomGoList.Find(cell => cell.GetInstanceID() == cellRoomGO.GetInstanceIDByLayer(layerType));
-                        // if (rootCell == null) return;
+                        int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
+                        CellRoomGO rootCell = roomGridService.GetCellByIndex(index);
                         cellPreviewManager.OnHoverSelectAction(rootCell, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
                     }
                     else {
@@ -157,7 +195,8 @@ namespace RoomUI {
                     break;
                 case RoomUIAction.TRASH:
                     if (elementSize.x > 1 || elementSize.y > 1) {
-                        CellRoomGO rootCell = cellRoomGoList.Find(cell => cell.GetInstanceID() == cellRoomGO.GetInstanceIDByLayer(layerType));
+                        int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
+                        CellRoomGO rootCell = roomGridService.GetCellByIndex(index);
                         cellPreviewManager.OnHoverTrashAction(rootCell, cellSize, cellRoomGOPosition, layerType);
                     }
                     else {
@@ -166,7 +205,8 @@ namespace RoomUI {
                     break;
                 case RoomUIAction.COPY:
                     if (elementSize.x > 1 || elementSize.y > 1) {
-                        CellRoomGO rootCell = cellRoomGoList.Find(cell => cell.GetInstanceID() == cellRoomGO.GetInstanceIDByLayer(layerType));
+                        int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
+                        CellRoomGO rootCell = roomGridService.GetCellByIndex(index);
                         cellPreviewManager.OnHoverCopyAction(rootCell, cellSize, cellRoomGOPosition, layerType);
                     }
                     else {
@@ -327,13 +367,6 @@ namespace RoomUI {
                 TooltipManager.Instance.CallTooltip(TooltipType.INFORMATION, "Room GRID reset because current id had been deleted !");
         }
 
-        private void AddUniqueCell(CellRoomGO cellRoomGO) {
-            if (!cellRoomGoList.Contains(cellRoomGO)) {
-                cellRoomGoList.Add(cellRoomGO);
-                Debug.Log("CellRoomGO added to list " + cellRoomGoList.Count);
-            }
-        }
-
         private void OnLoadRoomHandler(RoomUIModel roomUIModel) {
             if (roomUIModel == null) {
                 Debug.LogError("RoomGridManager(OnLoadRoomHandler): RoomUIModel is null copy not possible !");
@@ -342,8 +375,8 @@ namespace RoomUI {
 
             roomGridService.ResetLayers();
             currentGrid.ResetGrid();
-            ClearCellRoomGoList();
-            Debug.Log("Clear List" + cellRoomGoList.Count);
+            cellRoomGoDictionary.Clear();
+            Debug.Log("Clear List" + cellRoomGoDictionary[layerType].Count);
             CreateGridView();
 
             CreateCellsForLayer(roomUIModel.TopLayer);
@@ -360,7 +393,7 @@ namespace RoomUI {
                 CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
                 bool isCreatedCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layerType);
                 if (isCreatedCell) {
-                    AddUniqueCell(cellRoomGO);
+                    AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layerType, cellRoomGO.GetImages());
                 }
             });
         }
@@ -390,29 +423,42 @@ namespace RoomUI {
             ChangeButtonColor(button, selectedButtonColor);
         }
 
-        private void ChangeLayerOpacity(LayerType layerType) {
-            if (layerType == LayerType.TOP) {
-                cellRoomGoList.ForEach(cellRoomGO => {
-                    cellRoomGO.SetOpacity(LayerType.TOP, 1f);
-                    cellRoomGO.SetOpacity(LayerType.MIDDLE, 0.5f);
-                    cellRoomGO.SetOpacity(LayerType.BOTTOM, 0.5f);
-                });
-            }
-            else if (layerType == LayerType.MIDDLE) {
-                cellRoomGoList.ForEach(cellRoomGO => {
-                    cellRoomGO.SetOpacity(LayerType.TOP, 0.5f);
-                    cellRoomGO.SetOpacity(LayerType.MIDDLE, 1f);
-                    cellRoomGO.SetOpacity(LayerType.BOTTOM, 0.5f);
-                });
-            }
-            else if (layerType == LayerType.BOTTOM) {
-                cellRoomGoList.ForEach(cellRoomGO => {
-                    cellRoomGO.SetOpacity(LayerType.TOP, 0.5f);
-                    cellRoomGO.SetOpacity(LayerType.MIDDLE, 0.5f);
-                    cellRoomGO.SetOpacity(LayerType.BOTTOM, 1f);
-                });
+        private void SetOpacityForLayer(Image image, float opacity) {
+            image.color = new Color(image.color.r, image.color.g, image.color.b, opacity);
+        }
+
+        private void ChangeOpacityForLayers(LayerType layer, LayerType currentLayer) {
+            if (!cellRoomGoDictionary.ContainsKey(layer)) return;
+            foreach (var kvp in cellRoomGoDictionary[layer]) {
+                Image layerTop = kvp.Value.Item2;
+                Image layerMiddle = kvp.Value.Item3;
+                Image layerBottom = kvp.Value.Item4;
+                switch (currentLayer) {
+                    case LayerType.TOP:
+                        SetOpacityForLayer(layerTop, 1f);
+                        SetOpacityForLayer(layerMiddle, 0.5f);
+                        SetOpacityForLayer(layerBottom, 0.5f);
+                        break;
+                    case LayerType.MIDDLE:
+                        SetOpacityForLayer(layerTop, 0.5f);
+                        SetOpacityForLayer(layerMiddle, 1f);
+                        SetOpacityForLayer(layerBottom, 0.5f);
+                        break;
+                    case LayerType.BOTTOM:
+                        SetOpacityForLayer(layerTop, 0.5f);
+                        SetOpacityForLayer(layerMiddle, 0.5f);
+                        SetOpacityForLayer(layerBottom, 1f);
+                        break;
+                }
             }
         }
+
+        private void ChangeLayerOpacity(LayerType layerType) {
+            ChangeOpacityForLayers(LayerType.TOP, layerType);
+            ChangeOpacityForLayers(LayerType.BOTTOM, layerType);
+            ChangeOpacityForLayers(LayerType.MIDDLE, layerType);
+        }
+
         private void OnLayerTopButtonClick() {
             SetLayerConfiguration(LayerType.TOP, layerTopButton);
         }
@@ -442,17 +488,8 @@ namespace RoomUI {
             }
             else {
                 currentGrid.ResetGrid();
-                ClearCellRoomGoList();
+                cellRoomGoDictionary.Clear();
             }
-        }
-
-        private void ClearCellRoomGoList() {
-            cellRoomGoList.ForEach(cell => {
-                cell.SetOpacity(LayerType.TOP, 1f);
-                cell.SetOpacity(LayerType.MIDDLE, 1f);
-                cell.SetOpacity(LayerType.BOTTOM, 1f);
-            });
-            cellRoomGoList.Clear();
         }
 
         private void OnShapeChange(string shape) {
