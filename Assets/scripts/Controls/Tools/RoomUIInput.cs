@@ -33,7 +33,7 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
                     ""id"": ""4fe57867-6387-4283-ad57-d89cbc0ab568"",
                     ""expectedControlType"": ""Key"",
                     ""processors"": """",
-                    ""interactions"": ""Press(behavior=1)"",
+                    ""interactions"": """",
                     ""initialStateCheck"": false
                 }
             ],
@@ -78,6 +78,54 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Page_Event"",
+            ""id"": ""49e6c419-685b-495c-8389-a862ec7e7e0e"",
+            ""actions"": [
+                {
+                    ""name"": ""CellClickHold"",
+                    ""type"": ""Button"",
+                    ""id"": ""c8441dba-f6ba-485b-92b5-7846b8875546"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CellClickLeave"",
+                    ""type"": ""Button"",
+                    ""id"": ""e218e070-579f-4c07-911b-5a54f7e6434e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""9357bc95-57b2-47e4-99ae-a27ee6db6167"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": ""Press(pressPoint=0.2)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CellClickHold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""47fdd580-ca0e-4da5-b04a-e5dc7cefa200"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": ""Press(behavior=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CellClickLeave"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -88,6 +136,10 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
         // Modal_Confirm
         m_Modal_Confirm = asset.FindActionMap("Modal_Confirm", throwIfNotFound: true);
         m_Modal_Confirm_Close = m_Modal_Confirm.FindAction("Close", throwIfNotFound: true);
+        // Page_Event
+        m_Page_Event = asset.FindActionMap("Page_Event", throwIfNotFound: true);
+        m_Page_Event_CellClickHold = m_Page_Event.FindAction("CellClickHold", throwIfNotFound: true);
+        m_Page_Event_CellClickLeave = m_Page_Event.FindAction("CellClickLeave", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -237,6 +289,60 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
         }
     }
     public Modal_ConfirmActions @Modal_Confirm => new Modal_ConfirmActions(this);
+
+    // Page_Event
+    private readonly InputActionMap m_Page_Event;
+    private List<IPage_EventActions> m_Page_EventActionsCallbackInterfaces = new List<IPage_EventActions>();
+    private readonly InputAction m_Page_Event_CellClickHold;
+    private readonly InputAction m_Page_Event_CellClickLeave;
+    public struct Page_EventActions
+    {
+        private @RoomUIInput m_Wrapper;
+        public Page_EventActions(@RoomUIInput wrapper) { m_Wrapper = wrapper; }
+        public InputAction @CellClickHold => m_Wrapper.m_Page_Event_CellClickHold;
+        public InputAction @CellClickLeave => m_Wrapper.m_Page_Event_CellClickLeave;
+        public InputActionMap Get() { return m_Wrapper.m_Page_Event; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(Page_EventActions set) { return set.Get(); }
+        public void AddCallbacks(IPage_EventActions instance)
+        {
+            if (instance == null || m_Wrapper.m_Page_EventActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_Page_EventActionsCallbackInterfaces.Add(instance);
+            @CellClickHold.started += instance.OnCellClickHold;
+            @CellClickHold.performed += instance.OnCellClickHold;
+            @CellClickHold.canceled += instance.OnCellClickHold;
+            @CellClickLeave.started += instance.OnCellClickLeave;
+            @CellClickLeave.performed += instance.OnCellClickLeave;
+            @CellClickLeave.canceled += instance.OnCellClickLeave;
+        }
+
+        private void UnregisterCallbacks(IPage_EventActions instance)
+        {
+            @CellClickHold.started -= instance.OnCellClickHold;
+            @CellClickHold.performed -= instance.OnCellClickHold;
+            @CellClickHold.canceled -= instance.OnCellClickHold;
+            @CellClickLeave.started -= instance.OnCellClickLeave;
+            @CellClickLeave.performed -= instance.OnCellClickLeave;
+            @CellClickLeave.canceled -= instance.OnCellClickLeave;
+        }
+
+        public void RemoveCallbacks(IPage_EventActions instance)
+        {
+            if (m_Wrapper.m_Page_EventActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IPage_EventActions instance)
+        {
+            foreach (var item in m_Wrapper.m_Page_EventActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_Page_EventActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public Page_EventActions @Page_Event => new Page_EventActions(this);
     public interface IModal_RoomManangerActions
     {
         void OnClose(InputAction.CallbackContext context);
@@ -244,5 +350,10 @@ public partial class @RoomUIInput: IInputActionCollection2, IDisposable
     public interface IModal_ConfirmActions
     {
         void OnClose(InputAction.CallbackContext context);
+    }
+    public interface IPage_EventActions
+    {
+        void OnCellClickHold(InputAction.CallbackContext context);
+        void OnCellClickLeave(InputAction.CallbackContext context);
     }
 }

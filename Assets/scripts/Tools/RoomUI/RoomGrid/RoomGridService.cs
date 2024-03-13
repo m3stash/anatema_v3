@@ -6,23 +6,29 @@ namespace RoomUI {
 
         private GridLayoutGroup gridLayout;
         private List<GridElementModel> topLayer = new List<GridElementModel>();
-        private List<GridElementModel> groundLayer = new List<GridElementModel>();
+        private List<GridElementModel> middleLayer = new List<GridElementModel>();
+        private List<GridElementModel> bottomLayer = new List<GridElementModel>();
 
         public RoomGridService(GridLayoutGroup gridLayout) {
             this.gridLayout = gridLayout;
         }
 
-        public List<GridElementModel> GetGroundLayer() {
-            return groundLayer;
+        public List<GridElementModel> GetBottomLayer() {
+            return bottomLayer;
         }
 
         public List<GridElementModel> GetTopLayer() {
             return topLayer;
         }
 
+        public List<GridElementModel> GetMiddleLayer() {
+            return middleLayer;
+        }
+
         public void ResetLayers() {
-            groundLayer = new List<GridElementModel>();
+            bottomLayer = new List<GridElementModel>();
             topLayer = new List<GridElementModel>();
+            middleLayer = new List<GridElementModel>();
         }
 
         public List<CellRoomGO> GetCellsAtPosition(CellRoomGO cellRoomGO, Vector2Int selectedElementSize) {
@@ -39,6 +45,7 @@ namespace RoomUI {
                         int targetY = y - yOffset;
                         int targetChildIndex = targetY * gridSizeX + targetX;
                         if (targetChildIndex >= 0 && targetChildIndex < gridLayout.transform.childCount) {
+                            gridLayout.transform.GetChild(targetChildIndex).GetInstanceID();
                             CellRoomGO targetCell = gridLayout.transform.GetChild(targetChildIndex).GetComponent<CellRoomGO>();
                             cells.Add(targetCell);
                         }
@@ -50,66 +57,101 @@ namespace RoomUI {
             return cells;
         }
 
+        // public CellRoomGO GetCellByGridLayoutIndex(int instanceID) {
+        //     Transform gridTransform = gridLayout.transform;
+        //     for (int i = 0; i < gridTransform.childCount; i++) {
+        //         if (instanceID == gridTransform.GetChild(i).GetInstanceID()) {
+        //             return gridTransform.GetChild(i).GetComponent<CellRoomGO>();
+        //         }
+        //     }
+        //     return null;
+        // }
+
+        public CellRoomGO GetCellByIndex(int index) {
+            Transform child = gridLayout.transform.GetChild(index);
+            if (child) {
+                return child.GetComponent<CellRoomGO>();
+            }
+            return null;
+        }
+
+        public int GetCellIndexByPosition(Vector2Int pos) {
+            return pos.y * gridLayout.constraintCount + pos.x;
+        }
+
         public bool IsBigCell(Vector2Int size) {
             return size.x > 1 || size.y > 1;
         }
 
-        public void CreateCell(CellRoomGO cellRoomGO, Element selectedElement) {
-            if (selectedElement == null || cellRoomGO.GetConfig() != null) return;
-            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, selectedElement.GetSize());
-            if (cells.Exists(cell => cell.GetConfig() != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell())) {
-                return;
+        public bool CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layer) {
+            if (selectedElement == null || cellRoomGO.GetConfig(layer) != null) return false;
+            Vector2Int size = selectedElement.GetSize();
+            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, size);
+            if (cells.Exists(cell => cell.GetConfig(layer) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layer))) {
+                return false;
             }
-            else {
-                CellRoomGO cell = null;
-                if (IsBigCell(selectedElement.GetSize())) {
-                    cell = DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement);
-                }
-                else {
-                    cell = cellRoomGO;
-                }
-                AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition());
-                cell.Setup(selectedElement, gridLayout.spacing, cellRoomGO.GetPosition());
-                return;
+            if (IsBigCell(size)) {
+                DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement, layer);
             }
+            AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layer);
+            cellRoomGO.Setup(selectedElement, layer, gridLayout.spacing, cellRoomGO.GetPosition());
+            return true;
         }
 
-        public CellRoomGO DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement) {
-            CellRoomGO topLeftCell = null;
+        public void DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
             cells.ForEach(cell => {
-                /*
-                * Creates the sprite in the top-left cell.
-                * Unity manages its rows in such a way that each row below has a higher z'index than the one above.
-                * Otherwise, the image passes over the other cells and, when hovering, if it's at the bottom left, you can no longer select the cells above.
-                *
-                */
-                if (topLeftCell == null || cell.GetPosition().x < topLeftCell.GetPosition().x || cell.GetPosition().y < topLeftCell.GetPosition().y) {
-                    topLeftCell = cell;
-                }
-                cell.SetupDesactivatedCell(cellRoomGO, selectedElement);
-            });
-            return topLeftCell;
-        }
-
-        public void AddCellInUsedCell(Element element, Vector2Int position) {
-            topLayer.Add(new GridElementModel(element.GetId(), position));
-        }
-
-        public void DeleteCell(CellRoomGO cellRoomGO) {
-            Element config = cellRoomGO.GetConfig();
-            if (config == null && !cellRoomGO.IsDesactivatedCell()) return;
-            RemoveCellInUsedCell(cellRoomGO.GetRootCellRoomGO());
-            Vector2Int size = config.GetSize();
-            List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO.GetRootCellRoomGO(), config.GetSize());
-            cells.ForEach(cell => {
-                cell.ResetCell();
+                cell.SetupBigCell(cellRoomGO.GetInstanceID(), selectedElement, layerType);
             });
         }
 
-        private void RemoveCellInUsedCell(CellRoomGO cellRoomGO) {
-            topLayer.RemoveAt(topLayer.FindIndex(cellConfig =>
-                cellConfig.GetId() == cellRoomGO.GetConfig().GetId() &&
-                cellConfig.GetPosition() == cellRoomGO.GetPosition()));
+        public void AddCellInUsedCell(Element element, Vector2Int position, LayerType layerType) {
+            if (layerType == LayerType.BOTTOM) {
+                bottomLayer.Add(new GridElementModel(element.GetId(), position));
+            }
+            if (layerType == LayerType.MIDDLE) {
+                middleLayer.Add(new GridElementModel(element.GetId(), position));
+            }
+            if (layerType == LayerType.TOP) {
+                topLayer.Add(new GridElementModel(element.GetId(), position));
+            }
+        }
+
+        public bool DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
+            Element config = cellRoomGO.GetConfig(layerType);
+            if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return false;
+            bool isDeletedCell = RemoveCellInUsedCell(cellRoomGO, layerType);
+            if (isDeletedCell) {
+                List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, config.GetSize());
+                cells.ForEach(cell => {
+                    cell.ResetLayerCell(layerType);
+                });
+                return true;
+            }
+            return false;
+        }
+
+        private bool RemoveCellInUsedCell(CellRoomGO cellRoomGO, LayerType layerType) {
+            if (layerType == LayerType.BOTTOM) {
+                return DeleteElement(bottomLayer, layerType, cellRoomGO);
+            }
+            if (layerType == LayerType.MIDDLE) {
+                return DeleteElement(middleLayer, layerType, cellRoomGO);
+            }
+            if (layerType == LayerType.TOP) {
+                return DeleteElement(topLayer, layerType, cellRoomGO);
+            }
+            return false;
+        }
+
+        private bool DeleteElement(List<GridElementModel> layer, LayerType layerType, CellRoomGO cellRoomGO) {
+            int index = layer.FindIndex(cellConfig =>
+                cellConfig.GetId() == cellRoomGO.GetConfig(layerType).GetId() &&
+                cellConfig.GetPosition() == cellRoomGO.GetPosition());
+            if (index != -1) {
+                layer.RemoveAt(index);
+                return true;
+            }
+            return false;
         }
 
     }
