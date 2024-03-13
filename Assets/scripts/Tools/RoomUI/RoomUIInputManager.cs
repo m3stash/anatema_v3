@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public class RoomUIInputManager {
+public class RoomUIInputManager : MonoBehaviour {
 
     public RoomUIInput roomUIInput;
 
-    public RoomUIInputManager() {
+    private void Awake() {
         Init();
     }
 
@@ -15,11 +15,12 @@ public class RoomUIInputManager {
 
     void Start() {
         roomUIInput.Modal_RoomMananger.Enable();
+        roomUIInput.Page_Event.Enable();
     }
 
     private void OnDestroy() {
-        Debug.Log("DESTROYYYY");
         roomUIInput.Modal_RoomMananger.Disable();
+        roomUIInput.Page_Event.Disable();
     }
 
     public RoomUIInput GetRoomUIInput() {

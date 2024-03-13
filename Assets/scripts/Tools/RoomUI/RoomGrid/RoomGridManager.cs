@@ -4,10 +4,12 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour, IPointerExitHandler {
         [SerializeField] private RoomUIStateManager roomUIStateManager;
+        [SerializeField] private GameObject modalRoomManageRowPoolGO;
         [SerializeField] private GameObject cellPool;
         [SerializeField] private GameObject cellPreviewGO;
         [SerializeField] private Button gridZoomMinus;
@@ -20,11 +22,11 @@ namespace RoomUI {
         [SerializeField] private Button layerBottomButton;
         [SerializeField] private Camera mainCamera;
         [SerializeField] private Sprite cursorSprite;
+        [SerializeField] private GameObject roomUIInputManagerGO;
 
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
-
         private Dictionary<LayerType, Dictionary<int, (int, Image, Image, Image)>> cellRoomGoDictionary = new Dictionary<LayerType, Dictionary<int, (int, Image, Image, Image)>>();
         private CreateRoomGrid currentGrid;
         private RectTransform rectTransform;
@@ -41,6 +43,11 @@ namespace RoomUI {
         private Element currenSelectedObject;
         private CellPreviewManager cellPreviewManager;
         private RoomGridService roomGridService;
+        private RoomUIInput.Page_EventActions inputAction;
+        private RoomUIInputManager roomUIInputManager;
+        private bool holdClick = false;
+
+        private CellRoomGO currentHoverCell;
 
         private void Awake() {
             VerifySerialisables();
@@ -50,7 +57,43 @@ namespace RoomUI {
             CreatePooling();
             InitGrid();
             CreateRoomInstance();
+            CreateInputAction();
             // ChangeCursor();
+        }
+
+        private void CreateInputAction() {
+            if (roomUIInputManagerGO != null) {
+                roomUIInputManager = roomUIInputManagerGO.GetComponent<RoomUIInputManager>();
+                inputAction = roomUIInputManager.GetRoomUIInput().Page_Event;
+                inputAction.CellClickHold.performed += OnCellClickHoldHandler;
+                inputAction.CellClickLeave.performed += OnCellClickLeaveHandler;
+            }
+            else {
+                Debug.LogError("RoomUIService(Awake), roomUIInputManager is null");
+            }
+
+        }
+
+        private void OnCellClickHoldHandler(InputAction.CallbackContext context) {
+            if (currentHoverCell != null && !holdClick) {
+                Element cellConfig = currentHoverCell.GetConfig(layerType);
+                switch (currentAction) {
+                    case RoomUIAction.COPY:
+                        CopyCell(cellConfig);
+                        break;
+                    case RoomUIAction.SELECT:
+                        SelectCell(currentHoverCell);
+                        break;
+                    case RoomUIAction.TRASH:
+                        DeleteCell(currentHoverCell);
+                        break;
+                }
+            }
+            holdClick = true;
+        }
+
+        private void OnCellClickLeaveHandler(InputAction.CallbackContext context) {
+            holdClick = false;
         }
 
         private void InitCellDictionary() {
@@ -78,6 +121,7 @@ namespace RoomUI {
         }
 
         public void OnPointerExit(PointerEventData eventData) {
+            currentHoverCell = null;
             cellPreviewManager.Hide();
         }
 
@@ -176,6 +220,7 @@ namespace RoomUI {
         }
 
         private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
+            currentHoverCell = cellRoomGO;
             cellPreviewManager.Reset();
             if (cellRoomGO.IsDoorOrWall()) {
                 cellPreviewManager.Hide();
@@ -194,6 +239,9 @@ namespace RoomUI {
             switch (currentAction) {
                 case RoomUIAction.SELECT:
                     cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
+                    if (holdClick) {
+                        OnCellClickHandler(cellRoomGO);
+                    }
                     break;
                 case RoomUIAction.TRASH:
                     if (elementSize.x > 1 || elementSize.y > 1) {
@@ -202,6 +250,9 @@ namespace RoomUI {
                     }
                     else {
                         cellPreviewManager.OnHoverTrashAction(cellRoomGO, cellSize, cellRoomGOPosition, layerType);
+                    }
+                    if (holdClick) {
+                        OnCellClickHandler(cellRoomGO);
                     }
                     break;
                 case RoomUIAction.COPY:
@@ -282,7 +333,6 @@ namespace RoomUI {
 
         private void OnDestroy() {
             CellRoomGO.OnPointerEnterEvent -= OnCellPointerEnterHandler;
-            CellRoomGO.OnClick -= OnCellClickHandler;
             roomUIStateManager.OnShapeChange -= OnShapeChange;
             roomUIStateManager.OnBiomeChange -= OnBiomeChange;
             roomUIStateManager.OnObjectSelected -= OnObjectSelectedHandler;
@@ -295,7 +345,6 @@ namespace RoomUI {
 
         private void CreateListeners() {
             CellRoomGO.OnPointerEnterEvent += OnCellPointerEnterHandler;
-            CellRoomGO.OnClick += OnCellClickHandler;
             roomUIStateManager.OnShapeChange += OnShapeChange;
             roomUIStateManager.OnBiomeChange += OnBiomeChange;
             roomUIStateManager.OnObjectSelected += OnObjectSelectedHandler;

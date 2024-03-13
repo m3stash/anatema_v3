@@ -21,7 +21,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     private Image imageTop;
     private Image imageMiddle;
     private Image imageBottom;
-    private Button button;
     private Element configTopLayer;
     private Element configMiddleLayer;
     private Element configBottomLayer;
@@ -36,9 +35,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     private Color32 doorColor = new Color32(125, 125, 45, 255);
     private Color32 wallColor = new Color32(50, 50, 50, 255);
 
-    public delegate void CellClickEvent(CellRoomGO cellRoomGO);
-    public static event CellClickEvent OnClick;
-
     public delegate void CellRoomGOEvent(CellRoomGO cellRoomGO);
     public static event CellRoomGOEvent OnPointerEnterEvent;
 
@@ -49,8 +45,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     void Awake() {
         // issue with localscale on 1080p resolution after instantiate go
         transform.localScale = Vector3Int.one;
-        button = gameObject.GetComponent<Button>();
-        button.onClick.AddListener(OnCellClick);
         rectTransform = GetComponent<RectTransform>();
         cellMiddleTransform = cellMiddle.GetComponent<RectTransform>();
         cellTopTransform = cellTop.GetComponent<RectTransform>();
@@ -81,10 +75,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         return cellDesactivated;
     }
 
-    private void OnCellClick() {
-        OnClick?.Invoke(this);
-    }
-
     public bool IsDoorOrWall() {
         return isDoorOrWall;
     }
@@ -113,10 +103,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
             imageBottom.raycastTarget = false;
         }
         imageCell.sprite = transparentIcon;
-    }
-
-    void OnDestroy() {
-        button.onClick.RemoveListener(OnCellClick);
     }
 
     public void DesactivateDisplay() {
@@ -153,7 +139,6 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     }
 
     public void ResetPoolCell() {
-        button.interactable = true;
         isDoorOrWall = false;
         cellDesactivated = false;
         imageCell.color = defaultColorCell;
@@ -161,6 +146,30 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         SetOpacity(LayerType.TOP, 1f);
         SetOpacity(LayerType.MIDDLE, 1f);
         SetOpacity(LayerType.BOTTOM, 1f);
+        configTopLayer = null;
+        if (imageTop.sprite != transparentIcon) {
+            imageTop.sprite = transparentIcon;
+            imageTop.raycastTarget = true;
+            ResizeCellSize(LayerType.TOP);
+        }
+        rootTopCellRoomGOInstanceID = -1;
+        cellTopTransform.anchoredPosition = Vector2.zero;
+        configMiddleLayer = null;
+        if (imageMiddle.sprite != transparentIcon) {
+            imageMiddle.sprite = transparentIcon;
+            imageMiddle.raycastTarget = true;
+            ResizeCellSize(LayerType.MIDDLE);
+        }
+        rootMiddleCellRoomGOInstanceID = -1;
+        cellMiddleTransform.anchoredPosition = Vector2.zero;
+        configBottomLayer = null;
+        if (imageBottom.sprite != transparentIcon) {
+            imageBottom.sprite = transparentIcon;
+            imageBottom.raycastTarget = true;
+            ResizeCellSize(LayerType.BOTTOM);
+            rootBottomCellRoomGOInstanceID = -1;
+            cellBottomTransform.anchoredPosition = Vector2.zero;
+        }
         // backgroundTransform.anchoredPosition = Vector2.zero;
     }
 
@@ -198,21 +207,14 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         ResetPoolCell();
     }
 
-    public void ForbiddenAction() {
-        button.interactable = false;
-        button.interactable = true;
-    }
-
     public void AddWall() {
         imageCell.color = wallColor;
-        button.interactable = false;
         // imageCell.sprite = null;
         // background.SetActive(false);
     }
 
     public void AddDoor() {
         imageCell.color = doorColor;
-        button.interactable = false;
         // imageCell.sprite = null;
         // background.SetActive(false);
     }

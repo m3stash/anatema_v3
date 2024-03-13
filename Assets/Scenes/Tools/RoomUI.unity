@@ -6220,6 +6220,54 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 3811041156486595533}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1481191978
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1481191980}
+  - component: {fileID: 1481191979}
+  m_Layer: 5
+  m_Name: InputEvent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1481191979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1481191978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fbc585fa7c4467581852c2fd07f66e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!224 &1481191980
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1481191978}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2005402108}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1487739455
 GameObject:
   m_ObjectHideFlags: 0
@@ -7100,6 +7148,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roomUIStateManager: {fileID: 1045058813}
+  modalRoomManageRowPoolGO: {fileID: 0}
   cellPool: {fileID: 380827830}
   cellPreviewGO: {fileID: 1453676214}
   gridZoomMinus: {fileID: 1406179402}
@@ -7112,6 +7161,7 @@ MonoBehaviour:
   layerBottomButton: {fileID: 1767117226}
   mainCamera: {fileID: 1013379675}
   cursorSprite: {fileID: 21300000, guid: 017ab27861d324947bf57d5ddedb55b5, type: 3}
+  roomUIInputManagerGO: {fileID: 1481191978}
 --- !u!114 &1681987313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8158,6 +8208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modalManagerGO: {fileID: 386725443}
+  roomUIInputManagerGO: {fileID: 1481191978}
 --- !u!1001 &1927589557
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8495,6 +8546,7 @@ RectTransform:
   - {fileID: 2069790109}
   - {fileID: 1045058812}
   - {fileID: 386725445}
+  - {fileID: 1481191980}
   m_Father: {fileID: 2131741245}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

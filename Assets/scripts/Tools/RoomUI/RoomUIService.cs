@@ -6,6 +6,7 @@ namespace RoomUI {
     public class RoomUIService : MonoBehaviour {
 
         [SerializeField] private GameObject modalManagerGO;
+        [SerializeField] private GameObject roomUIInputManagerGO;
 
         private RoomUIStateManager roomUIStateManager;
         private RoomUiTable roomUiTable;
@@ -17,6 +18,16 @@ namespace RoomUI {
         private RoomUIInput roomUIInput;
         private ModalRoomMananger modalRoomManager;
         private ModalManager modalManager;
+
+        private void Awake() {
+            if (roomUIInputManagerGO != null) {
+                roomUIInputManager = roomUIInputManagerGO.GetComponent<RoomUIInputManager>();
+                roomUIInput = roomUIInputManager.GetRoomUIInput();
+            }
+            else {
+                Debug.LogError("RoomUIService(Awake), roomUIInputManager is null");
+            }
+        }
         public void Setup(DatabaseManager dbManager, RoomUIStateManager roomUIStateManager, ElementTable elementTable, SpriteLoader spriteLoader) {
             this.roomUIStateManager = roomUIStateManager;
             this.elementTable = elementTable;
@@ -29,12 +40,6 @@ namespace RoomUI {
                 Debug.LogError("RoomUIService(Setup), modalManager is null");
             }
             roomUiTable.CreateTableRoom();
-            SetRoomUIInput();
-        }
-
-        private void SetRoomUIInput() {
-            roomUIInputManager = new RoomUIInputManager();
-            roomUIInput = roomUIInputManager.GetRoomUIInput();
         }
 
         public SpriteLoader GetSpriteLoader() {
