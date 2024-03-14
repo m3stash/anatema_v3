@@ -487,16 +487,19 @@ namespace RoomUI {
                 Image layerBottom = kvp.Value.Item4;
                 switch (currentLayer) {
                     case LayerType.TOP:
+                        layerTop.transform.SetAsLastSibling();
                         SetOpacityForLayer(layerTop, 1f);
                         SetOpacityForLayer(layerMiddle, 0.5f);
                         SetOpacityForLayer(layerBottom, 0.5f);
                         break;
                     case LayerType.MIDDLE:
+                        layerMiddle.transform.SetAsLastSibling();
                         SetOpacityForLayer(layerTop, 0.5f);
                         SetOpacityForLayer(layerMiddle, 1f);
                         SetOpacityForLayer(layerBottom, 0.5f);
                         break;
                     case LayerType.BOTTOM:
+                        layerBottom.transform.SetAsLastSibling();
                         SetOpacityForLayer(layerTop, 0.5f);
                         SetOpacityForLayer(layerMiddle, 0.5f);
                         SetOpacityForLayer(layerBottom, 1f);

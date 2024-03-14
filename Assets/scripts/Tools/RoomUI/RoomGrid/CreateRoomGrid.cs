@@ -25,7 +25,7 @@ namespace RoomUI {
         public void ResetPool() {
             if (usedCells.Count > 0) {
                 usedCells.ForEach(cell => {
-                    cell.ResetPoolCell();
+                    cell.ResetCellLayers(LayerType.ALL);
                 });
                 pool.ReleaseMany(usedCells);
                 usedCells = new List<CellRoomGO>();

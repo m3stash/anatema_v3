@@ -51,21 +51,12 @@ namespace RoomUI {
                         }
                     }
                 }
+                // TODO -> voir pour split les images en plusieurs morceaux et dire que image(n)  = sprite(n)
                 return cells;
             }
             cells.Add(cellRoomGO);
             return cells;
         }
-
-        // public CellRoomGO GetCellByGridLayoutIndex(int instanceID) {
-        //     Transform gridTransform = gridLayout.transform;
-        //     for (int i = 0; i < gridTransform.childCount; i++) {
-        //         if (instanceID == gridTransform.GetChild(i).GetInstanceID()) {
-        //             return gridTransform.GetChild(i).GetComponent<CellRoomGO>();
-        //         }
-        //     }
-        //     return null;
-        // }
 
         public CellRoomGO GetCellByIndex(int index) {
             Transform child = gridLayout.transform.GetChild(index);
@@ -123,7 +114,7 @@ namespace RoomUI {
             if (isDeletedCell) {
                 List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, config.GetSize());
                 cells.ForEach(cell => {
-                    cell.ResetLayerCell(layerType);
+                    cell.ResetCellLayers(layerType);
                 });
                 return true;
             }

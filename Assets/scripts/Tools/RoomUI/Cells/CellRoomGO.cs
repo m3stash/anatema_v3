@@ -118,7 +118,7 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     public void DesactivateCell() {
         cellDesactivated = true;
         DesactivateDisplay();
-        ResetLayerCell(LayerType.ALL);
+        ResetCellLayers(LayerType.ALL);
     }
 
     public Element GetConfig(LayerType layerType) {
@@ -138,42 +138,7 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         return configTopLayer == null && configBottomLayer == null && configMiddleLayer == null;
     }
 
-    public void ResetPoolCell() {
-        isDoorOrWall = false;
-        cellDesactivated = false;
-        imageCell.color = defaultColorCell;
-        imageCell.sprite = null;
-        SetOpacity(LayerType.TOP, 1f);
-        SetOpacity(LayerType.MIDDLE, 1f);
-        SetOpacity(LayerType.BOTTOM, 1f);
-        configTopLayer = null;
-        if (imageTop.sprite != transparentIcon) {
-            imageTop.sprite = transparentIcon;
-            imageTop.raycastTarget = true;
-            ResizeCellSize(LayerType.TOP);
-        }
-        rootTopCellRoomGOInstanceID = -1;
-        cellTopTransform.anchoredPosition = Vector2.zero;
-        configMiddleLayer = null;
-        if (imageMiddle.sprite != transparentIcon) {
-            imageMiddle.sprite = transparentIcon;
-            imageMiddle.raycastTarget = true;
-            ResizeCellSize(LayerType.MIDDLE);
-        }
-        rootMiddleCellRoomGOInstanceID = -1;
-        cellMiddleTransform.anchoredPosition = Vector2.zero;
-        configBottomLayer = null;
-        if (imageBottom.sprite != transparentIcon) {
-            imageBottom.sprite = transparentIcon;
-            imageBottom.raycastTarget = true;
-            ResizeCellSize(LayerType.BOTTOM);
-            rootBottomCellRoomGOInstanceID = -1;
-            cellBottomTransform.anchoredPosition = Vector2.zero;
-        }
-        // backgroundTransform.anchoredPosition = Vector2.zero;
-    }
-
-    public void ResetLayerCell(LayerType layerType) {
+    public void ResetCellLayers(LayerType layerType) {
         if (layerType == LayerType.TOP || layerType == LayerType.ALL) {
             configTopLayer = null;
             if (imageTop.sprite != transparentIcon) {
@@ -204,7 +169,13 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
             rootBottomCellRoomGOInstanceID = -1;
             cellBottomTransform.anchoredPosition = Vector2.zero;
         }
-        ResetPoolCell();
+        if (LayerType.ALL == layerType || configTopLayer == null && configMiddleLayer == null && configBottomLayer == null) {
+            isDoorOrWall = false;
+            cellDesactivated = false;
+            imageCell.color = defaultColorCell;
+            imageCell.sprite = null;
+        }
+
     }
 
     public void AddWall() {
@@ -285,6 +256,7 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     }
 
     public void SetOpacity(LayerType layerType, float opacity) {
+        Debug.Log("SetOpacity " + layerType + " " + opacity);
         if (layerType == LayerType.TOP) {
             SetOpacityForLayer(imageTop, opacity);
         }
