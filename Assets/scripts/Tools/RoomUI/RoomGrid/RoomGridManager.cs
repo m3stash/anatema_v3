@@ -10,7 +10,6 @@ using UnityEngine.AI;
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour, IPointerExitHandler {
         [SerializeField] private RoomUIStateManager roomUIStateManager;
-        [SerializeField] private GameObject modalRoomManageRowPoolGO;
         [SerializeField] private GameObject cellPool;
         [SerializeField] private GameObject cellPreviewGO;
         [SerializeField] private Button gridZoomMinus;
@@ -24,6 +23,7 @@ namespace RoomUI {
         [SerializeField] private Camera mainCamera;
         [SerializeField] private Sprite cursorSprite;
         [SerializeField] private GameObject roomUIInputManagerGO;
+        [SerializeField] private GameObject ScrollViewGO;
 
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
@@ -49,9 +49,11 @@ namespace RoomUI {
         private bool holdClick = false;
 
         private CellRoomGO currentHoverCell;
+        private ScrollRect scrollRect;
 
         private void Awake() {
             VerifySerialisables();
+            InitComponent();
             CreateListeners();
             InitCellDictionary();
             InitButtonPanel();
@@ -60,6 +62,10 @@ namespace RoomUI {
             CreateRoomInstance();
             CreateInputAction();
             // ChangeCursor();
+        }
+
+        private void InitComponent() {
+            scrollRect = ScrollViewGO.GetComponent<ScrollRect>();
         }
 
         private void CreateInputAction() {
@@ -72,11 +78,11 @@ namespace RoomUI {
             else {
                 Debug.LogError("RoomUIService(Awake), roomUIInputManager is null");
             }
-
         }
 
         private void OnCellClickHoldHandler(InputAction.CallbackContext context) {
             if (currentHoverCell != null && !holdClick) {
+                scrollRect.enabled = false;
                 Element cellConfig = currentHoverCell.GetConfig(layerType);
                 switch (currentAction) {
                     case RoomUIAction.COPY:
@@ -94,6 +100,7 @@ namespace RoomUI {
         }
 
         private void OnCellClickLeaveHandler(InputAction.CallbackContext context) {
+            scrollRect.enabled = true;
             holdClick = false;
         }
 
@@ -344,7 +351,9 @@ namespace RoomUI {
                 { "layerMiddleButton", layerMiddleButton },
                 { "layerBottomButton", layerBottomButton },
                 { "mainCamera", mainCamera },
-                { "cursorSprite", cursorSprite }
+                { "cursorSprite", cursorSprite },
+                { "roomUIInputManagerGO", roomUIInputManagerGO },
+                { "ScrollViewGO", ScrollViewGO }
             };
             foreach (var field in serializableFields) {
                 if (field.Value == null) {
