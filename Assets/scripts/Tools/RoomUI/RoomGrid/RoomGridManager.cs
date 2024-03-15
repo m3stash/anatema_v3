@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.AI;
 
 namespace RoomUI {
     public class RoomGridManager : MonoBehaviour, IPointerExitHandler {
@@ -126,6 +127,7 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
+            if (cellRoomGO == null) return;
             Element cellConfig = cellRoomGO.GetConfig(layerType);
             switch (currentAction) {
                 case RoomUIAction.COPY:
@@ -170,13 +172,13 @@ namespace RoomUI {
             if (!IsVoidCell(cellRoomGO)) {
                 Vector2Int cellSize = cellRoomGO.GetConfig(layerType).GetSize();
                 CellRoomGO rootCell = cellRoomGO;
-                bool isdeletedCell = false;
+                List<CellRoomGO> deletedCells = new List<CellRoomGO>();
                 if (cellSize.x > 1 || cellSize.y > 1) {
                     int index = GetIndexByLayerAndInstanceID(cellRoomGO.GetRootCellRoomGOInstanceID(layerType), layerType);
                     if (index != -1) {
                         rootCell = roomGridService.GetCellByIndex(index);
                         if (rootCell) {
-                            isdeletedCell = roomGridService.DeleteCell(rootCell, layerType);
+                            deletedCells = roomGridService.DeleteCell(rootCell, layerType);
                         }
                         else {
                             Debug.LogError("DeleteCell: no rootCell with this id: ");
@@ -184,27 +186,47 @@ namespace RoomUI {
                     }
                 }
                 else {
-                    isdeletedCell = roomGridService.DeleteCell(cellRoomGO, layerType);
+                    deletedCells = roomGridService.DeleteCell(cellRoomGO, layerType);
                 }
-                if (isdeletedCell) {
-                    bool isEmptyCell = rootCell.IsLayersEmpty();
-                    if (isEmptyCell) {
-                        RemoveCellRoomGoItemByLayerAndInstanceID(rootCell.GetInstanceID(), layerType);
-                        Debug.Log("CellRoomGO removed from list " + cellRoomGoDictionary[layerType].Count);
+                if (deletedCells.Count > 0) {
+                    if (deletedCells.Count == 1) {
+                        RefreshCellRoomGoDictionary(rootCell, layerType);
+                    }
+                    else {
+                        deletedCells.ForEach(cell => {
+                            RefreshCellRoomGoDictionary(cell, layerType);
+                        });
                     }
                     cellPreviewManager.SetPreviewByActionType(PreviewAction.HOVER, cellRoomGO.transform.position, new Vector2(1, 1), cellRoomGO.GetCellSize());
                 }
             }
         }
 
-        private void SelectCell(CellRoomGO cellRoomGO) {
-            bool isCellCreated = roomGridService.CreateCell(cellRoomGO, currenSelectedObject, layerType);
-            if (isCellCreated) {
-                int index = roomGridService.GetCellIndexByPosition(cellRoomGO.GetPosition());
-                AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layerType, cellRoomGO.GetImages());
+        private void RefreshCellRoomGoDictionary(CellRoomGO cell, LayerType layerType) {
+            bool isEmptyCell = cell.IsLayersEmpty();
+            if (isEmptyCell) {
+                RemoveCellRoomGoItemByLayerAndInstanceID(cell.GetInstanceID(), layerType);
+                Debug.Log("CellRoomGO removed from list " + cellRoomGoDictionary[layerType].Count);
             }
-            if (currenSelectedObject != null)
-                cellPreviewManager.Forbidden();
+        }
+
+        private void SelectCell(CellRoomGO cellRoomGO) {
+            if (currenSelectedObject == null || cellRoomGO.GetConfig(layerType) != null) {
+                return;
+            }
+            List<CellRoomGO> cells = roomGridService.CreateCell(cellRoomGO, currenSelectedObject, layerType);
+            if (cells != null && cells.Count > 0) {
+                if (cells.Count == 1) {
+                    int index = roomGridService.GetCellIndexByPosition(cellRoomGO.GetPosition());
+                    AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layerType, cellRoomGO.GetImages());
+                }
+                else {
+                    cells.ForEach(cell => {
+                        int index = roomGridService.GetCellIndexByPosition(cell.GetPosition());
+                        AddCellRoomGoItem(cell.GetInstanceID(), index, layerType, cell.GetImages());
+                    });
+                }
+            }
         }
 
         private void CopyCell(Element cellConfig) {
@@ -440,12 +462,20 @@ namespace RoomUI {
             layerGridModel.ForEach(cell => {
                 int x = cell.GetPosition().x;
                 int y = cell.GetPosition().y;
-                int index = y * gridLayout.constraintCount + x;
+                int index = roomGridService.GetCellIndexByPosition(cell.GetPosition());
                 GameObject cellObject = gridLayout.transform.GetChild(index).gameObject;
                 CellRoomGO cellRoomGO = cellObject.GetComponent<CellRoomGO>();
-                bool isCreatedCell = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layer);
-                if (isCreatedCell) {
-                    AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layer, cellRoomGO.GetImages());
+                List<CellRoomGO> cells = roomGridService.CreateCell(cellRoomGO, cell.GetElement(), layer);
+                if (cells != null && cells.Count > 0) {
+                    if (cells.Count == 1) {
+                        AddCellRoomGoItem(cellRoomGO.GetInstanceID(), index, layer, cellRoomGO.GetImages());
+                    }
+                    else {
+                        cells.ForEach(cell => {
+                            int index = roomGridService.GetCellIndexByPosition(cell.GetPosition());
+                            AddCellRoomGoItem(cell.GetInstanceID(), index, layer, cell.GetImages());
+                        });
+                    }
                 }
             });
         }

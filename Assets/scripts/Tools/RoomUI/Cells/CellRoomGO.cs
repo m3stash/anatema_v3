@@ -84,35 +84,37 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
     }
 
     private void SetComponentValues(Element config, LayerType layerType) {
+        bool isBigCell = config.GetSize().x > 1 || config.GetSize().y > 1;
         if (layerType == LayerType.TOP || layerType == LayerType.ALL) {
             rootTopCellRoomGOInstanceID = GetInstanceID();
             configTopLayer = config;
-            imageTop.sprite = configTopLayer.GetSprite();
-            imageTop.raycastTarget = false;  // avoids interaction with cells above due to image size if larger than 1x1
+            if (!isBigCell) {
+                imageTop.sprite = config.GetSprite();
+            }
         }
         if (layerType == LayerType.MIDDLE || layerType == LayerType.ALL) {
             rootMiddleCellRoomGOInstanceID = GetInstanceID();
             configMiddleLayer = config;
-            imageMiddle.sprite = configMiddleLayer.GetSprite();
-            imageMiddle.raycastTarget = false;
+            if (!isBigCell) {
+                imageMiddle.sprite = config.GetSprite();
+            }
         }
         if (layerType == LayerType.BOTTOM || layerType == LayerType.ALL) {
             rootBottomCellRoomGOInstanceID = GetInstanceID();
             configBottomLayer = config;
-            imageBottom.sprite = configBottomLayer.GetSprite();
-            imageBottom.raycastTarget = false;
+            if (!isBigCell) {
+                imageBottom.sprite = config.GetSprite();
+            }
         }
         imageCell.sprite = transparentIcon;
     }
 
     public void DesactivateDisplay() {
         imageCell.sprite = transparentIcon;
-        // background.SetActive(false);
     }
 
     public void ActivateDisplay() {
         imageCell.sprite = null;
-        // background.SetActive(true);
     }
 
     public void DesactivateCell() {
@@ -194,48 +196,37 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         float rectWidth = rectTransform.sizeDelta.x;
         float rectHeight = rectTransform.sizeDelta.y;
         cellSize = new Vector2(rectWidth, rectHeight);
-        int InstanceId = GetInstanceID();
-        Vector2Int defaultSize = new Vector2Int(1, 1);
         switch (layerType) {
             case LayerType.TOP:
-                ResizeLayerCell(rectWidth, rectHeight, defaultSize, configTopLayer, cellTopTransform);
+                cellTopTransform.sizeDelta = new Vector2(rectWidth, rectHeight);
                 break;
             case LayerType.MIDDLE:
-                ResizeLayerCell(rectWidth, rectHeight, defaultSize, configMiddleLayer, cellMiddleTransform);
+                cellMiddleTransform.sizeDelta = new Vector2(rectWidth, rectHeight);
                 break;
             case LayerType.BOTTOM:
-                ResizeLayerCell(rectWidth, rectHeight, defaultSize, configBottomLayer, cellBottomTransform);
+                cellBottomTransform.sizeDelta = new Vector2(rectWidth, rectHeight);
                 break;
             case LayerType.ALL:
-                bool isRootTop = rootTopCellRoomGOInstanceID == InstanceId;
-                bool isRootMiddle = rootMiddleCellRoomGOInstanceID == InstanceId;
-                bool isRootBottom = rootBottomCellRoomGOInstanceID == InstanceId;
-                if (isRootTop) {
-                    ResizeLayerCell(rectWidth, rectHeight, defaultSize, configTopLayer, cellTopTransform);
-                }
-                if (isRootMiddle) {
-                    ResizeLayerCell(rectWidth, rectHeight, defaultSize, configMiddleLayer, cellMiddleTransform);
-                }
-                if (isRootBottom) {
-                    ResizeLayerCell(rectWidth, rectHeight, defaultSize, configBottomLayer, cellBottomTransform);
-                }
+                cellTopTransform.sizeDelta = new Vector2(rectWidth, rectHeight);
+                cellMiddleTransform.sizeDelta = new Vector2(rectWidth, rectHeight);
+                cellBottomTransform.sizeDelta = new Vector2(rectWidth, rectHeight);
                 break;
         }
     }
-    private void ResizeLayerCell(float rectWidth, float rectHeight, Vector2Int defaultSize, Element config, RectTransform cellTransform) {
-        Vector2Int size = config != null ? config.GetSize() : defaultSize;
-        CalculCellSizeAndManagePosition(size, rectWidth, rectHeight, cellTransform);
-    }
+    // private void ResizeLayerCell(float rectWidth, float rectHeight, Vector2Int defaultSize, Element config, RectTransform cellTransform) {
+    //     Vector2Int size = config != null ? config.GetSize() : defaultSize;
+    //     CalculCellSizeAndManagePosition(size, rectWidth, rectHeight, cellTransform);
+    // }
 
-    private void CalculCellSizeAndManagePosition(Vector2Int size, float rectWidth, float rectHeight, RectTransform rectTransform) {
-        float height = rectHeight;
-        float width = rectWidth;
-        if (size.x > 1 || size.y > 1) {
-            width = rectWidth * size.x + (size.x - 1 * spacing.x);
-            height = rectHeight * size.y + (size.y - 1 * spacing.y);
-        }
-        rectTransform.sizeDelta = new Vector2(width, height);
-    }
+    // private void CalculCellSizeAndManagePosition(Vector2Int size, float rectWidth, float rectHeight, RectTransform rectTransform) {
+    //     float height = rectHeight;
+    //     float width = rectWidth;
+    //     if (size.x > 1 || size.y > 1) {
+    //         width = rectWidth * size.x + (size.x - 1 * spacing.x);
+    //         height = rectHeight * size.y + (size.y - 1 * spacing.y);
+    //     }
+    //     rectTransform.sizeDelta = new Vector2(width, height);
+    // }
 
     public Vector2 GetCellSize() {
         return cellSize;
@@ -311,16 +302,19 @@ public class CellRoomGO : MonoBehaviour, IPointerEnterHandler {
         return (imageTop, imageMiddle, imageBottom);
     }
 
-    public void SetupBigCell(int instanceID, Element config, LayerType layerType) {
+    public void SetupBigCell(int instanceID, Element config, LayerType layerType, Sprite splitedSprite) {
         if (layerType == LayerType.TOP) {
+            imageTop.sprite = splitedSprite;
             configTopLayer = config;
             rootTopCellRoomGOInstanceID = instanceID;
         }
         else if (layerType == LayerType.MIDDLE) {
+            imageMiddle.sprite = splitedSprite;
             configMiddleLayer = config;
             rootMiddleCellRoomGOInstanceID = instanceID;
         }
         else if (layerType == LayerType.BOTTOM) {
+            imageBottom.sprite = splitedSprite;
             configBottomLayer = config;
             rootBottomCellRoomGOInstanceID = instanceID;
         }

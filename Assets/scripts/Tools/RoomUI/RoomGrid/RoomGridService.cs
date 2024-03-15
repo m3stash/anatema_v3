@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 namespace RoomUI {
@@ -8,6 +9,7 @@ namespace RoomUI {
         private List<GridElementModel> topLayer = new List<GridElementModel>();
         private List<GridElementModel> middleLayer = new List<GridElementModel>();
         private List<GridElementModel> bottomLayer = new List<GridElementModel>();
+        Dictionary<string, Sprite[]> spriteDictionary = new Dictionary<string, Sprite[]>();
 
         public RoomGridService(GridLayoutGroup gridLayout) {
             this.gridLayout = gridLayout;
@@ -51,7 +53,6 @@ namespace RoomUI {
                         }
                     }
                 }
-                // TODO -> voir pour split les images en plusieurs morceaux et dire que image(n)  = sprite(n)
                 return cells;
             }
             cells.Add(cellRoomGO);
@@ -74,24 +75,70 @@ namespace RoomUI {
             return size.x > 1 || size.y > 1;
         }
 
-        public bool CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layer) {
-            if (selectedElement == null || cellRoomGO.GetConfig(layer) != null) return false;
+        public List<CellRoomGO> CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layer) {
+            if (selectedElement == null || cellRoomGO.GetConfig(layer) != null) return null;
             Vector2Int size = selectedElement.GetSize();
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, size);
             if (cells.Exists(cell => cell.GetConfig(layer) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layer))) {
-                return false;
+                return null;
             }
             if (IsBigCell(size)) {
-                DesactivateAllCellsAndGetTopLeftCell(cells, cellRoomGO, selectedElement, layer);
+                SetupBigCell(cells, cellRoomGO, selectedElement, layer);
             }
             AddCellInUsedCell(selectedElement, cellRoomGO.GetPosition(), layer);
             cellRoomGO.Setup(selectedElement, layer, gridLayout.spacing, cellRoomGO.GetPosition());
-            return true;
+            return cells;
         }
 
-        public void DesactivateAllCellsAndGetTopLeftCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
+        private Sprite[] GetSprites(Element element) {
+            string name = element.GetSprite().name;
+            if (spriteDictionary.ContainsKey(name)) {
+                return spriteDictionary[name];
+            }
+            Sprite sprite = element.GetSprite();
+            Texture2D texture = sprite.texture;
+            Vector2Int size = element.GetSize();
+            RectInt[] cellRects = CalculateCellRects(texture, size);
+            Sprite[] sprites = new Sprite[cellRects.Length];
+            texture.Apply(false);
+            foreach (RectInt cellRect in cellRects) {
+                int cellWidth = texture.width / size.x;
+                int cellHeight = texture.height / size.y;
+                Color[] pixels = texture.GetPixels(cellRect.x, cellRect.y, cellWidth, cellHeight);
+                Texture2D newTexture = new Texture2D(cellWidth, cellHeight);
+                newTexture.SetPixels(pixels);
+                newTexture.Apply();
+                Sprite splitedSprite = Sprite.Create(newTexture, new Rect(0, 0, cellWidth, cellHeight), Vector2.one * 0.5f);
+                int index = System.Array.IndexOf(cellRects, cellRect);
+                sprites[index] = splitedSprite;
+            }
+            spriteDictionary.Add(name, sprites);
+            return sprites;
+        }
+
+        RectInt[] CalculateCellRects(Texture2D texture, Vector2Int size) {
+            int cellWidth = texture.width / size.x;
+            int cellHeight = texture.height / size.y;
+            RectInt[] cellRects = new RectInt[size.x * size.y];
+            int index = 0;
+            for (int y = 0; y < size.y; y++) {
+                for (int x = 0; x < size.x; x++) {
+                    int cellX = x * cellWidth;
+                    int cellY = y * cellHeight;
+                    cellRects[index] = new RectInt(cellX, cellY, cellWidth, cellHeight);
+                    index++;
+                }
+            }
+            return cellRects;
+        }
+
+        public void SetupBigCell(List<CellRoomGO> cells, CellRoomGO cellRoomGO, Element selectedElement, LayerType layerType) {
+            int i = 0;
+            Sprite[] sprites = GetSprites(selectedElement);
             cells.ForEach(cell => {
-                cell.SetupBigCell(cellRoomGO.GetInstanceID(), selectedElement, layerType);
+                Sprite sprite = sprites[i];
+                cell.SetupBigCell(cellRoomGO.GetInstanceID(), selectedElement, layerType, sprite);
+                i++;
             });
         }
 
@@ -107,18 +154,18 @@ namespace RoomUI {
             }
         }
 
-        public bool DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
+        public List<CellRoomGO> DeleteCell(CellRoomGO cellRoomGO, LayerType layerType) {
             Element config = cellRoomGO.GetConfig(layerType);
-            if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return false;
+            if (config == null && !cellRoomGO.IsDesactivatedCell(layerType)) return null;
             bool isDeletedCell = RemoveCellInUsedCell(cellRoomGO, layerType);
             if (isDeletedCell) {
                 List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, config.GetSize());
                 cells.ForEach(cell => {
                     cell.ResetCellLayers(layerType);
                 });
-                return true;
+                return cells;
             }
-            return false;
+            return null;
         }
 
         private bool RemoveCellInUsedCell(CellRoomGO cellRoomGO, LayerType layerType) {
