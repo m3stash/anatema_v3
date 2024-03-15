@@ -120,9 +120,9 @@ namespace RoomUI {
             });
         }
 
-        private void CreateElementFromId(List<GridElementModel> eltlayer, List<Element> elements) {
-            if (eltlayer == null) return;
-            eltlayer.ForEach(element => {
+        private void CreateElementFromId(List<GridElementModel> eltslayer, List<Element> elements) {
+            if (eltslayer == null) return;
+            eltslayer.ForEach(element => {
                 int elementId = element.GetId();
                 int itemId = element.GetId();
                 Element elt = elements.Find(e => e.GetId() == elementId);

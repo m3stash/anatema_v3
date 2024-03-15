@@ -21,7 +21,7 @@ public class SpriteLoader {
 
         if (!dictionnary.ContainsKey(category)) {
             Dictionary<string, Sprite> spriteDictionary = new Dictionary<string, Sprite>();
-            Sprite[] loadedSprites = Resources.LoadAll<Sprite>(path + category);
+            Sprite[] loadedSprites = Resources.LoadAll<Sprite>(path + category.ToLower());
             foreach (Sprite sprite in loadedSprites) {
                 string spriteName = sprite.name.Split('_')[0];
                 spriteDictionary.Add(spriteName, sprite);
