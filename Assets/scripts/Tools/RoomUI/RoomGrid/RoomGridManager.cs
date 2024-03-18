@@ -20,6 +20,7 @@ namespace RoomUI {
         [SerializeField] private Button layerTopButton;
         [SerializeField] private Button layerMiddleButton;
         [SerializeField] private Button layerBottomButton;
+        [SerializeField] private Button layerAll;
         [SerializeField] private Camera mainCamera;
         [SerializeField] private Sprite cursorSprite;
         [SerializeField] private GameObject roomUIInputManagerGO;
@@ -28,7 +29,7 @@ namespace RoomUI {
         private CellRoomPool pool;
         private GridLayoutGroup gridLayout;
         private Dictionary<RoomShapeEnum, Room> roomByShape = new Dictionary<RoomShapeEnum, Room>();
-        private Dictionary<LayerType, Dictionary<int, (int, Image, Image, Image)>> cellRoomGoDictionary = new Dictionary<LayerType, Dictionary<int, (int, Image, Image, Image)>>();
+        private Dictionary<int, (int, Image, Image, Image)> cellRoomGoDictionary = new Dictionary<int, (int, Image, Image, Image)>();
         private CreateRoomGrid currentGrid;
         private RectTransform rectTransform;
         private int cellSize = 28;
@@ -55,7 +56,6 @@ namespace RoomUI {
             VerifySerialisables();
             InitComponent();
             CreateListeners();
-            InitCellDictionary();
             InitButtonPanel();
             CreatePooling();
             InitGrid();
@@ -104,12 +104,6 @@ namespace RoomUI {
             holdClick = false;
         }
 
-        private void InitCellDictionary() {
-            cellRoomGoDictionary.Add(LayerType.TOP, new Dictionary<int, (int, Image, Image, Image)>());
-            cellRoomGoDictionary.Add(LayerType.MIDDLE, new Dictionary<int, (int, Image, Image, Image)>());
-            cellRoomGoDictionary.Add(LayerType.BOTTOM, new Dictionary<int, (int, Image, Image, Image)>());
-        }
-
         private void InitGrid() {
             gridLayout = gameObject.GetComponent<GridLayoutGroup>();
             gridLayout.cellSize = new Vector2(cellSize, cellSize);
@@ -134,7 +128,7 @@ namespace RoomUI {
         }
 
         private void OnCellClickHandler(CellRoomGO cellRoomGO) {
-            if (cellRoomGO == null) return;
+            if (cellRoomGO == null || layerType == LayerType.ALL) return;
             Element cellConfig = cellRoomGO.GetConfig(layerType);
             switch (currentAction) {
                 case RoomUIAction.COPY:
@@ -150,27 +144,23 @@ namespace RoomUI {
         }
 
         public void AddCellRoomGoItem(int instanceID, int index, LayerType layerType, (Image, Image, Image) images) {
-            if (!cellRoomGoDictionary[layerType].ContainsKey(instanceID)) {
-                cellRoomGoDictionary[layerType][instanceID] = (index, images.Item1, images.Item2, images.Item3);
+            if (!cellRoomGoDictionary.ContainsKey(instanceID)) {
+                cellRoomGoDictionary[instanceID] = (index, images.Item1, images.Item2, images.Item3);
             }
-            Debug.Log("ADD removed from list " + cellRoomGoDictionary[layerType].Count);
+            Debug.Log("ADD removed from list " + cellRoomGoDictionary.Count);
         }
 
         public bool RemoveCellRoomGoItemByLayerAndInstanceID(int instanceID, LayerType layerType) {
-            if (cellRoomGoDictionary.ContainsKey(layerType) && cellRoomGoDictionary[layerType].ContainsKey(instanceID)) {
-                cellRoomGoDictionary[layerType].Remove(instanceID);
+            if (cellRoomGoDictionary.ContainsKey(instanceID)) {
+                cellRoomGoDictionary.Remove(instanceID);
                 return true;
             }
             return false;
         }
 
         public int GetIndexByLayerAndInstanceID(int instanceID, LayerType layerType) {
-            if (cellRoomGoDictionary.ContainsKey(layerType) && cellRoomGoDictionary[layerType].ContainsKey(instanceID)) {
-                if (cellRoomGoDictionary.TryGetValue(layerType, out var layerDictionary)) {
-                    if (layerDictionary.TryGetValue(instanceID, out var data)) {
-                        return data.Item1;
-                    }
-                }
+            if (cellRoomGoDictionary.ContainsKey(instanceID)) {
+                return cellRoomGoDictionary[instanceID].Item1;
             }
             return -1;
         }
@@ -213,7 +203,7 @@ namespace RoomUI {
             bool isEmptyCell = cell.IsLayersEmpty();
             if (isEmptyCell) {
                 RemoveCellRoomGoItemByLayerAndInstanceID(cell.GetInstanceID(), layerType);
-                Debug.Log("CellRoomGO removed from list " + cellRoomGoDictionary[layerType].Count);
+                Debug.Log("CellRoomGO removed from list " + cellRoomGoDictionary.Count);
             }
         }
 
@@ -249,6 +239,10 @@ namespace RoomUI {
         }
 
         private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
+            if (layerType == LayerType.ALL) {
+                cellPreviewManager.Hover(); // to do voir pkoi ça marche pas ?
+                return;
+            }
             currentHoverCell = cellRoomGO;
             cellPreviewManager.Reset();
             if (cellRoomGO.IsDoorOrWall()) {
@@ -259,12 +253,6 @@ namespace RoomUI {
             Vector2 cellSize = cellRoomGO.GetCellSize(); // ex: 28 x 28
             Vector3 cellRoomGOPosition = cellRoomGO.transform.position;
             Vector2Int elementSize;
-            if (!isVoidCell) {
-                elementSize = cellRoomGO.GetConfig(layerType).GetSize();
-            }
-            else {
-                elementSize = new Vector2Int(1, 1);
-            }
             switch (currentAction) {
                 case RoomUIAction.SELECT:
                     cellPreviewManager.OnHoverSelectAction(cellRoomGO, cellSize, cellRoomGOPosition, isVoidCell, currenSelectedObject, layerType);
@@ -273,6 +261,7 @@ namespace RoomUI {
                     }
                     break;
                 case RoomUIAction.TRASH:
+                    elementSize = GetElementSize(isVoidCell, cellRoomGO);
                     if (elementSize.x > 1 || elementSize.y > 1) {
                         CellRoomGO rootCell = GetRootCellByIdAndLayer(cellRoomGO, layerType);
                         cellPreviewManager.OnHoverTrashAction(rootCell, cellSize, cellRoomGOPosition, layerType);
@@ -285,6 +274,7 @@ namespace RoomUI {
                     }
                     break;
                 case RoomUIAction.COPY:
+                    elementSize = GetElementSize(isVoidCell, cellRoomGO);
                     if (elementSize.x > 1 || elementSize.y > 1) {
                         CellRoomGO rootCell = GetRootCellByIdAndLayer(cellRoomGO, layerType);
                         cellPreviewManager.OnHoverCopyAction(rootCell, cellSize, cellRoomGOPosition, layerType);
@@ -297,6 +287,13 @@ namespace RoomUI {
                     cellPreviewManager.Reset();
                     break;
             }
+        }
+
+        private Vector2Int GetElementSize(bool isVoidCell, CellRoomGO cellRoomGO) {
+            if (!isVoidCell) {
+                return cellRoomGO.GetConfig(layerType).GetSize();
+            }
+            return new Vector2Int(1, 1);
         }
 
         private void InitButtonPanel() {
@@ -318,6 +315,7 @@ namespace RoomUI {
             ChangeButtonColor(layerTopButton, defaultButtonColor);
             ChangeButtonColor(layerMiddleButton, defaultButtonColor);
             ChangeButtonColor(layerBottomButton, defaultButtonColor);
+            ChangeButtonColor(layerAll, defaultButtonColor);
         }
 
         private void ResetButtonsColor() {
@@ -350,6 +348,7 @@ namespace RoomUI {
                 { "layerTopButton", layerTopButton },
                 { "layerMiddleButton", layerMiddleButton },
                 { "layerBottomButton", layerBottomButton },
+                { "layerAll", layerAll },
                 { "mainCamera", mainCamera },
                 { "cursorSprite", cursorSprite },
                 { "roomUIInputManagerGO", roomUIInputManagerGO },
@@ -425,6 +424,12 @@ namespace RoomUI {
             else {
                 Debug.LogError("layerBottomButton is null");
             }
+            if (layerAll != null) {
+                layerAll.onClick.AddListener(OnLayerAllButtonClick);
+            }
+            else {
+                Debug.LogError("layerAll is null");
+            }
             if (trashButton != null) {
                 trashButton.onClick.AddListener(OnTrashButtonClick);
             }
@@ -455,9 +460,9 @@ namespace RoomUI {
             roomGridService.ResetLayers();
             currentGrid.ResetGrid();
             cellRoomGoDictionary.Clear();
-            InitCellDictionary();
+            cellRoomGoDictionary = new Dictionary<int, (int, Image, Image, Image)>();
             if (cellRoomGoDictionary.Count > 0) {
-                Debug.Log("Clear List" + cellRoomGoDictionary[layerType].Count);
+                Debug.Log("Clear List" + cellRoomGoDictionary.Count);
             }
             CreateGridView();
             CreateCellsForLayer(roomUIModel.TopLayer, LayerType.TOP);
@@ -519,28 +524,41 @@ namespace RoomUI {
         }
 
         private void ChangeOpacityForLayers(LayerType layer, LayerType currentLayer) {
-            if (!cellRoomGoDictionary.ContainsKey(layer)) return;
-            foreach (var kvp in cellRoomGoDictionary[layer]) {
-                Image layerTop = kvp.Value.Item2;
-                Image layerMiddle = kvp.Value.Item3;
-                Image layerBottom = kvp.Value.Item4;
+            foreach (var cell in cellRoomGoDictionary) {
+                Image layerTop = cell.Value.Item2;
+                Image layerMiddle = cell.Value.Item3;
+                Image layerBottom = cell.Value.Item4;
                 switch (currentLayer) {
                     case LayerType.TOP:
+                        layerBottom.transform.SetAsLastSibling();
+                        layerMiddle.transform.SetAsLastSibling();
                         layerTop.transform.SetAsLastSibling();
                         SetOpacityForLayer(layerTop, 1f);
                         SetOpacityForLayer(layerMiddle, 0.5f);
                         SetOpacityForLayer(layerBottom, 0.5f);
                         break;
                     case LayerType.MIDDLE:
+                        layerBottom.transform.SetAsLastSibling();
+                        layerTop.transform.SetAsLastSibling();
                         layerMiddle.transform.SetAsLastSibling();
                         SetOpacityForLayer(layerTop, 0.5f);
                         SetOpacityForLayer(layerMiddle, 1f);
                         SetOpacityForLayer(layerBottom, 0.5f);
                         break;
                     case LayerType.BOTTOM:
+                        layerMiddle.transform.SetAsLastSibling();
+                        layerTop.transform.SetAsLastSibling();
                         layerBottom.transform.SetAsLastSibling();
                         SetOpacityForLayer(layerTop, 0.5f);
                         SetOpacityForLayer(layerMiddle, 0.5f);
+                        SetOpacityForLayer(layerBottom, 1f);
+                        break;
+                    case LayerType.ALL:
+                        layerBottom.transform.SetAsLastSibling();
+                        layerMiddle.transform.SetAsLastSibling();
+                        layerTop.transform.SetAsLastSibling();
+                        SetOpacityForLayer(layerTop, 1f);
+                        SetOpacityForLayer(layerMiddle, 1f);
                         SetOpacityForLayer(layerBottom, 1f);
                         break;
                 }
@@ -565,6 +583,11 @@ namespace RoomUI {
             SetLayerConfiguration(LayerType.BOTTOM, layerBottomButton);
         }
 
+        private void OnLayerAllButtonClick() {
+            layerType = LayerType.ALL;
+            SetLayerConfiguration(LayerType.ALL, layerAll);
+        }
+
         private void OnObjectSelectedHandler(Element selectedObject) {
             currenSelectedObject = selectedObject;
             OnSelectButtonClick();
@@ -583,7 +606,7 @@ namespace RoomUI {
             else {
                 currentGrid.ResetGrid();
                 cellRoomGoDictionary.Clear();
-                InitCellDictionary();
+                cellRoomGoDictionary = new Dictionary<int, (int, Image, Image, Image)>();
             }
         }
 
