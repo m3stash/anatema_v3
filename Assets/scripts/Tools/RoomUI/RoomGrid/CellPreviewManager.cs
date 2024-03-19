@@ -136,6 +136,22 @@ namespace RoomUI {
                 SetPreviewByActionType(PreviewAction.HOVER, cellRoomGOPosition, new Vector2(1, 1), cellSize);
                 return;
             }
+            string layerbottomGroupType = cellRoomGO.GetConfig(LayerType.BOTTOM)?.GetGroupType();
+            string layerMiddleGroupType = cellRoomGO.GetConfig(LayerType.MIDDLE)?.GetGroupType();
+            switch (layerType) {
+                case LayerType.MIDDLE:
+                    if (layerbottomGroupType == "HOLE" || layerbottomGroupType == "LIQUID") {
+                        SetPreviewByActionType(PreviewAction.FORBIDDEN, cellRoomGOPosition, new Vector2(1, 1), cellSize);
+                        return;
+                    };
+                    break;
+                case LayerType.TOP:
+                    if (layerMiddleGroupType == "HOLE" || layerMiddleGroupType == "LIQUID" || layerbottomGroupType == "HOLE" || layerbottomGroupType == "LIQUID") {
+                        SetPreviewByActionType(PreviewAction.FORBIDDEN, cellRoomGOPosition, new Vector2(1, 1), cellSize);
+                        return;
+                    };
+                    break;
+            }
             if (currenSelectedObject != null) {
                 Vector2Int selectedElementSize = currenSelectedObject.GetSize();
                 List<CellRoomGO> cells = roomGridService.GetCellsAtPosition(cellRoomGO, selectedElementSize);

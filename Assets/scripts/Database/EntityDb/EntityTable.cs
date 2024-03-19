@@ -4,7 +4,6 @@ using UnityEngine;
 using System.Data;
 using System;
 using Database;
-using System.Collections.Generic;
 
 public class EntityTable {
     private IDbConnection dbconn;
@@ -28,6 +27,7 @@ public class EntityTable {
             [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             [ElementID] INTEGER NOT NULL,
             [Life] INTEGER NOT NULL,
+            [Type] TEXT NOT NULL,
             FOREIGN KEY (ElementID) REFERENCES {elementTableName}(id)
         )";
         tableManager.CreateTable(tableName, sqlQuery, dbconn);
@@ -42,6 +42,7 @@ public class EntityTable {
                 int id = dbreader.GetInt32(0);
                 int elementId = dbreader.GetInt32(1);
                 int life = dbreader.GetInt32(2);
+                string type = dbreader.GetString(3);
             }
             Debug.Log("Table read successfully.");
         }
@@ -52,16 +53,18 @@ public class EntityTable {
 
     public int Insert(
         int elementId,
-        int life
+        int life,
+        string type
     ) {
         int lastInsertedId = -1;
         try {
             using IDbCommand dbcmd = dbconn.CreateCommand();
-            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, Life) " +
-                "VALUES (@ElementID, @Life); " +
+            dbcmd.CommandText = $"INSERT INTO {tableName} (ElementID, Life, Type) " +
+                "VALUES (@ElementID, @Life, @Type); " +
                 "SELECT last_insert_rowid() AS new_id;";
             dbManager.AddParameter(dbcmd, "@ElementID", elementId);
             dbManager.AddParameter(dbcmd, "@Life", life);
+            dbManager.AddParameter(dbcmd, "@Type", type);
             dbcmd.ExecuteNonQuery();
             Debug.Log($"{tableName} inserted successfully.");
             using IDataReader reader = dbcmd.ExecuteReader();
@@ -76,52 +79,6 @@ public class EntityTable {
         }
         return lastInsertedId;
     }
-
-    /*public List<Element> GetElementsByElementId(int idElement) {
-        List<Element> elements = new List<Element>();
-
-        using (IDbCommand dbcmd = dbconn.CreateCommand()) {
-            dbcmd.CommandText = $@"
-                SELECT *
-                FROM {tableName}
-                WHERE ElementID = @ElementID";
-            dbManager.AddParameter(dbcmd, "@ElementID", idElement);
-
-            try {
-                using IDataReader dbreader = dbcmd.ExecuteReader();
-                while (dbreader.Read()) {
-                    int id = dbreader.GetInt32(0);
-                    int elementID = dbreader.GetInt32(1);
-                    string displayName = dbreader.GetString(2);
-                    string subCategory = dbreader.GetString(3);
-                    string description = dbreader.GetString(4);
-                    string spriteName = dbreader.GetString(5);
-                    int sizeX = dbreader.GetInt32(6);
-                    int sizeY = dbreader.GetInt32(7);
-                    string biome = dbreader.GetString(8);
-                    string groupType = dbreader.GetString(9);
-                    Element elt = new Element(
-                        elementID,
-                        id,
-                        category,
-                        displayName,
-                        subCategory,
-                        description,
-                        spriteName,
-                        sizeX,
-                        sizeY,
-                        biome,
-                        groupType
-                    );
-                    elements.Add(elt);
-                }
-            }
-            catch (Exception e) {
-                Debug.LogError($"Error reading table: {e.Message}");
-            }
-        }
-        return elements;
-    }*/
 
     public Entity GetEntityById(int idElement) {
         try {
@@ -141,6 +98,7 @@ public class EntityTable {
                         int sizeY = dbreader.GetInt32(7);
                         string biome = dbreader.GetString(8);
                         string groupType = dbreader.GetString(9);
+                        string type = dbreader.GetString(10);
                         return new Entity(
                             id,
                             category,
@@ -151,7 +109,8 @@ public class EntityTable {
                             sizeX,
                             sizeY,
                             biome,
-                            groupType
+                            groupType,
+                            type
                         );
                     }
                 }

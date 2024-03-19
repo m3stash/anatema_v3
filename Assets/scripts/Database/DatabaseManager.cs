@@ -11,7 +11,7 @@ public class DatabaseManager {
     private TableManager tableManager;
     private readonly string dbName = "game_db";
 
-    public DatabaseManager(){
+    public DatabaseManager() {
         tableManager = new TableManager();
     }
 
@@ -47,5 +47,5 @@ public class DatabaseManager {
         parameter.Value = paramValue;
         command.Parameters.Add(parameter);
     }
-    
+
 }

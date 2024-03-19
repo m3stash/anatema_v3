@@ -240,7 +240,6 @@ namespace RoomUI {
 
         private void OnCellPointerEnterHandler(CellRoomGO cellRoomGO) {
             if (layerType == LayerType.ALL) {
-                cellPreviewManager.Hover(); // to do voir pkoi ça marche pas ?
                 return;
             }
             currentHoverCell = cellRoomGO;
