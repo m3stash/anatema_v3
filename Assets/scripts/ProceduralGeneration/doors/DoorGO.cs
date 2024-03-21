@@ -12,7 +12,7 @@ namespace DoorNs {
         // private PoolConfig config;
 
         private void Awake() {
-            if(spriteConfig == null) {
+            if (spriteConfig == null) {
                 Debug.LogError("DoorGO: SpriteConfig are not serialised !!!");
             }
             setSpriteRender();

@@ -2,6 +2,8 @@ using System;
 
 public class Entity : Element {
 
+    public string type;
+
     public Entity(
         int id,
         string category,
@@ -12,7 +14,8 @@ public class Entity : Element {
         int sizeX,
         int sizeY,
         string biome,
-        string groupType
+        string groupType,
+        string type
     ) : base(
         id,
         category,
@@ -25,6 +28,11 @@ public class Entity : Element {
         biome,
         groupType
     ) {
+        this.type = type;
+    }
+
+    public string GetEntityType() {
+        return type;
     }
 
 }

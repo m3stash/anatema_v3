@@ -77,6 +77,16 @@ namespace RoomUI {
 
         public List<CellRoomGO> CreateCell(CellRoomGO cellRoomGO, Element selectedElement, LayerType layer) {
             if (selectedElement == null || cellRoomGO.GetConfig(layer) != null) return null;
+            string layerbottomGroupType = cellRoomGO.GetConfig(LayerType.BOTTOM)?.GetGroupType();
+            string layerMiddleGroupType = cellRoomGO.GetConfig(LayerType.MIDDLE)?.GetGroupType();
+            switch (layer) {
+                case LayerType.MIDDLE:
+                    if (layerbottomGroupType == "HOLE" || layerbottomGroupType == "LIQUID") return null;
+                    break;
+                case LayerType.TOP:
+                    if (layerMiddleGroupType == "HOLE" || layerMiddleGroupType == "LIQUID" || layerbottomGroupType == "HOLE" || layerbottomGroupType == "LIQUID") return null;
+                    break;
+            }
             Vector2Int size = selectedElement.GetSize();
             List<CellRoomGO> cells = GetCellsAtPosition(cellRoomGO, size);
             if (cells.Exists(cell => cell.GetConfig(layer) != null || cell.IsDoorOrWall() || cell.IsDesactivatedCell(layer))) {
